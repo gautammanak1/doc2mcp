@@ -2,7 +2,12 @@ import { notFound } from "next/navigation";
 import { DocContent } from "@/components/docs/doc-content";
 import { getDocPage } from "@/lib/docs/loader";
 
-export async function DocPageLoader({ slug }: { slug: string[] }) {
+export async function DocPageLoader({
+  params,
+}: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const { slug = [] } = await params;
   const page = await getDocPage(slug);
 
   if (!page) {

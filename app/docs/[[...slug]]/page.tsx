@@ -12,12 +12,10 @@ export const metadata: Metadata = {
   description: "doc2mcp product documentation",
 };
 
-export default async function DocsPage({ params }: PageProps) {
-  const { slug = [] } = await params;
-
+export default function DocsPage({ params }: PageProps) {
   return (
     <Suspense fallback={<DocPageFallback />}>
-      <DocPageLoader slug={slug} />
+      <DocPageLoader params={params} />
     </Suspense>
   );
 }

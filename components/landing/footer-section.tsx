@@ -2,6 +2,7 @@
 
 import { Github, Linkedin, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { GITHUB_REPO_URL } from "@/lib/config/site";
 
@@ -66,6 +67,12 @@ function FooterColumn({
 }
 
 export function FooterSection() {
+  const [currentYear, setCurrentYear] = useState(2026);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className="relative overflow-hidden border-border/40 border-t bg-background pt-16 sm:pt-20">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
@@ -104,7 +111,7 @@ export function FooterSection() {
 
         <div className="mt-16 flex flex-col gap-4 border-border/40 border-t pt-8 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-muted-foreground text-xs">
-            © {new Date().getFullYear()} doc2mcp. All rights reserved.
+            © {currentYear} doc2mcp. All rights reserved.
           </p>
           <p className="font-mono text-[11px] text-muted-foreground/80">
             Powered by ASI1 · hosted on Vercel

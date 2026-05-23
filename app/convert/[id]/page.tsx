@@ -5,7 +5,12 @@ import { auth } from "@/app/(auth)/auth";
 import { ConvertExperience } from "@/features/doc2mcp/convert-experience";
 import { getPlatformProjectById } from "@/lib/db/queries";
 
-async function ConvertLoader({ id }: { id: string }) {
+async function ConvertLoader({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
     redirect(
@@ -40,16 +45,14 @@ function ConvertFallback() {
   );
 }
 
-export default async function ConvertPage({
+export default function ConvertPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-
   return (
     <Suspense fallback={<ConvertFallback />}>
-      <ConvertLoader id={id} />
+      <ConvertLoader params={params} />
     </Suspense>
   );
 }
