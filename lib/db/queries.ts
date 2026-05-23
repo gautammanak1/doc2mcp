@@ -77,6 +77,35 @@ export async function createGuestUser() {
   }
 }
 
+export async function getOrCreateOAuthUser(
+  email: string,
+  name: string,
+  image: string
+) {
+  try {
+    const existingUser = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email));
+
+    if (existingUser.length > 0) {
+      return existingUser[0];
+    }
+
+    const result = await db
+      .insert(user)
+      .values({ email, name, image, emailVerified: true })
+      .returning();
+
+    return result[0];
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to get or create OAuth user"
+    );
+  }
+}
+
 export async function saveChat({
   id,
   userId,
@@ -787,4 +816,70 @@ export async function saveWorkflow({
     .values({ userId, name, nodes, edges, projectId })
     .returning();
   return workflow;
+}
+
+// Admin Analytics Queries
+export async function getAdminStats() {
+  try {
+    const totalUsers = await db.select({ count: count() }).from(user);
+    const totalProjects = await db
+      .select({ count: count() })
+      .from(platformProject);
+    const totalMCPs = await db.select({ count: count() }).from(mcpServer);
+
+    return {
+      totalUsers: totalUsers[0]?.count || 0,
+      totalProjects: totalProjects[0]?.count || 0,
+      totalMCPs: totalMCPs[0]?.count || 0,
+    };
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to get admin stats"
+    );
+  }
+}
+
+export async function getAllProjects(limit: number = 50, offset: number = 0) {
+  try {
+    return await db
+      .select()
+      .from(platformProject)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(platformProject.createdAt));
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to get all projects"
+    );
+  }
+}
+
+export async function getAllUsers(limit: number = 50, offset: number = 0) {
+  try {
+    return await db
+      .select()
+      .from(user)
+      .limit(limit)
+      .offset(offset)
+      .orderBy(desc(user.createdAt));
+  } catch (_error) {
+    throw new ChatbotError("bad_request:database", "Failed to get all users");
+  }
+}
+
+export async function getUserProjects(userId: string) {
+  try {
+    return await db
+      .select()
+      .from(platformProject)
+      .where(eq(platformProject.userId, userId))
+      .orderBy(desc(platformProject.createdAt));
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to get user projects"
+    );
+  }
 }

@@ -2,8 +2,9 @@ import { compare } from "bcrypt-ts";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { DUMMY_PASSWORD } from "@/lib/constants";
-import { createGuestUser, getUser } from "@/lib/db/queries";
+import { createGuestUser, getUser, getOrCreateOAuthUser } from "@/lib/db/queries";
 import { authConfig } from "./auth.config";
 
 export type UserType = "guest" | "regular";
@@ -69,6 +70,11 @@ export const {
         return { ...user, type: "regular" };
       },
     }),
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
     Credentials({
       id: "guest",
       credentials: {},
@@ -79,10 +85,21 @@ export const {
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async signIn({ user, account }) {
+      // Handle OAuth sign in
+      if (account?.provider === "google" && user.email) {
+        const [existingUser] = await getUser(user.email);
+        if (!existingUser) {
+          await getOrCreateOAuthUser(user.email, user.name || "", user.image || "");
+        }
+      }
+      return true;
+    },
+    jwt({ token, user, account }) {
       if (user) {
         token.id = user.id as string;
-        token.type = user.type;
+        token.type = user.type || "regular";
+        token.provider = account?.provider;
       }
 
       return token;
@@ -90,7 +107,7 @@ export const {
     session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
-        session.user.type = token.type;
+        session.user.type = token.type as UserType;
       }
 
       return session;
