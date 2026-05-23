@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import { guestRegex, isDevelopmentEnvironment } from "./lib/constants";
+import { createServerClient } from "@supabase/ssr";
+import { guestRegex } from "./lib/constants";
 
 const PUBLIC_PATHS = [
   "/",
@@ -32,46 +32,60 @@ function isStaticAsset(pathname: string): boolean {
 }
 
 export async function proxy(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            supabaseResponse.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
   const { pathname } = request.nextUrl;
 
   if (isStaticAsset(pathname)) {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
   }
 
-  if (pathname.startsWith("/api/auth")) {
-    return NextResponse.next();
-  }
-
   if (isPublicPath(pathname)) {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.AUTH_SECRET,
-    secureCookie: !isDevelopmentEnvironment,
-  });
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
-  if (!token) {
-    const redirectUrl = encodeURIComponent(pathname);
-    return NextResponse.redirect(
-      new URL(`${base}/api/auth/guest?redirectUrl=${redirectUrl}`, request.url)
-    );
+  // Protect admin routes
+  if (pathname.startsWith("/admin")) {
+    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+      return NextResponse.redirect(new URL(`${base}/login`, request.url));
+    }
   }
 
-  const isGuest = guestRegex.test(token?.email ?? "");
-
-  if (token && !isGuest && ["/login", "/register"].includes(pathname)) {
+  // Redirect authenticated users away from auth pages
+  if (user && ["/login", "/register"].includes(pathname)) {
     return NextResponse.redirect(new URL(`${base}/`, request.url));
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 export const config = {

@@ -2,16 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useActionState, useEffect, useState } from "react";
 
 import { AuthForm } from "@/components/chat/auth-form";
 import { SubmitButton } from "@/components/chat/submit-button";
 import { toast } from "@/components/chat/toast";
 import { type LoginActionState, login } from "../actions";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 
 export default function Page() {
   const router = useRouter();
+  const { user, loading } = useSupabaseAuth();
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
 
@@ -20,9 +21,13 @@ export default function Page() {
     { status: "idle" }
   );
 
-  const { update: updateSession } = useSession();
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/");
+    }
+  }, [user, loading, router]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: router and updateSession are stable refs
   useEffect(() => {
     if (state.status === "failed") {
       toast({ type: "error", description: "Invalid credentials!" });
@@ -33,15 +38,25 @@ export default function Page() {
       });
     } else if (state.status === "success") {
       setIsSuccessful(true);
-      updateSession();
-      router.refresh();
+      // Redirect after successful login
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
     }
-  }, [state.status]);
+  }, [state.status, router]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
     formAction(formData);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <>

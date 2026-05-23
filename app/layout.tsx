@@ -1,7 +1,6 @@
 import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
-import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -72,14 +71,10 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
-          <SessionProvider
-            basePath={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/auth`}
-          >
-            <TooltipProvider>
-              {children}
-              <Toaster position="bottom-center" theme="system" />
-            </TooltipProvider>
-          </SessionProvider>
+          <TooltipProvider>
+            {children}
+            <Toaster position="bottom-center" theme="system" />
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

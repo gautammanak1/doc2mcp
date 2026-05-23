@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { User } from "next-auth";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
@@ -18,6 +17,7 @@ import {
   SidebarHistory,
 } from "@/components/chat/sidebar-history";
 import { SidebarUserNav } from "@/components/chat/sidebar-user-nav";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   Sidebar,
   SidebarContent,
@@ -44,8 +44,9 @@ import {
 } from "../ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
-export function AppSidebar({ user }: { user: User | undefined }) {
+export function AppSidebar() {
   const router = useRouter();
+  const { user } = useSupabaseAuth();
   const { setOpenMobile, toggleSidebar } = useSidebar();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
@@ -133,10 +134,10 @@ export function AppSidebar({ user }: { user: User | undefined }) {
             </SidebarGroupContent>
           </SidebarGroup>
           <SidebarHistory user={user} />
-        </SidebarContent>
-        <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
-          {user && <SidebarUserNav user={user} />}
-        </SidebarFooter>
+  </SidebarContent>
+  <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
+    {user && <SidebarUserNav />}
+  </SidebarFooter>
         <SidebarRail />
       </Sidebar>
 

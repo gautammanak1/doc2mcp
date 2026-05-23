@@ -11,8 +11,8 @@ import {
   WrenchIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   type ChangeEvent,
   type Dispatch,
@@ -141,8 +141,8 @@ function PureMultimodalInput({
   const doc2mcpMode = hasMounted ? persistedDoc2mcpMode : false;
   const setDoc2mcpMode = setPersistedDoc2mcpMode;
   const [doc2mcpLoading, setDoc2mcpLoading] = useState(false);
-  const { data: session } = useSession();
-  const isGuest = guestRegex.test(session?.user?.email ?? "");
+  const { user } = useSupabaseAuth();
+  const isGuest = guestRegex.test(user?.email ?? "");
 
   useEffect(() => {
     if (textareaRef.current) {
