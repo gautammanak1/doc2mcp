@@ -31,6 +31,7 @@ export const chatModels: ChatModel[] = [
   },
 ];
 
+// biome-ignore lint/suspicious/useAwait: signature stays async for future async work
 export async function getCapabilities(): Promise<
   Record<string, ModelCapabilities>
 > {

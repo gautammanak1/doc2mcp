@@ -1,4 +1,8 @@
-import type { ApiEndpoint, CompressedTool, CrawlResult } from "@/types/platform";
+import type {
+  ApiEndpoint,
+  CompressedTool,
+  CrawlResult,
+} from "@/types/platform";
 
 type LlmsTxtInput = {
   name: string;

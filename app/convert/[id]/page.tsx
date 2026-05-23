@@ -1,14 +1,16 @@
-import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { ConvertExperience } from "@/features/doc2mcp/convert-experience";
 import { getPlatformProjectById } from "@/lib/db/queries";
-import { notFound, redirect } from "next/navigation";
 
 async function ConvertLoader({ id }: { id: string }) {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect(`/api/auth/guest?redirectUrl=${encodeURIComponent(`/convert/${id}`)}`);
+    redirect(
+      `/api/auth/guest?redirectUrl=${encodeURIComponent(`/convert/${id}`)}`
+    );
   }
 
   if (session.user.type === "guest") {

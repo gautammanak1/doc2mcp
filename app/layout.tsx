@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
 import { GeistMono } from "geist/font/mono";
+import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {

@@ -149,8 +149,7 @@ export function McpPlayground({ projectId, token }: McpPlaygroundProps) {
       const data = await callMcp(projectId, token, selected, parsed);
       setOutput(JSON.stringify(data, null, 2));
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Request failed";
+      const message = error instanceof Error ? error.message : "Request failed";
       setOutput(JSON.stringify({ error: message }, null, 2));
       toast.error("Tool call failed");
     } finally {
@@ -223,9 +222,7 @@ export function McpPlayground({ projectId, token }: McpPlaygroundProps) {
         </div>
 
         <div>
-          <p className="mb-1 font-mono text-muted-foreground text-xs">
-            output
-          </p>
+          <p className="mb-1 font-mono text-muted-foreground text-xs">output</p>
           <pre className="min-h-[220px] overflow-auto rounded-xl border border-border/60 bg-background/60 p-4 font-mono text-[11px] leading-relaxed">
             {output ?? "// Pick a tool and run it to see live JSON."}
           </pre>

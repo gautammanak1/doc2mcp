@@ -22,47 +22,91 @@ export function CrawlerIcon() {
       </defs>
 
       <rect
-        height="84"
-        rx="6"
-        ry="6"
-        width="118"
-        x="21"
-        y="18"
         fill="url(#crawlerGlow)"
-        opacity="0.5"
-      />
-      <rect
         height="84"
+        opacity="0.5"
         rx="6"
         ry="6"
         width="118"
         x="21"
         y="18"
       />
+      <rect height="84" rx="6" ry="6" width="118" x="21" y="18" />
 
       <line x1="21" x2="139" y1="34" y2="34" />
-      <circle cx="29" cy="26" r="1.6" fill="currentColor" />
-      <circle cx="35" cy="26" r="1.6" fill="currentColor" />
-      <circle cx="41" cy="26" r="1.6" fill="currentColor" />
+      <circle cx="29" cy="26" fill="currentColor" r="1.6" />
+      <circle cx="35" cy="26" fill="currentColor" r="1.6" />
+      <circle cx="41" cy="26" fill="currentColor" r="1.6" />
 
-      <rect height="4" rx="2" width="36" x="32" y="44" fill="currentColor" opacity="0.7" />
-      <rect height="3" rx="1.5" width="84" x="32" y="54" fill="currentColor" opacity="0.25" />
-      <rect height="3" rx="1.5" width="64" x="32" y="62" fill="currentColor" opacity="0.25" />
+      <rect
+        fill="currentColor"
+        height="4"
+        opacity="0.7"
+        rx="2"
+        width="36"
+        x="32"
+        y="44"
+      />
+      <rect
+        fill="currentColor"
+        height="3"
+        opacity="0.25"
+        rx="1.5"
+        width="84"
+        x="32"
+        y="54"
+      />
+      <rect
+        fill="currentColor"
+        height="3"
+        opacity="0.25"
+        rx="1.5"
+        width="64"
+        x="32"
+        y="62"
+      />
 
-      <rect height="14" rx="3" width="60" x="32" y="76" fill="currentColor" opacity="0.12" />
-      <text fill="currentColor" fontFamily="ui-monospace, monospace" fontSize="7" x="38" y="86">
+      <rect
+        fill="currentColor"
+        height="14"
+        opacity="0.12"
+        rx="3"
+        width="60"
+        x="32"
+        y="76"
+      />
+      <text
+        fill="currentColor"
+        fontFamily="ui-monospace, monospace"
+        fontSize="7"
+        x="38"
+        y="86"
+      >
         GET /docs
       </text>
 
       <g>
         <circle cx="118" cy="80" fill="currentColor" r="3">
-          <animate attributeName="r" dur="1.8s" repeatCount="indefinite" values="3;6;3" />
-          <animate attributeName="opacity" dur="1.8s" repeatCount="indefinite" values="1;0.2;1" />
+          <animate
+            attributeName="r"
+            dur="1.8s"
+            repeatCount="indefinite"
+            values="3;6;3"
+          />
+          <animate
+            attributeName="opacity"
+            dur="1.8s"
+            repeatCount="indefinite"
+            values="1;0.2;1"
+          />
         </circle>
       </g>
 
       {/* Spider / crawl lines */}
-      <path d="M118 80 L 80 50 M 118 80 L 60 70 M 118 80 L 90 90" opacity="0.4" />
+      <path
+        d="M118 80 L 80 50 M 118 80 L 60 70 M 118 80 L 90 90"
+        opacity="0.4"
+      />
     </svg>
   );
 }
@@ -101,13 +145,7 @@ export function ToolsIcon() {
         { x: 134, y: 92, label: "ask()" },
       ].map((node) => (
         <g key={`${node.x}-${node.y}`}>
-          <line
-            opacity="0.45"
-            x1="80"
-            x2={node.x}
-            y1="60"
-            y2={node.y}
-          >
+          <line opacity="0.45" x1="80" x2={node.x} y1="60" y2={node.y}>
             <animate
               attributeName="opacity"
               dur="2.4s"

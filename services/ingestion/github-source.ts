@@ -63,7 +63,7 @@ async function fetchWithTimeout(
 
 async function defaultBranch(owner: string, repo: string): Promise<string> {
   const res = await fetchWithTimeout(`${GITHUB_API}/repos/${owner}/${repo}`);
-  if (!res || !res.ok) {
+  if (!res?.ok) {
     return "main";
   }
   const data = (await res.json()) as { default_branch?: string };
@@ -78,7 +78,7 @@ async function listRepoTree(
   const res = await fetchWithTimeout(
     `${GITHUB_API}/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`
   );
-  if (!res || !res.ok) {
+  if (!res?.ok) {
     return [];
   }
   const data = (await res.json()) as GhTreeResponse;
@@ -91,7 +91,9 @@ function pickDocFiles(entries: GhEntry[], subPath?: string): string[] {
   const docs = entries
     .filter((e) => e.type === "blob")
     .map((e) => e.path)
-    .filter((path) => (root ? path.startsWith(`${root}/`) || path === root : true))
+    .filter((path) =>
+      root ? path.startsWith(`${root}/`) || path === root : true
+    )
     .filter((path) => {
       if (DOC_FILE_PATTERNS.some((re) => re.test(path))) {
         return true;
@@ -124,7 +126,7 @@ async function fetchRaw(
   const res = await fetchWithTimeout(url, {
     headers: { Accept: "text/markdown,text/plain" },
   });
-  if (!res || !res.ok) {
+  if (!res?.ok) {
     return null;
   }
   return res.text();
@@ -144,7 +146,8 @@ export async function crawlGitHubRepo(params: {
   branch?: string;
   path?: string;
 }): Promise<CrawlResult[]> {
-  const branch = params.branch ?? (await defaultBranch(params.owner, params.repo));
+  const branch =
+    params.branch ?? (await defaultBranch(params.owner, params.repo));
   const tree = await listRepoTree(params.owner, params.repo, branch);
   if (tree.length === 0) {
     return [];

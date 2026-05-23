@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
-import { ConversionDemo } from "@/components/landing/conversion-demo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
+import { ConversionDemo } from "@/components/landing/conversion-demo";
 
 export const metadata: Metadata = {
   title: "doc2mcp — Live demo",
@@ -53,7 +53,8 @@ export default function DemoPage() {
             Watch a docs URL become an MCP.
           </h1>
           <p className="mt-3 text-muted-foreground">
-            No video — this is the actual UI flow looping with real example URLs.
+            No video — this is the actual UI flow looping with real example
+            URLs.
           </p>
         </div>
 

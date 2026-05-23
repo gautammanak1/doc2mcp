@@ -37,7 +37,9 @@ function withTimeout(signal?: AbortSignal): {
     if (signal.aborted) {
       controller.abort();
     } else {
-      signal.addEventListener("abort", () => controller.abort(), { once: true });
+      signal.addEventListener("abort", () => controller.abort(), {
+        once: true,
+      });
     }
   }
 
@@ -162,7 +164,13 @@ const braveProvider: SearchProvider = {
         return [];
       }
       const data = (await res.json()) as {
-        web?: { results?: Array<{ title?: string; url?: string; description?: string }> };
+        web?: {
+          results?: Array<{
+            title?: string;
+            url?: string;
+            description?: string;
+          }>;
+        };
       };
       return (data.web?.results ?? []).map((r) => ({
         title: r.title ?? r.url ?? "",
@@ -246,6 +254,7 @@ export function listConfiguredProviders(): SearchProvider[] {
 }
 
 /** Run a single web search using whichever provider is configured. */
+// biome-ignore lint/suspicious/useAwait: returns provider's promise — keep async for API symmetry
 export async function webSearch(
   query: string,
   opts?: SearchOptions

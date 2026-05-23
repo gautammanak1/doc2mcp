@@ -19,20 +19,18 @@ import type { VisibilityType } from "@/components/chat/visibility-selector";
 import { ChatbotError } from "../errors";
 import { generateUUID } from "../utils";
 import {
+  aiWorkflow,
   type Chat,
   chat,
   type DBMessage,
   document,
+  mcpServer,
   message,
+  type PlatformProject,
+  platformProject,
   type Suggestion,
   stream,
   suggestion,
-  aiWorkflow,
-  type AiWorkflow,
-  type McpServer,
-  mcpServer,
-  type PlatformProject,
-  platformProject,
   type User,
   user,
   vote,
@@ -662,6 +660,7 @@ export async function createPlatformProject({
   return project;
 }
 
+// biome-ignore lint/suspicious/useAwait: drizzle query returns a thenable promise
 export async function getPlatformProjectsByUserId({
   userId,
 }: {
@@ -684,9 +683,7 @@ export async function getPlatformProjectById({
   const [project] = await db
     .select()
     .from(platformProject)
-    .where(
-      and(eq(platformProject.id, id), eq(platformProject.userId, userId))
-    );
+    .where(and(eq(platformProject.id, id), eq(platformProject.userId, userId)));
   return project ?? null;
 }
 
@@ -718,9 +715,7 @@ export async function updatePlatformProject({
   const [updated] = await db
     .update(platformProject)
     .set({ ...data, updatedAt: new Date() })
-    .where(
-      and(eq(platformProject.id, id), eq(platformProject.userId, userId))
-    )
+    .where(and(eq(platformProject.id, id), eq(platformProject.userId, userId)))
     .returning();
   return updated ?? null;
 }
@@ -734,9 +729,7 @@ export async function deletePlatformProject({
 }) {
   await db
     .delete(platformProject)
-    .where(
-      and(eq(platformProject.id, id), eq(platformProject.userId, userId))
-    );
+    .where(and(eq(platformProject.id, id), eq(platformProject.userId, userId)));
 }
 
 export async function createMcpServerRecord({
@@ -759,6 +752,7 @@ export async function createMcpServerRecord({
   return record;
 }
 
+// biome-ignore lint/suspicious/useAwait: drizzle query returns a thenable promise
 export async function getMcpServersByUserId({ userId }: { userId: string }) {
   return db
     .select()
@@ -767,6 +761,7 @@ export async function getMcpServersByUserId({ userId }: { userId: string }) {
     .orderBy(desc(mcpServer.createdAt));
 }
 
+// biome-ignore lint/suspicious/useAwait: drizzle query returns a thenable promise
 export async function getWorkflowsByUserId({ userId }: { userId: string }) {
   return db
     .select()

@@ -32,10 +32,20 @@ type OpenApiDocument = {
   info?: { title?: string; description?: string; version?: string };
   servers?: Array<{ url: string; description?: string }>;
   paths?: Record<string, Record<string, OpenApiOperation>>;
-  components?: { securitySchemes?: Record<string, { type?: string; scheme?: string }> };
+  components?: {
+    securitySchemes?: Record<string, { type?: string; scheme?: string }>;
+  };
 };
 
-const METHODS = ["get", "post", "put", "patch", "delete", "head", "options"] as const;
+const METHODS = [
+  "get",
+  "post",
+  "put",
+  "patch",
+  "delete",
+  "head",
+  "options",
+] as const;
 
 /** Try JSON first, then YAML (light-touch — handles common spec shapes). */
 export function parseOpenApiText(text: string): OpenApiDocument | null {
@@ -62,13 +72,14 @@ export function parseOpenApiText(text: string): OpenApiDocument | null {
  */
 function parseSimpleYaml(text: string): OpenApiDocument | null {
   try {
-    const lines = text.split("\n").filter(
-      (l) => !/^\s*#/.test(l) && l.trim().length > 0
-    );
+    const lines = text
+      .split("\n")
+      .filter((l) => !/^\s*#/.test(l) && l.trim().length > 0);
     const root: Record<string, unknown> = {};
-    const stack: Array<{ indent: number; node: Record<string, unknown> | unknown[] }> = [
-      { indent: -1, node: root },
-    ];
+    const stack: Array<{
+      indent: number;
+      node: Record<string, unknown> | unknown[];
+    }> = [{ indent: -1, node: root }];
 
     for (const rawLine of lines) {
       const indent = rawLine.match(/^\s*/)?.[0].length ?? 0;
@@ -95,7 +106,10 @@ function parseSimpleYaml(text: string): OpenApiDocument | null {
       if (colon === -1) {
         continue;
       }
-      const key = line.slice(0, colon).trim().replace(/^["']|["']$/g, "");
+      const key = line
+        .slice(0, colon)
+        .trim()
+        .replace(/^["']|["']$/g, "");
       const value = line.slice(colon + 1).trim();
 
       if (Array.isArray(parent)) {
@@ -155,7 +169,9 @@ export function expandOpenApiSpec(
     spec.info?.version ? `\n**Version:** ${spec.info.version}` : "",
     baseUrl ? `\n**Base URL:** ${baseUrl}` : "",
     spec.components?.securitySchemes
-      ? `\n## Authentication\n\n${Object.entries(spec.components.securitySchemes)
+      ? `\n## Authentication\n\n${Object.entries(
+          spec.components.securitySchemes
+        )
           .map(
             ([name, scheme]) =>
               `- **${name}**: ${(scheme.type ?? "").toString()} ${
@@ -206,15 +222,17 @@ export function expandOpenApiSpec(
 
       if (op.requestBody?.content) {
         sections.push("## Request body");
-        for (const [mediaType, body] of Object.entries(op.requestBody.content)) {
+        for (const [mediaType, body] of Object.entries(
+          op.requestBody.content
+        )) {
           sections.push(`### ${mediaType}`);
           if (body.example !== undefined) {
             sections.push(
-              "```json\n" + JSON.stringify(body.example, null, 2) + "\n```"
+              `\`\`\`json\n${JSON.stringify(body.example, null, 2)}\n\`\`\``
             );
           } else if (body.schema) {
             sections.push(
-              "```json\n" + JSON.stringify(body.schema, null, 2) + "\n```"
+              `\`\`\`json\n${JSON.stringify(body.schema, null, 2)}\n\`\`\``
             );
           }
         }
@@ -229,7 +247,7 @@ export function expandOpenApiSpec(
           const example = Object.values(resp.content ?? {})[0]?.example;
           if (example !== undefined) {
             sections.push(
-              "```json\n" + JSON.stringify(example, null, 2) + "\n```"
+              `\`\`\`json\n${JSON.stringify(example, null, 2)}\n\`\`\``
             );
           }
         }
@@ -239,10 +257,8 @@ export function expandOpenApiSpec(
         sections.push(`\n_Tags: ${op.tags.join(", ")}_`);
       }
 
-      const operationName =
-        op.operationId ??
-        op.summary ??
-        `${method.toUpperCase()} ${path}`;
+      const _operationName =
+        op.operationId ?? op.summary ?? `${method.toUpperCase()} ${path}`;
 
       results.push({
         url: `${sourceUrl}#${method}-${path}`,

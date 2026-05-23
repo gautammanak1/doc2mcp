@@ -1,4 +1,4 @@
-import { readFile, readdir } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { cacheLife } from "next/cache";
 
@@ -31,7 +31,10 @@ function parseFrontmatter(raw: string): {
     const idx = line.indexOf(":");
     if (idx > 0) {
       const key = line.slice(0, idx).trim();
-      const value = line.slice(idx + 1).trim().replace(/^["']|["']$/g, "");
+      const value = line
+        .slice(idx + 1)
+        .trim()
+        .replace(/^["']|["']$/g, "");
       meta[key] = value;
     }
   }
@@ -95,8 +98,7 @@ export async function getDocPage(slug: string[]): Promise<DocPage | null> {
   "use cache";
   cacheLife("max");
 
-  const filename =
-    slug.length === 0 ? "index.md" : `${slug.join("/")}.md`;
+  const filename = slug.length === 0 ? "index.md" : `${slug.join("/")}.md`;
   const filePath = path.join(DOCS_ROOT, filename);
 
   try {

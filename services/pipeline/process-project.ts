@@ -1,12 +1,10 @@
-import {
-  createMcpServerRecord,
-  updatePlatformProject,
-} from "@/lib/db/queries";
-import {
-  createMcpProjectToken,
-  hashMcpToken,
-} from "@/lib/doc2mcp/mcp-access";
-import type { ProcessingLog, ProjectArtifacts, SourceType } from "@/types/platform";
+import { createMcpServerRecord, updatePlatformProject } from "@/lib/db/queries";
+import { createMcpProjectToken, hashMcpToken } from "@/lib/doc2mcp/mcp-access";
+import type {
+  ProcessingLog,
+  ProjectArtifacts,
+  SourceType,
+} from "@/types/platform";
 import { analyzeDocumentation } from "../ai/understanding";
 import { buildApiGraph } from "../graph/builder";
 import { crawlDocsSource } from "../ingestion/crawler";

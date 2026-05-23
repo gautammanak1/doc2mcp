@@ -13,7 +13,6 @@ import {
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { guestRegex } from "@/lib/constants";
 import {
   type ChangeEvent,
   type Dispatch,
@@ -38,13 +37,14 @@ import {
   ModelSelectorName,
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
+import { Doc2McpModeToggle } from "@/components/doc2mcp/mode-toggle";
 import {
   type ChatModel,
   chatModels,
   DEFAULT_CHAT_MODEL,
   type ModelCapabilities,
 } from "@/lib/ai/models";
-import { Doc2McpModeToggle } from "@/components/doc2mcp/mode-toggle";
+import { guestRegex } from "@/lib/constants";
 import { extractDocsUrl } from "@/lib/doc2mcp/detect-url";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -236,7 +236,7 @@ function PureMultimodalInput({
     async (url: string) => {
       if (isGuest) {
         toast.error("Sign in to generate an MCP server");
-        const target = `/api/auth/guest?redirectUrl=${encodeURIComponent(
+        const _target = `/api/auth/guest?redirectUrl=${encodeURIComponent(
           "/login"
         )}`;
         router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
@@ -284,7 +284,9 @@ function PureMultimodalInput({
       }
       const url = extractDocsUrl(input);
       if (url) {
-        void runDoc2McpConversion(url);
+        runDoc2McpConversion(url).catch(() => {
+          // error already toasted inside runDoc2McpConversion
+        });
         return;
       }
       toast.error("Paste a documentation URL (https://…)");

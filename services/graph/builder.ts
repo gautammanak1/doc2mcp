@@ -60,7 +60,10 @@ export function buildApiGraph(
           path: endpoint.path,
           summary: endpoint.summary,
         },
-        position: { x: xBase + (i % 2) * 100, y: yBase + 80 + Math.floor(i / 2) * 60 },
+        position: {
+          x: xBase + (i % 2) * 100,
+          y: yBase + 80 + Math.floor(i / 2) * 60,
+        },
       });
 
       edges.push({

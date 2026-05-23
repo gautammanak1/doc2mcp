@@ -11,7 +11,11 @@ export function detectSourceTypeFromUrl(url: string): SourceType {
     return "markdown";
   }
 
-  if (lower.endsWith(".json") || lower.endsWith(".yaml") || lower.endsWith(".yml")) {
+  if (
+    lower.endsWith(".json") ||
+    lower.endsWith(".yaml") ||
+    lower.endsWith(".yml")
+  ) {
     if (lower.includes("postman") || lower.includes("collection")) {
       return "postman";
     }
@@ -36,7 +40,10 @@ export function detectSourceTypeFromUrl(url: string): SourceType {
     return "openapi";
   }
 
-  if (lower.includes("github.com") || lower.includes("raw.githubusercontent.com")) {
+  if (
+    lower.includes("github.com") ||
+    lower.includes("raw.githubusercontent.com")
+  ) {
     if (lower.endsWith(".md") || lower.endsWith(".mdx")) {
       return "markdown";
     }
@@ -61,7 +68,11 @@ export function sniffSourceTypeFromContent(
   const head = body.slice(0, 2000).trimStart();
   const ct = contentType.toLowerCase();
 
-  if (ct.includes("application/json") || head.startsWith("{") || head.startsWith("[")) {
+  if (
+    ct.includes("application/json") ||
+    head.startsWith("{") ||
+    head.startsWith("[")
+  ) {
     if (/"swagger"\s*:|"openapi"\s*:/.test(head)) {
       return "openapi";
     }
@@ -70,17 +81,26 @@ export function sniffSourceTypeFromContent(
     }
   }
 
-  if (ct.includes("yaml") || ct.includes("text/x-yaml")) {
-    if (/^(swagger|openapi)\s*:\s*['"]?\d/m.test(head)) {
-      return "openapi";
-    }
+  if (
+    (ct.includes("yaml") || ct.includes("text/x-yaml")) &&
+    /^(swagger|openapi)\s*:\s*['"]?\d/m.test(head)
+  ) {
+    return "openapi";
   }
 
-  if (ct.includes("markdown") || /^#{1,6}\s/.test(head) || head.startsWith("---")) {
+  if (
+    ct.includes("markdown") ||
+    /^#{1,6}\s/.test(head) ||
+    head.startsWith("---")
+  ) {
     return "markdown";
   }
 
-  if (ct.includes("text/html") || head.startsWith("<!DOCTYPE") || head.startsWith("<html")) {
+  if (
+    ct.includes("text/html") ||
+    head.startsWith("<!DOCTYPE") ||
+    head.startsWith("<html")
+  ) {
     return "html";
   }
 

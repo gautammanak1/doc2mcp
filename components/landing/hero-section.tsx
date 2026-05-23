@@ -1,35 +1,34 @@
-'use client'
+"use client";
 
-import { startTransition, useEffect, useState } from 'react'
-import Link from 'next/link'
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { startTransition, useEffect, useState } from "react";
 
-import { ArrowRight } from 'lucide-react'
+import { Button } from "@/components/ui/button";
 
-import { Button } from '@/components/ui/button'
+import { AnimatedSphere } from "./animated-sphere";
 
-import { AnimatedSphere } from './animated-sphere'
-
-const words = ['crawl', 'compress', 'generate', 'ship']
+const words = ["crawl", "compress", "generate", "ship"];
 
 const marqueeStats = [
-  { value: '<60s', label: 'docs to MCP', company: 'PIPELINE' },
-  { value: '1 URL', label: 'paste & go', company: 'INPUT' },
-  { value: 'No install', label: 'remote MCP', company: 'HOSTED' },
-  { value: 'Cursor', label: 'ready config', company: 'EXPORT' }
-]
+  { value: "<60s", label: "docs to MCP", company: "PIPELINE" },
+  { value: "1 URL", label: "paste & go", company: "INPUT" },
+  { value: "No install", label: "remote MCP", company: "HOSTED" },
+  { value: "Cursor", label: "ready config", company: "EXPORT" },
+];
 
 export function HeroSection() {
-  const [isVisible, setIsVisible] = useState(false)
-  const [wordIndex, setWordIndex] = useState(0)
+  const [isVisible, setIsVisible] = useState(false);
+  const [wordIndex, setWordIndex] = useState(0);
 
   useEffect(() => {
-    startTransition(() => setIsVisible(true))
+    startTransition(() => setIsVisible(true));
     const interval = setInterval(
-      () => setWordIndex(prev => (prev + 1) % words.length),
+      () => setWordIndex((prev) => (prev + 1) % words.length),
       2500
-    )
-    return () => clearInterval(interval)
-  }, [])
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-32">
@@ -38,10 +37,10 @@ export function HeroSection() {
       </div>
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden opacity-[0.07]">
-        {[...Array(8)].map((_, i) => (
+        {Array.from({ length: 8 }, (_, i) => i).map((i) => (
           <div
             className="absolute right-0 left-0 h-px bg-foreground"
-            key={`h-${i}`}
+            key={`hero-line-${String(i)}`}
             style={{ top: `${12.5 * (i + 1)}%` }}
           />
         ))}
@@ -50,7 +49,7 @@ export function HeroSection() {
       <div className="relative z-10 mx-auto w-full max-w-[1280px] px-6 pb-20 lg:px-12 lg:pb-28">
         <div
           className={`mb-8 transition-all duration-700 ${
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
           <span className="inline-flex items-center gap-3 rounded-full border border-border/50 bg-card/40 px-4 py-1.5 font-mono text-[11px] text-muted-foreground backdrop-blur-xl sm:text-xs">
@@ -61,18 +60,18 @@ export function HeroSection() {
 
         <h1
           className={`max-w-[12ch] font-display text-[clamp(2.75rem,9vw,8.5rem)] leading-[0.95] tracking-tight transition-all duration-1000 ${
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
           <span className="block">Paste docs.</span>
           <span className="block">
-            Get{' '}
+            Get{" "}
             <span className="relative inline-block">
               <span className="inline-flex" key={wordIndex}>
-                {words[wordIndex].split('').map((char, i) => (
+                {words[wordIndex].split("").map((char, i) => (
                   <span
                     className="animate-char-in inline-block"
-                    key={`${wordIndex}-${i}`}
+                    key={`${wordIndex}-${char}-${String(i)}`}
                     style={{ animationDelay: `${i * 50}ms` }}
                   >
                     {char}
@@ -86,7 +85,7 @@ export function HeroSection() {
 
         <p
           className={`mt-8 max-w-2xl text-base leading-relaxed text-muted-foreground transition-all delay-200 duration-700 sm:text-lg lg:text-xl ${
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
           Paste any docs URL — LangChain, Stripe, your own — and get a hosted
@@ -96,7 +95,7 @@ export function HeroSection() {
 
         <div
           className={`mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 transition-all delay-300 duration-700 ${
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
           <Button
@@ -120,7 +119,7 @@ export function HeroSection() {
         </div>
 
         <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {marqueeStats.map(stat => (
+          {marqueeStats.map((stat) => (
             <div
               className="rounded-xl border border-border/40 bg-card/30 px-4 py-4 backdrop-blur-xl"
               key={stat.company}
@@ -137,5 +136,5 @@ export function HeroSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

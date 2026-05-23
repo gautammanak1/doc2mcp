@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { DocPageFallback } from "@/components/docs/docs-shell";
 import { DocPageLoader } from "@/components/docs/doc-page-loader";
+import { DocPageFallback } from "@/components/docs/docs-shell";
 
 type PageProps = {
   params: Promise<{ slug?: string[] }>;

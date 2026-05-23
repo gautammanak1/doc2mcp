@@ -62,8 +62,7 @@ export function handleMcpPages(pages: CrawlResult[]) {
 
 export function handleMcpPageGet(pages: CrawlResult[], ref: string) {
   const page =
-    getDocPage(pages, { url: ref }) ??
-    getDocPage(pages, { id: ref });
+    getDocPage(pages, { url: ref }) ?? getDocPage(pages, { id: ref });
   if (!page) {
     return mcpError("page_not_found", 404);
   }

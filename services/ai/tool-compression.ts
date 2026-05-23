@@ -1,7 +1,9 @@
 import { asi1GenerateText } from "@/lib/asi1/client";
 import type { ApiEndpoint, CompressedTool } from "@/types/platform";
 
-function groupEndpointsByResource(endpoints: ApiEndpoint[]): Record<string, ApiEndpoint[]> {
+function groupEndpointsByResource(
+  endpoints: ApiEndpoint[]
+): Record<string, ApiEndpoint[]> {
   const groups: Record<string, ApiEndpoint[]> = {};
 
   for (const endpoint of endpoints) {

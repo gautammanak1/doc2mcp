@@ -26,7 +26,7 @@ export function Doc2McpMark({
           <stop offset="0%" stopColor="#A78BFA" />
           <stop offset="100%" stopColor="#7C3AED" />
         </linearGradient>
-        <filter id="d2mGlow" x="-20%" y="-20%" width="140%" height="140%">
+        <filter height="140%" id="d2mGlow" width="140%" x="-20%" y="-20%">
           <feGaussianBlur in="SourceGraphic" stdDeviation="0.6" />
           <feMerge>
             <feMergeNode />
@@ -46,7 +46,13 @@ export function Doc2McpMark({
         width="64"
       />
 
-      <g filter="url(#d2mGlow)" stroke="url(#d2mAccent)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4">
+      <g
+        filter="url(#d2mGlow)"
+        stroke="url(#d2mAccent)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2.4"
+      >
         {/* Document with folded corner */}
         <path d="M14 18 L 14 46 L 28 46 L 28 22 L 24 18 Z" fill="none" />
         <path d="M24 18 L 24 22 L 28 22" />

@@ -384,7 +384,10 @@ async function normalizeDocsUrl(input: string): Promise<string> {
   }
 
   const host = parsed.hostname.replace(/^www\./, "");
-  const baseHost = host.replace(/^(?:docs|developers|developer|platform)\./, "");
+  const baseHost = host.replace(
+    /^(?:docs|developers|developer|platform)\./,
+    ""
+  );
   const path = parsed.pathname;
 
   // 1. Direct alias hit (apex or non-docs subdomain)
@@ -396,7 +399,10 @@ async function normalizeDocsUrl(input: string): Promise<string> {
     }
     try {
       const aliasUrl = new URL(alias);
-      if (aliasUrl.hostname === parsed.hostname && path.startsWith(aliasUrl.pathname)) {
+      if (
+        aliasUrl.hostname === parsed.hostname &&
+        path.startsWith(aliasUrl.pathname)
+      ) {
         // already on the canonical path, keep
         break;
       }
@@ -483,17 +489,16 @@ const MARKETING_BLOCKLIST = [
 function isMarketingPath(path: string): boolean {
   const lower = path.toLowerCase();
   for (const seg of MARKETING_BLOCKLIST) {
-    if (lower === seg || lower.startsWith(`${seg}/`) || lower.includes(seg)) {
-      // Only block if the URL is NOT clearly a doc:
-      if (
-        !lower.includes("/docs") &&
-        !lower.includes("/api") &&
-        !lower.includes("/reference") &&
-        !lower.includes("/guide") &&
-        !lower.includes("/sdk")
-      ) {
-        return true;
-      }
+    const hitsSegment =
+      lower === seg || lower.startsWith(`${seg}/`) || lower.includes(seg);
+    const looksLikeDoc =
+      lower.includes("/docs") ||
+      lower.includes("/api") ||
+      lower.includes("/reference") ||
+      lower.includes("/guide") ||
+      lower.includes("/sdk");
+    if (hitsSegment && !looksLikeDoc) {
+      return true;
     }
   }
   return false;
@@ -510,7 +515,10 @@ async function fetchLlmsManifest(origin: string): Promise<string[]> {
   } catch {
     // ignore
   }
-  const baseHost = host.replace(/^(?:docs|developers|developer|platform)\./, "");
+  const baseHost = host.replace(
+    /^(?:docs|developers|developer|platform)\./,
+    ""
+  );
 
   const candidates = new Set<string>([
     `${origin}/llms.txt`,
@@ -525,7 +533,7 @@ async function fetchLlmsManifest(origin: string): Promise<string[]> {
 
   for (const url of candidates) {
     const res = await fetchText(url, "text/plain,text/markdown");
-    if (!res || !res.text || res.text.length < 50) {
+    if (!res?.text || res.text.length < 50) {
       continue;
     }
     const urls = new Set<string>();

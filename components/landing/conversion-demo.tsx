@@ -246,11 +246,7 @@ export function ConversionDemo() {
 }
 
 function renderConfig(slug: string, phase: Phase): string {
-  if (
-    phase === "typing" ||
-    phase === "submitting" ||
-    phase === "crawling"
-  ) {
+  if (phase === "typing" || phase === "submitting" || phase === "crawling") {
     return `{
   "mcpServers": {
     "${slug}": {

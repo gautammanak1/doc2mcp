@@ -71,7 +71,11 @@ export function ApiGraph({
         onEdgesChange={onEdgesChange}
         onNodesChange={onNodesChange}
       >
-        <Background color="#ffffff06" gap={24} variant={BackgroundVariant.Dots} />
+        <Background
+          color="#ffffff06"
+          gap={24}
+          variant={BackgroundVariant.Dots}
+        />
         <Controls className="!bg-card/90 !border-white/10" />
         <MiniMap
           className="!bg-black/60"

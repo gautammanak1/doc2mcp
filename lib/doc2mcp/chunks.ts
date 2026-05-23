@@ -112,7 +112,11 @@ function packSection(body: string): string[] {
       inFence = !inFence;
     }
 
-    if (next.length > CHUNK_TARGET_CHARS && current.length >= CHUNK_MIN_CHARS && !inFence) {
+    if (
+      next.length > CHUNK_TARGET_CHARS &&
+      current.length >= CHUNK_MIN_CHARS &&
+      !inFence
+    ) {
       chunks.push(current);
       const tail = current.slice(-CHUNK_OVERLAP_CHARS);
       current = `${tail}\n\n${para}`;
@@ -243,10 +247,7 @@ export function searchChunks(
       continue;
     }
 
-    const start =
-      firstMatchIdx >= 0
-        ? Math.max(0, firstMatchIdx - 80)
-        : 0;
+    const start = firstMatchIdx >= 0 ? Math.max(0, firstMatchIdx - 80) : 0;
     const snippet = chunk.content.slice(start, start + 320).trim();
     hits.push({ chunk, score, snippet });
   }

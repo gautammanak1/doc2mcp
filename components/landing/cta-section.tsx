@@ -1,10 +1,9 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
-import { ArrowRight } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 
 export function CtaSection() {
   return (
@@ -17,17 +16,17 @@ export function CtaSection() {
           Paste a docs URL. Get a Cursor-ready MCP server. Free to try.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button asChild size="lg" className="rounded-full gap-2">
+          <Button asChild className="rounded-full gap-2" size="lg">
             <Link href="/chat">
               Open app
               <ArrowRight className="size-4" />
             </Link>
           </Button>
-          <Button asChild size="lg" variant="outline" className="rounded-full">
+          <Button asChild className="rounded-full" size="lg" variant="outline">
             <Link href="/pricing">View pricing</Link>
           </Button>
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -10,7 +10,10 @@ import { compressApiToTools } from "./tool-compression";
 
 function buildAnalysisPrompt(crawlResults: CrawlResult[]): string {
   const docsSummary = crawlResults
-    .map((r) => `## ${r.title} (${r.type})\nURL: ${r.url}\n${r.content.slice(0, 2000)}`)
+    .map(
+      (r) =>
+        `## ${r.title} (${r.type})\nURL: ${r.url}\n${r.content.slice(0, 2000)}`
+    )
     .join("\n\n");
 
   return `You are an expert API documentation analyst. Analyze the following documentation and extract structured API information.
@@ -36,7 +39,11 @@ export type AnalysisResult = {
   useCases: string[];
   compressedTools: CompressedTool[];
   llmsTxt: string;
-  tokenUsage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+  tokenUsage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 };
 
 export async function analyzeDocumentation(

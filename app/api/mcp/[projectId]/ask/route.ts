@@ -1,10 +1,6 @@
 import { asi1GenerateText } from "@/lib/asi1/client";
-import {
-  mcpError,
-  mcpJson,
-  resolveMcpProject,
-} from "@/lib/doc2mcp/mcp-api";
 import { searchDocs } from "@/lib/doc2mcp/docs-index";
+import { mcpError, mcpJson, resolveMcpProject } from "@/lib/doc2mcp/mcp-api";
 
 export async function POST(
   request: Request,

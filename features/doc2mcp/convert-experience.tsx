@@ -1,18 +1,12 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  ArrowLeft,
-  Check,
-  Copy,
-  Download,
-  Loader2,
-} from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Check, Copy, Download, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ApiGraph } from "@/components/doc2mcp/api-graph";
 import { AnimatedBackground } from "@/components/doc2mcp/animated-background";
+import { ApiGraph } from "@/components/doc2mcp/api-graph";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
 import { PipelineProgress } from "@/components/doc2mcp/pipeline-progress";
@@ -21,11 +15,15 @@ import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
 import { ToolCard } from "@/components/doc2mcp/tool-card";
 import { Button } from "@/components/ui/button";
 import type { PlatformProject } from "@/lib/db/schema";
-import type { CompressedTool, ProjectArtifacts, ProcessingLog } from "@/types/platform";
 import {
   generateClaudeDesktopConfig,
   generateCursorMcpJson,
 } from "@/services/mcp/generator";
+import type {
+  CompressedTool,
+  ProcessingLog,
+  ProjectArtifacts,
+} from "@/types/platform";
 
 const PIPELINE_STEPS = [
   "crawl",
@@ -98,14 +96,12 @@ export function ConvertExperience({
     URL.revokeObjectURL(url);
   };
 
-  const cursorConfig =
-    artifacts?.mcpConfig
-      ? generateCursorMcpJson(artifacts.mcpConfig)
-      : "{}";
-  const claudeConfig =
-    artifacts?.mcpConfig
-      ? generateClaudeDesktopConfig(artifacts.mcpConfig)
-      : "{}";
+  const cursorConfig = artifacts?.mcpConfig
+    ? generateCursorMcpJson(artifacts.mcpConfig)
+    : "{}";
+  const claudeConfig = artifacts?.mcpConfig
+    ? generateClaudeDesktopConfig(artifacts.mcpConfig)
+    : "{}";
 
   return (
     <div className="relative min-h-dvh">
@@ -145,7 +141,9 @@ export function ConvertExperience({
 
         {/* Live logs */}
         <section className="glass-card neon-border rounded-2xl p-5">
-          <p className="mb-3 font-mono text-muted-foreground text-xs">terminal</p>
+          <p className="mb-3 font-mono text-muted-foreground text-xs">
+            terminal
+          </p>
           {logs.length > 0 ? (
             <TerminalLog
               lines={logs.map((l) => `[${l.level}] ${l.message}`)}
@@ -185,7 +183,9 @@ export function ConvertExperience({
 
               {/* MCP output */}
               <section className="glass-card rounded-2xl p-6">
-                <h2 className="font-display font-semibold text-xl">MCP Server</h2>
+                <h2 className="font-display font-semibold text-xl">
+                  MCP Server
+                </h2>
                 <p className="mt-1 text-muted-foreground text-sm">
                   Production-ready MCP configuration
                 </p>
@@ -258,20 +258,18 @@ export function ConvertExperience({
 
               <section className="grid gap-4 lg:grid-cols-2">
                 <ConfigPanel
-                  onCopy={() => copyText(cursorConfig, "Cursor config")}
-                  onDownload={() =>
-                    download("cursor-mcp.json", cursorConfig)
-                  }
-                  title="Cursor MCP"
                   config={cursorConfig}
+                  onCopy={() => copyText(cursorConfig, "Cursor config")}
+                  onDownload={() => download("cursor-mcp.json", cursorConfig)}
+                  title="Cursor MCP"
                 />
                 <ConfigPanel
+                  config={claudeConfig}
                   onCopy={() => copyText(claudeConfig, "Claude config")}
                   onDownload={() =>
                     download("claude-desktop.json", claudeConfig)
                   }
                   title="Claude Desktop"
-                  config={claudeConfig}
                 />
               </section>
 
@@ -327,7 +325,9 @@ export function ConvertExperience({
               className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center"
               initial={{ opacity: 0 }}
             >
-              <p className="text-red-300">Conversion failed. Try another URL.</p>
+              <p className="text-red-300">
+                Conversion failed. Try another URL.
+              </p>
               <Button asChild className="mt-4" variant="outline">
                 <Link href="/">Start over</Link>
               </Button>

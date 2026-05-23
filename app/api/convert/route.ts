@@ -1,11 +1,11 @@
 import { after } from "next/server";
+import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import { createPlatformProject } from "@/lib/db/queries";
-import { ChatbotError } from "@/lib/errors";
-import { processProjectPipeline } from "@/services/pipeline/process-project";
 import { detectSourceTypeFromUrl } from "@/lib/doc2mcp/detect-source-type";
 import { deriveMcpServerSlug } from "@/lib/doc2mcp/naming";
-import { z } from "zod";
+import { ChatbotError } from "@/lib/errors";
+import { processProjectPipeline } from "@/services/pipeline/process-project";
 
 const bodySchema = z.object({
   sourceUrl: z.string().url(),

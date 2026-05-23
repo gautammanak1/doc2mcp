@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { encode } from "next-auth/jwt";
-import { getToken } from "next-auth/jwt";
-import { createGuestUser } from "@/lib/db/queries";
+import { encode, getToken } from "next-auth/jwt";
 import { isDevelopmentEnvironment } from "@/lib/constants";
+import { createGuestUser } from "@/lib/db/queries";
 
 function sessionCookieName(): string {
   return isDevelopmentEnvironment

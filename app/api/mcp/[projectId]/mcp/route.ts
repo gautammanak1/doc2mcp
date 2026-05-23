@@ -17,12 +17,7 @@ function rpcSuccess(id: JsonRpcId, result: unknown) {
   return Response.json({ jsonrpc: "2.0", id, result });
 }
 
-function rpcError(
-  id: JsonRpcId,
-  code: number,
-  message: string,
-  status = 200
-) {
+function rpcError(id: JsonRpcId, code: number, message: string, status = 200) {
   return Response.json(
     {
       jsonrpc: "2.0",
@@ -44,6 +39,7 @@ function rpcHttpError(status: number, code: number, message: string) {
   );
 }
 
+// biome-ignore lint/suspicious/useAwait: Next.js route handlers must be async
 export async function GET() {
   return new Response(
     "doc2mcp HTTP MCP — use POST with JSON-RPC 2.0 (initialize, tools/list, tools/call)",
@@ -102,7 +98,7 @@ export async function POST(
   if (method === "tools/call") {
     const toolName =
       typeof (rpcParams as { name?: unknown }).name === "string"
-        ? ((rpcParams as { name: string }).name)
+        ? (rpcParams as { name: string }).name
         : "";
     const toolArgs =
       (rpcParams as { arguments?: Record<string, unknown> }).arguments ?? {};
@@ -119,12 +115,19 @@ export async function POST(
       if (resolved.error === "not_ready") {
         return rpcHttpError(409, -32_002, "Project is not ready yet");
       }
-      return rpcHttpError(401, -32_003, "Unauthorized: missing or invalid token");
+      return rpcHttpError(
+        401,
+        -32_003,
+        "Unauthorized: missing or invalid token"
+      );
     }
 
     try {
       const result = await runDocMcpTool(toolName, toolArgs, {
-        project: { name: resolved.project.name, sourceUrl: resolved.project.sourceUrl },
+        project: {
+          name: resolved.project.name,
+          sourceUrl: resolved.project.sourceUrl,
+        },
         pages: resolved.pages,
         artifacts: resolved.artifacts,
       });

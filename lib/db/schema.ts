@@ -146,14 +146,7 @@ export const platformProject = pgTable("PlatformProject", {
     enum: ["url", "github", "markdown", "openapi", "postman", "html"],
   }).notNull(),
   status: varchar("status", {
-    enum: [
-      "pending",
-      "crawling",
-      "analyzing",
-      "generating",
-      "ready",
-      "error",
-    ],
+    enum: ["pending", "crawling", "analyzing", "generating", "ready", "error"],
   })
     .notNull()
     .default("pending"),

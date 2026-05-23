@@ -78,7 +78,10 @@ export const DOC_MCP_TOOLS: McpToolDefinition[] = [
     inputSchema: {
       type: "object",
       properties: {
-        question: { type: "string", description: "Your question about the docs" },
+        question: {
+          type: "string",
+          description: "Your question about the docs",
+        },
       },
       required: ["question"],
     },

@@ -34,7 +34,9 @@ function buildMcpServerEntry(options: McpGeneratorOptions) {
   };
 }
 
-export function generateMcpConfig(options: McpGeneratorOptions): McpServerConfig {
+export function generateMcpConfig(
+  options: McpGeneratorOptions
+): McpServerConfig {
   const serverSlug = resolveServerSlug(options) || "docs";
   const serverEntry = buildMcpServerEntry(options);
 

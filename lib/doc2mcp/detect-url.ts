@@ -1,5 +1,4 @@
-const URL_PATTERN =
-  /https?:\/\/[^\s]+/i;
+const URL_PATTERN = /https?:\/\/[^\s]+/i;
 
 export function extractDocsUrl(text: string): string | null {
   const trimmed = text.trim();

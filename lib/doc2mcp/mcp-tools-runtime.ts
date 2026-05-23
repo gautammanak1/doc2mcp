@@ -126,9 +126,7 @@ export async function runDocMcpTool(
           ? args.maxPages
           : undefined;
       const slice = maxPages ? ctx.pages.slice(0, maxPages) : ctx.pages;
-      return textOk(
-        buildFullDocsMarkdown(slice, ctx.project.sourceUrl ?? "")
-      );
+      return textOk(buildFullDocsMarkdown(slice, ctx.project.sourceUrl ?? ""));
     }
 
     case "ask_documentation": {
@@ -143,7 +141,7 @@ export async function runDocMcpTool(
       const localExcerpts = hits
         .map(
           (h) =>
-            `### ${h.chunk.breadcrumbs}\n${h.chunk.pageUrl}\n\n${h.chunk.content.slice(0, 4_500)}`
+            `### ${h.chunk.breadcrumbs}\n${h.chunk.pageUrl}\n\n${h.chunk.content.slice(0, 4500)}`
         )
         .join("\n\n---\n\n");
 
@@ -166,10 +164,7 @@ export async function runDocMcpTool(
         });
         if (webHits.length > 0) {
           webBlock = webHits
-            .map(
-              (h) =>
-                `### ${h.title}\n${h.url}\n\n${h.snippet}`
-            )
+            .map((h) => `### ${h.title}\n${h.url}\n\n${h.snippet}`)
             .join("\n\n---\n\n");
           for (const h of webHits) {
             webSources.push({ title: h.title, url: h.url });

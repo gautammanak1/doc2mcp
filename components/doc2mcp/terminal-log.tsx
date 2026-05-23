@@ -15,7 +15,7 @@ export function TerminalLog({
         <motion.div
           animate={{ opacity: 1 }}
           initial={{ opacity: 0 }}
-          key={`${line}-${i}`}
+          key={`${line}-${String(i)}`}
           transition={{ delay: i * 0.05 }}
         >
           {line}

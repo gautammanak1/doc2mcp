@@ -9,10 +9,9 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-const BASE_URL = (process.env.DOC2MCP_BASE_URL ?? "http://localhost:3000").replace(
-  /\/$/,
-  ""
-);
+const BASE_URL = (
+  process.env.DOC2MCP_BASE_URL ?? "http://localhost:3000"
+).replace(/\/$/, "");
 const PROJECT_ID = process.env.DOC2MCP_PROJECT_ID ?? "";
 const PROJECT_TOKEN = process.env.DOC2MCP_PROJECT_TOKEN ?? "";
 const SERVER_NAME = process.env.DOC2MCP_SERVER_NAME ?? "doc2mcp";
@@ -96,8 +95,7 @@ async function mcpGet(path: string): Promise<unknown> {
 }
 
 function textResult(data: unknown) {
-  const text =
-    typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
   return { content: [{ type: "text" as const, text }] };
 }
 
@@ -152,14 +150,18 @@ const server = new Server(
   { capabilities: { tools: {} } }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [...TOOLS],
-}));
+server.setRequestHandler(ListToolsRequestSchema, () =>
+  Promise.resolve({ tools: [...TOOLS] })
+);
 
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const args = (request.params.arguments ?? {}) as Record<string, unknown>;
-  return handleTool(request.params.name, args);
-});
+server.setRequestHandler(
+  CallToolRequestSchema,
+  // biome-ignore lint/suspicious/useAwait: MCP SDK requires async handlers
+  async (request) => {
+    const args = (request.params.arguments ?? {}) as Record<string, unknown>;
+    return handleTool(request.params.name, args);
+  }
+);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

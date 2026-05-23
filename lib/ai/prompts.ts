@@ -38,7 +38,8 @@ export const systemPrompt = ({
   return `${regularPrompt}\n\n${getRequestPromptFromHints(requestHints)}`;
 };
 
-export const titlePrompt = `Generate a short title (max 6 words) summarizing the chat. Return only the title, no quotes.`;
+export const titlePrompt =
+  "Generate a short title (max 6 words) summarizing the chat. Return only the title, no quotes.";
 
 export const codePrompt =
   "Write clean, idiomatic code that solves the user's request. Prefer the simplest correct solution and add brief comments only where intent is non-obvious.";

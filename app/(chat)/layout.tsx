@@ -3,13 +3,17 @@ import Script from "next/script";
 import { Suspense } from "react";
 import { Toaster } from "sonner";
 import { AppSidebar } from "@/components/chat/app-sidebar";
-import { ChatShell } from "@/components/chat/shell";
 import { DataStreamProvider } from "@/components/chat/data-stream-provider";
-import { ActiveChatProvider } from "@/hooks/use-active-chat";
+import { ChatShell } from "@/components/chat/shell";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { ActiveChatProvider } from "@/hooks/use-active-chat";
 import { auth } from "../(auth)/auth";
 
-export default function ChatLayout({ children }: { children: React.ReactNode }) {
+export default function ChatLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <>
       <Script

@@ -1,102 +1,102 @@
-'use client'
+"use client";
 
-import { useEffect, useRef, useState } from 'react'
-import { FEATURE_ICONS } from './feature-icons'
+import { useEffect, useRef, useState } from "react";
+import { FEATURE_ICONS } from "./feature-icons";
 
 const features = [
   {
-    number: '01',
-    title: 'Universal docs crawler',
+    number: "01",
+    title: "Universal docs crawler",
     description:
-      'Mintlify, Docusaurus, Swagger, GitBook, GitHub raw markdown, plain HTML — code blocks always preserved.',
-    visual: 'deploy'
+      "Mintlify, Docusaurus, Swagger, GitBook, GitHub raw markdown, plain HTML — code blocks always preserved.",
+    visual: "deploy",
   },
   {
-    number: '02',
-    title: 'AI-native tools',
+    number: "02",
+    title: "AI-native tools",
     description:
-      'ASI1 reads the docs and exposes search, page lookup, full read, and natural-language Q&A — not raw REST.',
-    visual: 'ai'
+      "ASI1 reads the docs and exposes search, page lookup, full read, and natural-language Q&A — not raw REST.",
+    visual: "ai",
   },
   {
-    number: '03',
-    title: 'Hosted remote MCP',
+    number: "03",
+    title: "Hosted remote MCP",
     description:
-      'No npx, no local clone. Cursor connects with a URL + Bearer token. Same JSON works in Claude Desktop and Windsurf.',
-    visual: 'collab'
+      "No npx, no local clone. Cursor connects with a URL + Bearer token. Same JSON works in Claude Desktop and Windsurf.",
+    visual: "collab",
   },
   {
-    number: '04',
-    title: 'Chat the docs first',
+    number: "04",
+    title: "Chat the docs first",
     description:
-      'Built-in chat lets you ask your docs anything before wiring up the MCP. Switch doc2mcp mode and paste a URL.',
-    visual: 'security'
-  }
-]
+      "Built-in chat lets you ask your docs anything before wiring up the MCP. Switch doc2mcp mode and paste a URL.",
+    visual: "security",
+  },
+];
 
-function DeployVisual() {
+function _DeployVisual() {
   return (
-    <svg viewBox="0 0 200 160" className="w-full h-full">
+    <svg className="w-full h-full" viewBox="0 0 200 160">
       <defs>
         <clipPath id="deployClip">
-          <rect x="30" y="20" width="140" height="120" rx="4" />
+          <rect height="120" rx="4" width="140" x="30" y="20" />
         </clipPath>
       </defs>
 
       {/* Container */}
       <rect
-        x="30"
-        y="20"
-        width="140"
+        fill="none"
         height="120"
         rx="4"
-        fill="none"
         stroke="currentColor"
         strokeWidth="2"
+        width="140"
+        x="30"
+        y="20"
       />
 
       {/* Animated bars */}
       <g clipPath="url(#deployClip)">
-        {[0, 1, 2, 3, 4, 5].map(i => (
+        {[0, 1, 2, 3, 4, 5].map((i) => (
           <rect
+            fill="currentColor"
+            height="10"
             key={i}
+            opacity="0.15"
+            rx="2"
+            width="120"
             x="40"
             y={35 + i * 16}
-            width="120"
-            height="10"
-            rx="2"
-            fill="currentColor"
-            opacity="0.15"
           >
             <animate
               attributeName="opacity"
-              values="0.15;0.8;0.15"
-              dur="2s"
               begin={`${i * 0.15}s`}
+              dur="2s"
               repeatCount="indefinite"
+              values="0.15;0.8;0.15"
             />
             <animate
               attributeName="width"
-              values="20;120;20"
-              dur="2s"
               begin={`${i * 0.15}s`}
+              dur="2s"
               repeatCount="indefinite"
+              values="20;120;20"
             />
           </rect>
         ))}
       </g>
 
       {/* Progress indicator */}
-      <circle cx="100" cy="155" r="3" fill="currentColor" opacity="0.3">
+      <circle cx="100" cy="155" fill="currentColor" opacity="0.3" r="3">
         <animate
           attributeName="opacity"
-          values="0.3;1;0.3"
           dur="1s"
           repeatCount="indefinite"
+          values="0.3;1;0.3"
         />
       </circle>
     </svg>
-  )
+  );
 }
 
 /** Fixed coords — Math.cos/sin differ slightly between SSR and client. */
@@ -106,41 +106,41 @@ const AI_ORBIT_NODES = [
   { x2: 75, y2: 123.3 },
   { x2: 50, y2: 80 },
   { x2: 75, y2: 36.7 },
-  { x2: 125, y2: 36.7 }
-] as const
+  { x2: 125, y2: 36.7 },
+] as const;
 
-function AIVisual() {
+function _AIVisual() {
   return (
-    <svg viewBox="0 0 200 160" className="w-full h-full">
+    <svg className="w-full h-full" viewBox="0 0 200 160">
       {/* Central node */}
-      <circle cx="100" cy="80" r="12" fill="currentColor">
+      <circle cx="100" cy="80" fill="currentColor" r="12">
         <animate
           attributeName="r"
-          values="12;14;12"
           dur="2s"
           repeatCount="indefinite"
+          values="12;14;12"
         />
       </circle>
 
       {/* Orbiting nodes */}
       {AI_ORBIT_NODES.map((node, i) => (
-        <g key={i}>
+        <g key={`${node.x2}-${node.y2}`}>
           {/* Connection line */}
           <line
-            x1="100"
-            y1="80"
-            x2={node.x2}
-            y2={node.y2}
+            opacity="0.3"
             stroke="currentColor"
             strokeWidth="1"
-            opacity="0.3"
+            x1="100"
+            x2={node.x2}
+            y1="80"
+            y2={node.y2}
           >
             <animate
               attributeName="opacity"
-              values="0.3;0.8;0.3"
-              dur="2s"
               begin={`${i * 0.3}s`}
+              dur="2s"
               repeatCount="indefinite"
+              values="0.3;0.8;0.3"
             />
           </line>
 
@@ -148,17 +148,17 @@ function AIVisual() {
           <circle
             cx={node.x2}
             cy={node.y2}
-            r="6"
             fill="none"
+            r="6"
             stroke="currentColor"
             strokeWidth="2"
           >
             <animate
               attributeName="r"
-              values="6;8;6"
-              dur="2s"
               begin={`${i * 0.3}s`}
+              dur="2s"
               repeatCount="indefinite"
+              values="6;8;6"
             />
           </circle>
         </g>
@@ -168,59 +168,59 @@ function AIVisual() {
       <circle
         cx="100"
         cy="80"
-        r="30"
         fill="none"
+        opacity="0"
+        r="30"
         stroke="currentColor"
         strokeWidth="1"
-        opacity="0"
       >
         <animate
           attributeName="r"
-          values="20;60"
           dur="2s"
           repeatCount="indefinite"
+          values="20;60"
         />
         <animate
           attributeName="opacity"
-          values="0.5;0"
           dur="2s"
           repeatCount="indefinite"
+          values="0.5;0"
         />
       </circle>
     </svg>
-  )
+  );
 }
 
-function CollabVisual() {
+function _CollabVisual() {
   return (
-    <svg viewBox="0 0 200 160" className="w-full h-full">
+    <svg className="w-full h-full" viewBox="0 0 200 160">
       {/* User A */}
       <g>
         <rect
-          x="30"
-          y="50"
-          width="50"
+          fill="none"
           height="60"
           rx="4"
-          fill="none"
           stroke="currentColor"
           strokeWidth="2"
+          width="50"
+          x="30"
+          y="50"
         />
         <text
+          fill="currentColor"
+          fontFamily="monospace"
+          fontSize="20"
+          textAnchor="middle"
           x="55"
           y="85"
-          textAnchor="middle"
-          fontSize="20"
-          fontFamily="monospace"
-          fill="currentColor"
         >
           A
         </text>
         <circle
           cx="55"
           cy="35"
-          r="12"
           fill="none"
+          r="12"
           stroke="currentColor"
           strokeWidth="2"
         />
@@ -229,30 +229,30 @@ function CollabVisual() {
       {/* User B */}
       <g>
         <rect
-          x="120"
-          y="50"
-          width="50"
+          fill="none"
           height="60"
           rx="4"
-          fill="none"
           stroke="currentColor"
           strokeWidth="2"
+          width="50"
+          x="120"
+          y="50"
         />
         <text
+          fill="currentColor"
+          fontFamily="monospace"
+          fontSize="20"
+          textAnchor="middle"
           x="145"
           y="85"
-          textAnchor="middle"
-          fontSize="20"
-          fontFamily="monospace"
-          fill="currentColor"
         >
           B
         </text>
         <circle
           cx="145"
           cy="35"
-          r="12"
           fill="none"
+          r="12"
           stroke="currentColor"
           strokeWidth="2"
         />
@@ -260,54 +260,54 @@ function CollabVisual() {
 
       {/* Connection */}
       <line
-        x1="80"
-        y1="80"
-        x2="120"
-        y2="80"
         stroke="currentColor"
-        strokeWidth="2"
         strokeDasharray="4 4"
+        strokeWidth="2"
+        x1="80"
+        x2="120"
+        y1="80"
+        y2="80"
       >
         <animate
           attributeName="stroke-dashoffset"
-          values="0;-8"
           dur="0.5s"
           repeatCount="indefinite"
+          values="0;-8"
         />
       </line>
 
       {/* Data packet */}
-      <circle r="4" fill="currentColor">
+      <circle fill="currentColor" r="4">
         <animateMotion dur="1.5s" repeatCount="indefinite">
           <mpath href="#dataPath" />
         </animateMotion>
       </circle>
-      <path id="dataPath" d="M 80 80 L 120 80" fill="none" />
+      <path d="M 80 80 L 120 80" fill="none" id="dataPath" />
 
       {/* Sync indicator */}
       <g transform="translate(100, 130)">
-        <circle r="6" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle fill="none" r="6" stroke="currentColor" strokeWidth="2">
           <animate
             attributeName="r"
-            values="6;10;6"
             dur="1s"
             repeatCount="indefinite"
+            values="6;10;6"
           />
           <animate
             attributeName="opacity"
-            values="1;0.3;1"
             dur="1s"
             repeatCount="indefinite"
+            values="1;0.3;1"
           />
         </circle>
       </g>
     </svg>
-  )
+  );
 }
 
-function SecurityVisual() {
+function _SecurityVisual() {
   return (
-    <svg viewBox="0 0 200 160" className="w-full h-full">
+    <svg className="w-full h-full" viewBox="0 0 200 160">
       {/* Shield */}
       <path
         d="M 100 20 L 150 40 L 150 90 Q 150 130 100 145 Q 50 130 50 90 L 50 40 Z"
@@ -324,94 +324,98 @@ function SecurityVisual() {
       >
         <animate
           attributeName="opacity"
-          values="0.1;0.2;0.1"
           dur="2s"
           repeatCount="indefinite"
+          values="0.1;0.2;0.1"
         />
       </path>
 
       {/* Lock icon */}
-      <rect x="85" y="70" width="30" height="25" rx="3" fill="currentColor" />
+      <rect fill="currentColor" height="25" rx="3" width="30" x="85" y="70" />
       <path
         d="M 90 70 L 90 60 Q 90 50 100 50 Q 110 50 110 60 L 110 70"
         fill="none"
         stroke="currentColor"
-        strokeWidth="3"
         strokeLinecap="round"
+        strokeWidth="3"
       />
 
       {/* Keyhole */}
-      <circle cx="100" cy="80" r="4" fill="white" />
-      <rect x="98" y="82" width="4" height="8" fill="white" />
+      <circle cx="100" cy="80" fill="white" r="4" />
+      <rect fill="white" height="8" width="4" x="98" y="82" />
 
       {/* Scan lines */}
       <line
-        x1="60"
-        y1="60"
-        x2="140"
-        y2="60"
+        opacity="0"
         stroke="currentColor"
         strokeWidth="1"
-        opacity="0"
+        x1="60"
+        x2="140"
+        y1="60"
+        y2="60"
       >
         <animate
           attributeName="y1"
-          values="40;120;40"
           dur="3s"
           repeatCount="indefinite"
+          values="40;120;40"
         />
         <animate
           attributeName="y2"
-          values="40;120;40"
           dur="3s"
           repeatCount="indefinite"
+          values="40;120;40"
         />
         <animate
           attributeName="opacity"
-          values="0;0.5;0"
           dur="3s"
           repeatCount="indefinite"
+          values="0;0.5;0"
         />
       </line>
     </svg>
-  )
+  );
 }
 
 function AnimatedVisual({ type }: { type: string }) {
   const Icon =
     (FEATURE_ICONS as Record<string, React.ComponentType>)[type] ??
-    FEATURE_ICONS.deploy
-  return <Icon />
+    FEATURE_ICONS.deploy;
+  return <Icon />;
 }
 
 function FeatureCard({
   feature,
-  index
+  index,
 }: {
-  feature: (typeof features)[0]
-  index: number
+  feature: (typeof features)[0];
+  index: number;
 }) {
-  const [isVisible, setIsVisible] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true)
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
       },
       { threshold: 0.2 }
-    )
+    );
 
-    if (cardRef.current) observer.observe(cardRef.current)
-    return () => observer.disconnect()
-  }, [])
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div
-      ref={cardRef}
       className={`group relative transition-all duration-700 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
       }`}
+      ref={cardRef}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 py-12 lg:py-20 border-b border-foreground/10">
@@ -442,30 +446,34 @@ function FeatureCard({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function FeaturesSection() {
-  const [isVisible, setIsVisible] = useState(false)
-  const sectionRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) setIsVisible(true)
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
       },
       { threshold: 0.1 }
-    )
+    );
 
-    if (sectionRef.current) observer.observe(sectionRef.current)
-    return () => observer.disconnect()
-  }, [])
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section
+      className="relative py-16 sm:py-24 lg:py-32"
       id="features"
       ref={sectionRef}
-      className="relative py-16 sm:py-24 lg:py-32"
     >
       <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
         {/* Header */}
@@ -477,8 +485,8 @@ export function FeaturesSection() {
           <h2
             className={`font-display text-3xl tracking-tight transition-all duration-700 sm:text-4xl lg:text-6xl ${
               isVisible
-                ? 'opacity-100 translate-y-0'
-                : 'opacity-0 translate-y-4'
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-4"
             }`}
           >
             Everything you need.
@@ -492,10 +500,10 @@ export function FeaturesSection() {
         {/* Features List */}
         <div>
           {features.map((feature, index) => (
-            <FeatureCard key={feature.number} feature={feature} index={index} />
+            <FeatureCard feature={feature} index={index} key={feature.number} />
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
