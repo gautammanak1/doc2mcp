@@ -21,6 +21,7 @@
     "@ai-sdk/openai-compatible": "^2.0.47",
     "@ai-sdk/provider": "^3.0.3",
     "@ai-sdk/react": "3.0.118",
+    "@anthropic-ai/sdk": "^0.98.0",
     "@codemirror/lang-python": "^6.1.6",
     "@codemirror/state": "^6.5.0",
     "@codemirror/theme-one-dark": "^6.1.2",
