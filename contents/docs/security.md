@@ -92,7 +92,7 @@ Web search and Jina are **optional**. With no keys set, only Source docs, ASI1, 
 
 ## Headers and proxy
 
-- `proxy.ts` gates everything except the public-by-design routes: `/`, `/login`, `/register`, `/api/auth`, `/ping`, `/chat`, `/docs`, `/api/mcp`.
+- `proxy.ts` gates everything except the public-by-design routes: `/`, `/login`, `/register`, `/pricing`, `/demo`, `/api/auth`, `/ping`, `/chat`, `/docs`, `/api/mcp`.
 - `/api/mcp/[projectId]/mcp` accepts the Bearer token via `Authorization`, falls back to `X-Doc2MCP-Token`, then to a `?token=` query param for clients that cannot set headers.
 - Guest sessions are cookie-only, signed with `AUTH_SECRET`.
 

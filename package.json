@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "next build",
+    "build": "tsx lib/db/migrate.ts && next build",
     "start": "next start",
     "check": "ultracite check",
     "fix": "ultracite fix",

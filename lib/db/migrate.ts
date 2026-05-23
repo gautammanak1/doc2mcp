@@ -13,7 +13,7 @@ function validatePostgresUrl(url: string): void {
   if (PLACEHOLDER_PATTERN.test(url)) {
     throw new Error(
       "POSTGRES_URL is still a placeholder. Set your Supabase database password:\n" +
-        "  Dashboard → Project Settings → Database → Connection string → URI (pooler, port 6543)\n" +
+        "  Dashboard → Project Settings → Database → Connection string → URI (Session pooler, port 6543)\n" +
         "  https://supabase.com/dashboard/project/ilibxowyivxhdujeguaw/settings/database"
     );
   }
@@ -31,8 +31,8 @@ function validatePostgresUrl(url: string): void {
     if (error instanceof TypeError) {
       throw new Error(
         `POSTGRES_URL is not a valid connection string: ${url.slice(0, 40)}...\n` +
-          "Use the URI from Supabase (pooler mode, port 6543), e.g.:\n" +
-          "postgresql://postgres:YOUR_PASSWORD@db.ilibxowyivxhdujeguaw.supabase.co:5432/postgres"
+          "Use the Session pooler URI from Supabase (port 6543), e.g.:\n" +
+          "postgresql://postgres.ilibxowyivxhdujeguaw:YOUR_PASSWORD@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
       );
     }
     throw error;
@@ -40,6 +40,18 @@ function validatePostgresUrl(url: string): void {
 }
 
 const runMigrate = async () => {
+  if (process.env.SKIP_MIGRATE === "1") {
+    console.log("SKIP_MIGRATE set, skipping migrations");
+    process.exit(0);
+  }
+
+  // Vercel build network cannot reach Supabase direct connections (IPv6 :5432).
+  // Tables are applied via Supabase dashboard / `pnpm db:migrate` locally instead.
+  if (process.env.VERCEL === "1") {
+    console.log("Vercel build detected, skipping migrations");
+    process.exit(0);
+  }
+
   const postgresUrl = process.env.POSTGRES_URL;
   if (!postgresUrl) {
     console.log("POSTGRES_URL not defined, skipping migrations");
@@ -48,7 +60,7 @@ const runMigrate = async () => {
 
   validatePostgresUrl(postgresUrl);
 
-  const connection = postgres(postgresUrl, { max: 1 });
+  const connection = postgres(postgresUrl, { max: 1, prepare: false });
   const db = drizzle(connection);
 
   console.log("Running migrations...");

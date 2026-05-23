@@ -6,6 +6,8 @@ const PUBLIC_PATHS = [
   "/",
   "/login",
   "/register",
+  "/pricing",
+  "/demo",
   "/api/auth",
   "/ping",
   "/chat",
@@ -19,8 +21,22 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
+function isStaticAsset(pathname: string): boolean {
+  return (
+    pathname.startsWith("/_next/static") ||
+    pathname.startsWith("/_next/image") ||
+    /\.(?:png|jpe?g|gif|webp|svg|ico|txt|xml|woff2?|ttf|eot|mp4|webm)$/i.test(
+      pathname
+    )
+  );
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (isStaticAsset(pathname)) {
+    return NextResponse.next();
+  }
 
   if (pathname.startsWith("/ping")) {
     return new Response("pong", { status: 200 });
@@ -65,6 +81,8 @@ export const config = {
     "/api/:path*",
     "/login",
     "/register",
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|doc2mcp-logo.png).*)",
+    "/pricing",
+    "/demo",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|txt|xml|woff2?|ttf|eot)$).*)",
   ],
 };
