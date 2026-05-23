@@ -2,9 +2,8 @@
 
 import { ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { User } from "next-auth";
-import { signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,19 +28,19 @@ function emailToHue(email: string): number {
   return Math.abs(hash) % 360;
 }
 
-export function SidebarUserNav({ user }: { user: User }) {
+export function SidebarUserNav() {
   const router = useRouter();
-  const { data, status } = useSession();
+  const { user, loading, signOut } = useSupabaseAuth();
   const { setTheme, resolvedTheme } = useTheme();
 
-  const isGuest = guestRegex.test(data?.user?.email ?? "");
+  const isGuest = user ? guestRegex.test(user.email ?? "") : false;
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {status === "loading" ? (
+            {loading ? (
               <SidebarMenuButton className="h-10 justify-between rounded-lg bg-transparent text-sidebar-foreground/50 transition-colors duration-150 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                 <div className="flex flex-row items-center gap-2">
                   <div className="size-6 animate-pulse rounded-full bg-sidebar-foreground/10" />
@@ -61,7 +60,7 @@ export function SidebarUserNav({ user }: { user: User }) {
                 <div
                   className="size-5 shrink-0 rounded-full ring-1 ring-sidebar-border/50"
                   style={{
-                    background: `linear-gradient(135deg, oklch(0.35 0.08 ${emailToHue(user.email ?? "")}), oklch(0.25 0.05 ${emailToHue(user.email ?? "") + 40}))`,
+                    background: `linear-gradient(135deg, oklch(0.35 0.08 ${emailToHue(user?.email ?? "")}), oklch(0.25 0.05 ${emailToHue(user?.email ?? "") + 40}))`,
                   }}
                 />
                 <span className="truncate text-[13px]" data-testid="user-email">
@@ -89,8 +88,8 @@ export function SidebarUserNav({ user }: { user: User }) {
             <DropdownMenuItem asChild data-testid="user-nav-item-auth">
               <button
                 className="w-full cursor-pointer text-[13px]"
-                onClick={() => {
-                  if (status === "loading") {
+                onClick={async () => {
+                  if (loading) {
                     toast({
                       type: "error",
                       description:
@@ -103,9 +102,8 @@ export function SidebarUserNav({ user }: { user: User }) {
                   if (isGuest) {
                     router.push("/login");
                   } else {
-                    signOut({
-                      redirectTo: "/",
-                    });
+                    await signOut();
+                    router.push("/");
                   }
                 }}
                 type="button"

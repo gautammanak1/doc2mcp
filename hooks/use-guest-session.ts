@@ -1,17 +1,16 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import { useEffect, useRef } from "react";
 
 export function useGuestSession(redirectPath = "/chat") {
-  const { status } = useSession();
+  const { user, loading } = useSupabaseAuth();
   const started = useRef(false);
 
   useEffect(() => {
-    if (status === "unauthenticated" && !started.current) {
+    if (!loading && !user && !started.current) {
       started.current = true;
-      const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-      window.location.href = `${base}/api/auth/guest?redirectUrl=${encodeURIComponent(redirectPath)}`;
+      window.location.href = redirectPath;
     }
-  }, [status, redirectPath]);
+  }, [loading, user, redirectPath]);
 }

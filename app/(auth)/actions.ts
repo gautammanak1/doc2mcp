@@ -1,10 +1,7 @@
 "use server";
 
 import { z } from "zod";
-
-import { createUser, getUser } from "@/lib/db/queries";
-
-import { signIn } from "./auth";
+import { createClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
   email: z.string().email(),
@@ -25,11 +22,17 @@ export const login = async (
       password: formData.get("password"),
     });
 
-    await signIn("credentials", {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
     });
+
+    if (error) {
+      console.error("[v0] Login error:", error.message);
+      return { status: "failed" };
+    }
 
     return { status: "success" };
   } catch (error) {
@@ -37,6 +40,7 @@ export const login = async (
       return { status: "invalid_data" };
     }
 
+    console.error("[v0] Login exception:", error);
     return { status: "failed" };
   }
 };
@@ -61,17 +65,40 @@ export const register = async (
       password: formData.get("password"),
     });
 
-    const [user] = await getUser(validatedData.email);
+    const supabase = await createClient();
 
-    if (user) {
-      return { status: "user_exists" } as RegisterActionState;
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from("User")
+      .select("id")
+      .eq("email", validatedData.email)
+      .single();
+
+    if (existingUser) {
+      return { status: "user_exists" };
     }
-    await createUser(validatedData.email, validatedData.password);
-    await signIn("credentials", {
+
+    // Sign up with Supabase Auth
+    const { error: signUpError } = await supabase.auth.signUp({
       email: validatedData.email,
       password: validatedData.password,
-      redirect: false,
     });
+
+    if (signUpError) {
+      console.error("[v0] Sign up error:", signUpError.message);
+      return { status: "failed" };
+    }
+
+    // Sign in after successful registration
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: validatedData.email,
+      password: validatedData.password,
+    });
+
+    if (signInError) {
+      console.error("[v0] Sign in error after registration:", signInError.message);
+      return { status: "failed" };
+    }
 
     return { status: "success" };
   } catch (error) {
@@ -79,6 +106,7 @@ export const register = async (
       return { status: "invalid_data" };
     }
 
+    console.error("[v0] Register exception:", error);
     return { status: "failed" };
   }
 };
