@@ -5,11 +5,7 @@ import { auth } from "@/app/(auth)/auth";
 import { ConvertExperience } from "@/features/doc2mcp/convert-experience";
 import { getPlatformProjectById } from "@/lib/db/queries";
 
-async function ConvertLoader({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
   if (!session?.user?.id) {
