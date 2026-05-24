@@ -16,10 +16,7 @@ function RegisterHeading() {
 
 function RegisterFormSkeleton() {
   return (
-    <div
-      aria-hidden="true"
-      className="flex flex-col gap-4"
-    >
+    <div aria-hidden="true" className="flex flex-col gap-4">
       <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
       <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
       <div className="h-10 animate-pulse rounded-lg bg-muted/60" />

@@ -5,12 +5,20 @@ export type UserType = "guest" | "regular";
 
 export { createClient as getSupabaseClient } from "@/lib/supabase/server";
 
+import { cache } from "react";
 import { guestRegex } from "@/lib/constants";
 import { ensureAppUserFromSupabase } from "@/lib/db/queries";
 import { getSafeUser } from "@/lib/supabase/safe-session";
 import { createClient } from "@/lib/supabase/server";
 
-export async function auth() {
+/**
+ * Resolve the current session for this request.
+ *
+ * Wrapped in React `cache()` so multiple consumers in the same render
+ * (layout + page + nav + sub-components) all share a single Supabase
+ * round trip + DB sync instead of duplicating them.
+ */
+export const auth = cache(async () => {
   const supabase = await createClient();
   const user = await getSafeUser(supabase);
 
@@ -42,4 +50,4 @@ export async function auth() {
       type: userType,
     },
   };
-}
+});

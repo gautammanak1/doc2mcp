@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import type {
   BillingCycle,
   PlanEntitlements,
@@ -19,30 +20,36 @@ export type UserPlanInfo = {
   currentPeriodEnd: Date | null;
 };
 
-export async function getUserPlan(userId: string): Promise<UserPlanInfo> {
-  const sub = await getActiveSubscriptionByUserId(userId);
+/**
+ * Resolve a user's current plan + entitlements, memoized per request so
+ * dashboard layout + page + nav don't all re-hit the Subscription table.
+ */
+export const getUserPlan = cache(
+  async (userId: string): Promise<UserPlanInfo> => {
+    const sub = await getActiveSubscriptionByUserId(userId);
 
-  if (!sub || (sub.status !== "active" && sub.status !== "trialing")) {
+    if (!sub || (sub.status !== "active" && sub.status !== "trialing")) {
+      return {
+        planId: "free",
+        billingCycle: null,
+        entitlements: FREE_ENTITLEMENTS,
+        status: sub?.status ?? null,
+        currentPeriodEnd: sub?.currentPeriodEnd ?? null,
+      };
+    }
+
+    const planId = sub.plan as PlanId;
+    const config = PLANS[planId];
+
     return {
-      planId: "free",
-      billingCycle: null,
-      entitlements: FREE_ENTITLEMENTS,
-      status: sub?.status ?? null,
-      currentPeriodEnd: sub?.currentPeriodEnd ?? null,
+      planId,
+      billingCycle: sub.billingCycle as BillingCycle,
+      entitlements: config.entitlements,
+      status: sub.status,
+      currentPeriodEnd: sub.currentPeriodEnd,
     };
   }
-
-  const planId = sub.plan as PlanId;
-  const config = PLANS[planId];
-
-  return {
-    planId,
-    billingCycle: sub.billingCycle as BillingCycle,
-    entitlements: config.entitlements,
-    status: sub.status,
-    currentPeriodEnd: sub.currentPeriodEnd,
-  };
-}
+);
 
 export class EntitlementError extends Error {
   constructor(message: string) {

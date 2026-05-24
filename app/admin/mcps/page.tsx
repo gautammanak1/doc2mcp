@@ -1,9 +1,9 @@
+import { Suspense } from "react";
 import { McpsTable } from "@/components/admin/mcps-table";
+import { SkeletonTable } from "@/components/ui/page-skeleton";
 import { getAllProjectsWithUser } from "@/lib/db/queries";
 
-export default async function AdminMcpsPage() {
-  const rows = await getAllProjectsWithUser(200);
-
+export default function AdminMcpsPage() {
   return (
     <div className="space-y-4">
       <div>
@@ -12,17 +12,27 @@ export default async function AdminMcpsPage() {
           All conversions · hard delete removes project and MCP servers
         </p>
       </div>
-      <McpsTable
-        rows={rows.map((r) => ({
-          id: r.project.id,
-          name: r.project.name,
-          status: r.project.status,
-          sourceUrl: r.project.sourceUrl,
-          sourceType: r.project.sourceType,
-          userEmail: r.userEmail,
-          createdAt: r.project.createdAt.toISOString(),
-        }))}
-      />
+      <Suspense fallback={<SkeletonTable columns={6} rows={10} />}>
+        <McpsRows />
+      </Suspense>
     </div>
+  );
+}
+
+async function McpsRows() {
+  const rows = await getAllProjectsWithUser(200);
+
+  return (
+    <McpsTable
+      rows={rows.map((r) => ({
+        id: r.project.id,
+        name: r.project.name,
+        status: r.project.status,
+        sourceUrl: r.project.sourceUrl,
+        sourceType: r.project.sourceType,
+        userEmail: r.userEmail,
+        createdAt: r.project.createdAt.toISOString(),
+      }))}
+    />
   );
 }
