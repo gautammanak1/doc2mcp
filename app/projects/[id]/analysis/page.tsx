@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { LiveProcessor } from "@/components/processing/live-processor";
 import { APIGraph } from "@/components/visualization/api-graph";
 import { WorkflowDiagram } from "@/components/visualization/workflow-diagram";
-import { LiveProcessor } from "@/components/processing/live-processor";
 import type { AuthMethod } from "@/lib/ai/auth-inference";
 import type { DetectedWorkflow } from "@/lib/ai/workflow-detector";
 
@@ -23,8 +23,8 @@ function AnalysisPageContent() {
   const [activeTab, setActiveTab] = useState<
     "processing" | "graph" | "workflows" | "auth"
   >("processing");
-  const [authMethods, setAuthMethods] = useState<AuthMethod[]>([]);
-  const [workflows, setWorkflows] = useState<DetectedWorkflow[]>([]);
+  const [authMethods, _setAuthMethods] = useState<AuthMethod[]>([]);
+  const [workflows, _setWorkflows] = useState<DetectedWorkflow[]>([]);
   const [isComplete, setIsComplete] = useState(false);
 
   const handleProcessingComplete = (result: unknown) => {
@@ -41,9 +41,7 @@ function AnalysisPageContent() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Project Analysis
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">Project Analysis</h1>
           <p className="mt-2 text-gray-600">
             Real-time documentation processing and API graph generation
           </p>
@@ -58,17 +56,18 @@ function AnalysisPageContent() {
             { id: "auth", label: "Authentication" },
           ].map((tab) => (
             <button
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? "border-b-2 border-blue-600 text-blue-600"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
               key={tab.id}
               onClick={() =>
                 setActiveTab(
                   tab.id as "processing" | "graph" | "workflows" | "auth"
                 )
               }
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab.id
-                  ? "border-b-2 border-blue-600 text-blue-600"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
+              type="button"
             >
               {tab.label}
             </button>
@@ -80,10 +79,10 @@ function AnalysisPageContent() {
           {activeTab === "processing" && (
             <div>
               <LiveProcessor
-                projectId={projectId}
+                autoStart={true}
                 onComplete={handleProcessingComplete}
                 onError={handleProcessingError}
-                autoStart={true}
+                projectId={projectId}
               />
             </div>
           )}
@@ -91,20 +90,20 @@ function AnalysisPageContent() {
           {activeTab === "graph" && isComplete && (
             <div>
               <APIGraph
-                workflows={workflows}
                 authMethods={authMethods}
                 title="API Architecture Graph"
+                workflows={workflows}
               />
             </div>
           )}
 
           {activeTab === "workflows" && workflows.length > 0 && (
             <div className="space-y-6">
-              {workflows.map((workflow, idx) => (
+              {workflows.map((workflow) => (
                 <WorkflowDiagram
-                  key={idx}
-                  workflow={workflow}
+                  key={workflow.name}
                   showDetails={true}
+                  workflow={workflow}
                 />
               ))}
             </div>
@@ -112,19 +111,17 @@ function AnalysisPageContent() {
 
           {activeTab === "auth" && authMethods.length > 0 && (
             <div className="space-y-4">
-              {authMethods.map((method, idx) => (
+              {authMethods.map((method) => (
                 <div
-                  key={idx}
                   className="rounded-lg border border-gray-200 bg-white p-6"
+                  key={`${method.type}-${method.description}`}
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
                         {method.type.toUpperCase()}
                       </h3>
-                      <p className="mt-1 text-gray-600">
-                        {method.description}
-                      </p>
+                      <p className="mt-1 text-gray-600">{method.description}</p>
                     </div>
                     <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
                       {method.type}
@@ -159,10 +156,10 @@ function AnalysisPageContent() {
                         Scopes:
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {method.scopes.map((scope, idx) => (
+                        {method.scopes.map((scope) => (
                           <span
-                            key={idx}
                             className="inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-700"
+                            key={scope}
                           >
                             {scope}
                           </span>
@@ -177,10 +174,10 @@ function AnalysisPageContent() {
                         Endpoints:
                       </p>
                       <ul className="mt-2 space-y-1">
-                        {method.endpoints.map((endpoint, idx) => (
+                        {method.endpoints.map((endpoint) => (
                           <li
-                            key={idx}
                             className="font-mono text-sm text-gray-600"
+                            key={endpoint}
                           >
                             {endpoint}
                           </li>
@@ -198,8 +195,9 @@ function AnalysisPageContent() {
               <p className="text-yellow-900">
                 Processing incomplete. Please check the{" "}
                 <button
-                  onClick={() => setActiveTab("processing")}
                   className="font-semibold underline hover:no-underline"
+                  onClick={() => setActiveTab("processing")}
+                  type="button"
                 >
                   Live Processing
                 </button>{" "}

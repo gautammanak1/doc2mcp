@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import type { DetectedWorkflow } from "@/lib/ai/workflow-detector";
 
 interface WorkflowDiagramProps {
@@ -41,27 +40,27 @@ export function WorkflowDiagram({
       </div>
 
       <svg
-        width="100%"
+        className="rounded-lg bg-gray-50"
         height={canvasHeight}
         viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-        className="rounded-lg bg-gray-50"
+        width="100%"
       >
         {/* Start node */}
         <circle
           cx={canvasWidth / 2}
           cy={30}
-          r="15"
           fill="#10b981"
+          r="15"
           stroke="white"
           strokeWidth="2"
         />
         <text
+          fill="white"
+          fontSize="12"
+          fontWeight="bold"
+          textAnchor="middle"
           x={canvasWidth / 2}
           y={35}
-          textAnchor="middle"
-          fontSize="12"
-          fill="white"
-          fontWeight="bold"
         >
           START
         </text>
@@ -75,57 +74,57 @@ export function WorkflowDiagram({
               : { x: canvasWidth / 2, y: canvasHeight - 50 };
 
           return (
-            <g key={`step-${idx}`}>
+            <g key={`${step.name}-${String(idx)}`}>
               {/* Arrow from previous */}
               {idx === 0 ? (
                 <line
-                  x1={canvasWidth / 2}
-                  y1={45}
-                  x2={pos.x + stepBoxWidth / 2}
-                  y2={pos.y}
+                  markerEnd="url(#arrowhead)"
                   stroke="#d1d5db"
                   strokeWidth="2"
-                  markerEnd="url(#arrowhead)"
+                  x1={canvasWidth / 2}
+                  x2={pos.x + stepBoxWidth / 2}
+                  y1={45}
+                  y2={pos.y}
                 />
               ) : (
                 <line
-                  x1={stepPositions[idx - 1].x + stepBoxWidth / 2}
-                  y1={stepPositions[idx - 1].y + stepBoxHeight}
-                  x2={pos.x + stepBoxWidth / 2}
-                  y2={pos.y}
+                  markerEnd="url(#arrowhead)"
                   stroke="#d1d5db"
                   strokeWidth="2"
-                  markerEnd="url(#arrowhead)"
+                  x1={stepPositions[idx - 1].x + stepBoxWidth / 2}
+                  x2={pos.x + stepBoxWidth / 2}
+                  y1={stepPositions[idx - 1].y + stepBoxHeight}
+                  y2={pos.y}
                 />
               )}
 
               {/* Step box */}
               <rect
-                x={pos.x}
-                y={pos.y}
-                width={stepBoxWidth}
-                height={stepBoxHeight}
                 fill="#3b82f6"
+                height={stepBoxHeight}
+                rx="4"
                 stroke="white"
                 strokeWidth="2"
-                rx="4"
+                width={stepBoxWidth}
+                x={pos.x}
+                y={pos.y}
               />
               <text
-                x={pos.x + stepBoxWidth / 2}
-                y={pos.y + stepBoxHeight / 2 - 5}
-                textAnchor="middle"
+                fill="white"
                 fontSize="12"
                 fontWeight="bold"
-                fill="white"
+                textAnchor="middle"
+                x={pos.x + stepBoxWidth / 2}
+                y={pos.y + stepBoxHeight / 2 - 5}
               >
                 {step.name}
               </text>
               <text
+                fill="rgba(255,255,255,0.8)"
+                fontSize="10"
+                textAnchor="middle"
                 x={pos.x + stepBoxWidth / 2}
                 y={pos.y + stepBoxHeight / 2 + 12}
-                textAnchor="middle"
-                fontSize="10"
-                fill="rgba(255,255,255,0.8)"
               >
                 Step {idx + 1}
               </text>
@@ -133,13 +132,13 @@ export function WorkflowDiagram({
               {/* Arrow to next or end */}
               {idx === workflow.steps.length - 1 && (
                 <line
-                  x1={pos.x + stepBoxWidth / 2}
-                  y1={pos.y + stepBoxHeight}
-                  x2={nextPos.x}
-                  y2={nextPos.y}
+                  markerEnd="url(#arrowhead)"
                   stroke="#d1d5db"
                   strokeWidth="2"
-                  markerEnd="url(#arrowhead)"
+                  x1={pos.x + stepBoxWidth / 2}
+                  x2={nextPos.x}
+                  y1={pos.y + stepBoxHeight}
+                  y2={nextPos.y}
                 />
               )}
             </g>
@@ -150,18 +149,18 @@ export function WorkflowDiagram({
         <circle
           cx={canvasWidth / 2}
           cy={canvasHeight - 30}
-          r="15"
           fill="#10b981"
+          r="15"
           stroke="white"
           strokeWidth="2"
         />
         <text
+          fill="white"
+          fontSize="12"
+          fontWeight="bold"
+          textAnchor="middle"
           x={canvasWidth / 2}
           y={canvasHeight - 25}
-          textAnchor="middle"
-          fontSize="12"
-          fill="white"
-          fontWeight="bold"
         >
           END
         </text>
@@ -170,13 +169,13 @@ export function WorkflowDiagram({
         <defs>
           <marker
             id="arrowhead"
-            markerWidth="10"
             markerHeight="10"
+            markerWidth="10"
+            orient="auto"
             refX="9"
             refY="3"
-            orient="auto"
           >
-            <polygon points="0 0, 10 3, 0 6" fill="#d1d5db" />
+            <polygon fill="#d1d5db" points="0 0, 10 3, 0 6" />
           </marker>
         </defs>
       </svg>
@@ -186,13 +185,14 @@ export function WorkflowDiagram({
         <div className="mt-4 space-y-3 border-t border-gray-200 pt-4">
           <h4 className="font-semibold text-gray-900">Step Details</h4>
           {workflow.steps.map((step, idx) => (
-            <div key={`detail-${idx}`} className="rounded-lg bg-gray-50 p-3">
+            <div
+              className="rounded-lg bg-gray-50 p-3"
+              key={`detail-${step.name}`}
+            >
               <p className="font-medium text-gray-900">
                 Step {idx + 1}: {step.name}
               </p>
-              <p className="mt-1 text-sm text-gray-600">
-                {step.description}
-              </p>
+              <p className="mt-1 text-sm text-gray-600">{step.description}</p>
               {step.inputParameters.length > 0 && (
                 <div className="mt-2 text-sm">
                   <p className="font-medium text-gray-700">Inputs:</p>
@@ -219,10 +219,10 @@ export function WorkflowDiagram({
         <div className="rounded-lg bg-yellow-50 p-4">
           <h4 className="font-semibold text-gray-900">Integration Points</h4>
           <div className="mt-2 flex flex-wrap gap-2">
-            {workflow.integrationPoints.map((point, idx) => (
+            {workflow.integrationPoints.map((point) => (
               <span
-                key={idx}
                 className="inline-block rounded-full bg-yellow-200 px-3 py-1 text-sm text-yellow-900"
+                key={point}
               >
                 {point}
               </span>

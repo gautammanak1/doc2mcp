@@ -94,15 +94,14 @@ Return as JSON:
           optimizations: string[];
         }) => {
           const original = tools.find((t) => t.name === ct.originalName);
-          if (!original) return null;
+          if (!original) {
+            return null;
+          }
 
           const compressed: ToolSignature = {
             ...original,
             description: ct.compressedDescription,
           };
-
-          const compressedJson = JSON.stringify(compressed);
-          const tokensCompressed = estimateTokens(compressedJson);
 
           return {
             original,
@@ -148,9 +147,10 @@ Return as JSON:
   };
 }
 
-export function compressToolDescription(
-  tool: ToolSignature
-): { compressed: ToolSignature; reduction: string } {
+export function compressToolDescription(tool: ToolSignature): {
+  compressed: ToolSignature;
+  reduction: string;
+} {
   const original = JSON.stringify(tool);
   const originalLength = original.length;
 
@@ -162,7 +162,7 @@ export function compressToolDescription(
       .replace(/This /g, "")
       .replace(/ method/g, "")
       .replace(/ function/g, "")
-      .substring(0, 100),
+      .slice(0, 100),
   };
 
   const compressedJson = JSON.stringify(compressed);

@@ -1,7 +1,7 @@
 import { tool, type UIMessageStreamWriter } from "ai";
-import type { Session } from "@/lib/auth/types";
 import { z } from "zod";
 import { documentHandlersByArtifactKind } from "@/lib/artifacts/server";
+import type { Session } from "@/lib/auth/types";
 import { getDocumentById } from "@/lib/db/queries";
 import type { ChatMessage } from "@/lib/types";
 

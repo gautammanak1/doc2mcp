@@ -114,7 +114,10 @@ export function FooterSection() {
             © {currentYear} doc2mcp. All rights reserved.
           </p>
           <p className="font-mono text-[11px] text-muted-foreground/80">
-            <a className="hover:text-foreground" href={`mailto:${CONTACT_EMAIL}`}>
+            <a
+              className="hover:text-foreground"
+              href={`mailto:${CONTACT_EMAIL}`}
+            >
               {CONTACT_EMAIL}
             </a>
             {" · "}Powered by ASI1 · hosted on Vercel

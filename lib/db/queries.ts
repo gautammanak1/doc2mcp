@@ -15,9 +15,9 @@ import {
 import { drizzle } from "drizzle-orm/postgres-js";
 import type { ArtifactKind } from "@/components/chat/artifact";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
-import { getPostgresClient } from "./client";
 import { ChatbotError } from "../errors";
 import { generateUUID } from "../utils";
+import { getPostgresClient } from "./client";
 import {
   aiWorkflow,
   type Chat,
@@ -833,14 +833,11 @@ export async function getAdminStats() {
       totalMCPs: totalMCPs[0]?.count || 0,
     };
   } catch (_error) {
-    throw new ChatbotError(
-      "bad_request:database",
-      "Failed to get admin stats"
-    );
+    throw new ChatbotError("bad_request:database", "Failed to get admin stats");
   }
 }
 
-export async function getAllProjects(limit: number = 50, offset: number = 0) {
+export async function getAllProjects(limit = 50, offset = 0) {
   try {
     return await db
       .select()
@@ -856,7 +853,7 @@ export async function getAllProjects(limit: number = 50, offset: number = 0) {
   }
 }
 
-export async function getAllUsers(limit: number = 50, offset: number = 0) {
+export async function getAllUsers(limit = 50, offset = 0) {
   try {
     return await db
       .select()

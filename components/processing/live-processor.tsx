@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useSSE } from "@/lib/hooks/useSSE";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSSE } from "@/lib/hooks/use-sse";
 
 export interface LogEntry {
   timestamp: string;
@@ -55,7 +56,7 @@ export function LiveProcessor({
   // Auto-scroll logs to bottom
   useEffect(() => {
     logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [logs]);
+  }, []);
 
   // Process incoming SSE data
   useEffect(() => {
@@ -163,8 +164,12 @@ export function LiveProcessor({
                 {isLoading ? "Initializing..." : "No logs yet"}
               </p>
             ) : (
-              logs.map((log, idx) => (
-                <LogLine key={idx} log={log} colorClass={getLogColor(log.level)}>
+              logs.map((log) => (
+                <LogLine
+                  colorClass={getLogColor(log.level)}
+                  key={`${log.timestamp}-${log.message}`}
+                  log={log}
+                >
                   {getLogIcon(log.level)}
                 </LogLine>
               ))

@@ -1,14 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 export interface AuthMethod {
-  type:
-    | "api_key"
-    | "oauth2"
-    | "bearer"
-    | "basic"
-    | "jwt"
-    | "custom"
-    | "none";
+  type: "api_key" | "oauth2" | "bearer" | "basic" | "jwt" | "custom" | "none";
   description: string;
   headerName?: string;
   format?: string;
@@ -92,7 +85,7 @@ Return a JSON object with:
 
 export async function generateAuthImplementation(
   authMethods: AuthMethod[],
-  framework: string = "typescript"
+  framework = "typescript"
 ): Promise<string> {
   const methodsDesc = authMethods
     .map((m) => `- ${m.type}: ${m.description}`)

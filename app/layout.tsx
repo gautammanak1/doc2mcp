@@ -7,7 +7,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://doc2mcp.site"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://doc2mcp.site"
+  ),
   title: "doc2mcp — Paste Docs URL, Get MCP Server",
   description:
     "Turn any documentation URL into a Cursor-ready MCP server in seconds. No install, no API keys — powered by ASI1.",

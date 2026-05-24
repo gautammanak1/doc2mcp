@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface UseSSEOptions {
   onOpen?: () => void;
@@ -10,7 +10,7 @@ interface UseSSEOptions {
 
 export function useSSE(
   url: string,
-  enabled: boolean = true,
+  enabled = true,
   options: UseSSEOptions = {}
 ) {
   const [data, setData] = useState<string | null>(null);
@@ -27,7 +27,9 @@ export function useSSE(
   } = options;
 
   const connect = useCallback(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -46,7 +48,8 @@ export function useSSE(
       };
 
       eventSource.onerror = (event) => {
-        const errorMsg = (event as unknown as Record<string, unknown>).message ||
+        const errorMsg =
+          (event as unknown as Record<string, unknown>).message ||
           "SSE connection error";
         const err = new Error(String(errorMsg));
 
@@ -58,10 +61,13 @@ export function useSSE(
 
           // Attempt retry
           if (retries < retryCount) {
-            setTimeout(() => {
-              setRetries((prev) => prev + 1);
-              connect();
-            }, retryDelay * Math.pow(2, retries));
+            setTimeout(
+              () => {
+                setRetries((prev) => prev + 1);
+                connect();
+              },
+              retryDelay * 2 ** retries
+            );
           }
         }
       };
@@ -76,7 +82,16 @@ export function useSSE(
       setIsLoading(false);
       onErrorCallback?.(error);
     }
-  }, [url, enabled, retries, retryCount, retryDelay, onOpen, onClose, onErrorCallback]);
+  }, [
+    url,
+    enabled,
+    retries,
+    retryCount,
+    retryDelay,
+    onOpen,
+    onClose,
+    onErrorCallback,
+  ]);
 
   useEffect(() => {
     const cleanup = connect();

@@ -1,7 +1,7 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
 import { CONTACT_EMAIL } from "@/lib/config/site";
 import { getAdminStats, getAllProjects } from "@/lib/db/queries";
-import { redirect } from "next/navigation";
 
 export async function AdminDashboard() {
   const session = await auth();

@@ -17,7 +17,6 @@ import {
   SidebarHistory,
 } from "@/components/chat/sidebar-history";
 import { SidebarUserNav } from "@/components/chat/sidebar-user-nav";
-import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +31,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -134,10 +134,10 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
           <SidebarHistory user={user} />
-  </SidebarContent>
-  <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
-    {user && <SidebarUserNav />}
-  </SidebarFooter>
+        </SidebarContent>
+        <SidebarFooter className="border-t border-sidebar-border pt-2 pb-3">
+          {user && <SidebarUserNav />}
+        </SidebarFooter>
         <SidebarRail />
       </Sidebar>
 

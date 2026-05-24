@@ -101,7 +101,7 @@ For each workflow, provide:
 
 export async function generateWorkflowCode(
   workflow: DetectedWorkflow,
-  language: string = "typescript"
+  language = "typescript"
 ): Promise<string> {
   const stepsDesc = workflow.steps
     .map((s) => `${s.name}: ${s.description}`)
@@ -137,14 +137,13 @@ Return production-ready code.`;
 }
 
 export function workflowToMermaid(workflow: DetectedWorkflow): string {
-  let mermaid = `graph TD\n`;
+  let mermaid = "graph TD\n";
   let nodeId = 0;
 
   mermaid += `  Start[${workflow.name}]\n`;
   nodeId++;
 
   for (const step of workflow.steps) {
-    const cleanName = step.name.replace(/[^a-zA-Z0-9]/g, "");
     mermaid += `  Node${nodeId}["${step.name}"]\n`;
     mermaid += `  Start --> Node${nodeId}\n`;
     nodeId++;

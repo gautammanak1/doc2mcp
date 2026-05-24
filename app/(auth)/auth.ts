@@ -1,14 +1,18 @@
 // Compatibility module for Supabase Auth
 // Replaces old NextAuth module
 
-import { createClient } from "@/lib/supabase/server";
-
 export type UserType = "guest" | "regular";
+
+export { createClient as getSupabaseClient } from "@/lib/supabase/server";
+
+import { createClient } from "@/lib/supabase/server";
 
 export async function auth() {
   const supabase = await createClient();
-  const { data: { session } } = await supabase.auth.getSession();
-  
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   if (!session?.user) {
     return null;
   }
@@ -23,5 +27,3 @@ export async function auth() {
     },
   };
 }
-
-export { createClient as getSupabaseClient };

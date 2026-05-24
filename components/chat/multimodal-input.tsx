@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   type ChangeEvent,
   type Dispatch,
@@ -46,6 +45,7 @@ import {
 } from "@/lib/ai/models";
 import { guestRegex } from "@/lib/constants";
 import { extractDocsUrl } from "@/lib/doc2mcp/detect-url";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {

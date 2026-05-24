@@ -3,7 +3,6 @@
 import { ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useSupabaseAuth } from "@/lib/supabase/auth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +16,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { guestRegex } from "@/lib/constants";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 import { LoaderIcon } from "./icons";
 import { toast } from "./toast";
 

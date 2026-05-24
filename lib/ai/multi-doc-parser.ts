@@ -93,7 +93,7 @@ Return JSON:
 
   const parsed: ParsedDocument[] = [];
   for (const doc of documents) {
-    const sections = await extractSections(doc.content);
+    const sections = extractSections(doc.content);
     const keywords = await extractKeywords(doc.content);
     const summary = await generateSummary(doc.content);
     const contentType = await detectContentType(doc.content);
@@ -133,7 +133,7 @@ Return JSON:
   };
 }
 
-async function extractSections(content: string): Promise<DocumentSection[]> {
+function extractSections(content: string): DocumentSection[] {
   // Simple markdown heading extraction
   const lines = content.split("\n");
   const sections: DocumentSection[] = [];
@@ -156,7 +156,7 @@ async function extractSections(content: string): Promise<DocumentSection[]> {
       };
       currentContent = "";
     } else {
-      currentContent += line + "\n";
+      currentContent += `${line}\n`;
     }
   }
 
@@ -172,15 +172,16 @@ async function extractSections(content: string): Promise<DocumentSection[]> {
 function extractCodeBlocks(content: string): CodeBlock[] {
   const blocks: CodeBlock[] = [];
   const regex = /```(\w+)?\n([\s\S]*?)```/g;
-  let match;
+  let match = regex.exec(content);
 
-  while ((match = regex.exec(content)) !== null) {
+  while (match !== null) {
     blocks.push({
       language: match[1] || "text",
       code: match[2].trim(),
       description: "",
       isExample: true,
     });
+    match = regex.exec(content);
   }
 
   return blocks;
@@ -280,9 +281,7 @@ export function buildConceptMap(
 ): Record<string, Set<string>> {
   const conceptMap: Record<string, Set<string>> = {};
 
-  for (const [concept, definition] of Object.entries(
-    analysis.conceptGlossary
-  )) {
+  for (const concept of Object.keys(analysis.conceptGlossary)) {
     conceptMap[concept] = new Set();
 
     // Find related documents
@@ -304,10 +303,7 @@ export async function generateIntegrationGuide(
   analysis: MultiDocAnalysis
 ): Promise<string> {
   const flowsList = analysis.dataFlows
-    .map(
-      (f) =>
-        `${f.from} -> ${f.to}: ${f.description} (${f.dataFormat})`
-    )
+    .map((f) => `${f.from} -> ${f.to}: ${f.description} (${f.dataFormat})`)
     .join("\n");
 
   const prompt = `Create an integration guide based on these data flows:

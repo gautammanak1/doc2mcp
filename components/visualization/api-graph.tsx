@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import type { AuthMethod } from "@/lib/ai/auth-inference";
 import type { DetectedWorkflow } from "@/lib/ai/workflow-detector";
 
@@ -88,15 +88,18 @@ export function APIGraph({
   const positions = useMemo(() => {
     const map = new Map<string, { x: number; y: number }>();
     let col = 0;
-    let row = 0;
+    const _row = 0;
     const cols = Math.ceil(Math.sqrt(nodes.length));
 
-    nodes.forEach((node) => {
+    for (const node of nodes) {
       const x = (col % cols) * (canvasWidth / cols) + 50;
-      const y = Math.floor(col / cols) * (canvasHeight / Math.ceil(nodes.length / cols)) + 50;
+      const y =
+        Math.floor(col / cols) *
+          (canvasHeight / Math.ceil(nodes.length / cols)) +
+        50;
       map.set(node.id, { x, y });
       col++;
-    });
+    }
 
     return map;
   }, [nodes]);
@@ -122,34 +125,36 @@ export function APIGraph({
       </div>
 
       <svg
-        width="100%"
+        className="rounded-lg border border-gray-200 bg-white"
         height={canvasHeight}
         viewBox={`0 0 ${canvasWidth} ${canvasHeight}`}
-        className="rounded-lg border border-gray-200 bg-white"
+        width="100%"
       >
         {/* Draw edges */}
-        {edges.map((edge, idx) => {
+        {edges.map((edge) => {
           const fromPos = positions.get(edge.from);
           const toPos = positions.get(edge.to);
-          if (!fromPos || !toPos) return null;
+          if (!fromPos || !toPos) {
+            return null;
+          }
 
           return (
-            <g key={`edge-${idx}`}>
+            <g key={`${edge.from}-${edge.to}`}>
               <line
-                x1={fromPos.x}
-                y1={fromPos.y}
-                x2={toPos.x}
-                y2={toPos.y}
+                markerEnd="url(#arrowhead)"
                 stroke="#d1d5db"
                 strokeWidth="2"
-                markerEnd="url(#arrowhead)"
+                x1={fromPos.x}
+                x2={toPos.x}
+                y1={fromPos.y}
+                y2={toPos.y}
               />
               <text
+                fill="#6b7280"
+                fontSize="12"
+                textAnchor="middle"
                 x={(fromPos.x + toPos.x) / 2}
                 y={(fromPos.y + toPos.y) / 2 - 5}
-                fontSize="12"
-                fill="#6b7280"
-                textAnchor="middle"
               >
                 {edge.label}
               </text>
@@ -161,41 +166,43 @@ export function APIGraph({
         <defs>
           <marker
             id="arrowhead"
-            markerWidth="10"
             markerHeight="10"
+            markerWidth="10"
+            orient="auto"
             refX="9"
             refY="3"
-            orient="auto"
           >
-            <polygon points="0 0, 10 3, 0 6" fill="#d1d5db" />
+            <polygon fill="#d1d5db" points="0 0, 10 3, 0 6" />
           </marker>
         </defs>
 
         {/* Draw nodes */}
         {nodes.map((node) => {
           const pos = positions.get(node.id);
-          if (!pos) return null;
+          if (!pos) {
+            return null;
+          }
 
           return (
             <g key={node.id}>
               <circle
                 cx={pos.x}
                 cy={pos.y}
-                r="30"
                 fill={node.color}
+                r="30"
                 stroke="white"
                 strokeWidth="2"
               />
               <text
+                dominantBaseline="middle"
+                fill="white"
+                fontSize="12"
+                fontWeight="bold"
+                textAnchor="middle"
                 x={pos.x}
                 y={pos.y}
-                dominantBaseline="middle"
-                textAnchor="middle"
-                fontSize="12"
-                fill="white"
-                fontWeight="bold"
               >
-                {node.label.substring(0, 8)}
+                {node.label.slice(0, 8)}
               </text>
             </g>
           );
