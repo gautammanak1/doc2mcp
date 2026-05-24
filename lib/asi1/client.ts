@@ -1,7 +1,7 @@
 import "server-only";
 
 const ASI1_BASE_URL = "https://api.asi1.ai/v1";
-export const ASI1_MODEL = process.env.ASI1_MODEL ?? "asi1";
+export const ASI1_MODEL = process.env.ASI1_MODEL ?? "asi1-ultra";
 
 export type Asi1Message = {
   role: "system" | "user" | "assistant";

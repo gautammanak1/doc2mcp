@@ -606,11 +606,81 @@ function isDocLink(link: string, originPath: string): boolean {
   return DOC_LINK_PATTERNS.some((p) => lower.includes(p));
 }
 
+interface PostmanRequestItem {
+  name: string;
+  request?: {
+    method?: string;
+    description?: string | { content?: string };
+    url?: string | { raw?: string };
+    body?: { raw?: string };
+  };
+  item?: PostmanRequestItem[];
+}
+
+function recursiveParsePostman(
+  items: PostmanRequestItem[],
+  results: CrawlResult[],
+  sourceUrl: string
+) {
+  for (const item of items) {
+    if (item.item && Array.isArray(item.item)) {
+      recursiveParsePostman(item.item, results, sourceUrl);
+    } else if (item.request) {
+      const method = item.request.method ?? "GET";
+      const desc = typeof item.request.description === "object"
+        ? item.request.description.content ?? ""
+        : item.request.description ?? "";
+      const rawUrl = typeof item.request.url === "object"
+        ? item.request.url.raw ?? ""
+        : item.request.url ?? "";
+      const body = item.request.body?.raw ?? "";
+
+      const content = `### Endpoint: ${item.name}
+Method: ${method}
+URL: ${rawUrl}
+
+Description:
+${desc}
+
+Request Body Schema:
+\`\`\`json
+${body}
+\`\`\`
+`;
+      results.push({
+        url: `${sourceUrl}#${encodeURIComponent(item.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}`,
+        title: item.name,
+        content: content.slice(0, PER_PAGE_CHARS),
+        type: "api",
+      });
+    }
+  }
+}
+
 export async function crawlDocsSource(
   sourceUrl: string,
   sourceType: SourceType
 ): Promise<CrawlResult[]> {
-  if (sourceType === "openapi" || sourceType === "postman") {
+  if (sourceType === "postman") {
+    const res = await fetchText(sourceUrl, "application/json,text/plain");
+    if (!res) {
+      return [];
+    }
+    try {
+      const collection = JSON.parse(res.text);
+      if (collection && (collection.item || collection.info)) {
+        const results: CrawlResult[] = [];
+        recursiveParsePostman(collection.item ?? [], results, sourceUrl);
+        if (results.length > 0) {
+          return results;
+        }
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  if (sourceType === "openapi") {
     const res = await fetchText(
       sourceUrl,
       "application/json,application/yaml,text/yaml,text/plain"

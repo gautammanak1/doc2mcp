@@ -85,6 +85,7 @@ export async function processProjectPipeline({
       sourceUrl,
       projectName,
       mcpAccessToken,
+      compressedTools: analysis.compressedTools,
     });
 
     addLog("Building API graph visualization...", "info", "graph");
@@ -107,6 +108,7 @@ export async function processProjectPipeline({
       mcpAccessToken,
       mcpTokenHash,
       docsPageCount: crawlResults.length,
+      qualityScore: analysis.qualityScore,
       cursorConfig: {
         mcp: JSON.parse(generateCursorMcpJson(mcpConfig)),
         claude: JSON.parse(generateClaudeDesktopConfig(mcpConfig)),

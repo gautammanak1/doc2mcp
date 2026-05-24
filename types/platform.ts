@@ -80,6 +80,14 @@ export type CrawlResult = {
   type: "page" | "api" | "auth" | "workflow";
 };
 
+export type QualityScore = {
+  docsScore: number;
+  authConfidence: number;
+  workflowConfidence: number;
+  mcpScore: number;
+  explanation?: string;
+};
+
 export type ProjectArtifacts = {
   endpoints: ApiEndpoint[];
   compressedTools: CompressedTool[];
@@ -94,6 +102,7 @@ export type ProjectArtifacts = {
   mcpAccessToken?: string;
   mcpTokenHash?: string;
   docsPageCount?: number;
+  qualityScore?: QualityScore;
 };
 
 export type ProcessingLog = {

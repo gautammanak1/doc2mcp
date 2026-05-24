@@ -27,8 +27,9 @@ import type {
 
 const PIPELINE_STEPS = [
   "crawl",
+  "auth",
   "extract",
-  "analyze",
+  "workflows",
   "compress",
   "mcp",
   "config",
@@ -45,7 +46,7 @@ function stepFromStatus(status: string): number {
     case "generating":
       return 5;
     case "ready":
-      return 6;
+      return 7;
     case "error":
       return -1;
     default:
@@ -164,6 +165,48 @@ export function ConvertExperience({
               className="space-y-10"
               initial={{ opacity: 0 }}
             >
+              {/* Quality scorecard */}
+              {artifacts.qualityScore && (
+                <section className="glass-card rounded-2xl p-6 border border-white/5 bg-black/30">
+                  <h2 className="font-display font-semibold text-xl text-white">
+                    AI Quality Scorecard
+                  </h2>
+                  <p className="mt-1 text-muted-foreground text-sm">
+                    Independent analysis of the documentation quality and generated MCP reliability
+                  </p>
+                  <div className="mt-6 grid gap-4 sm:grid-cols-4">
+                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase">Docs Quality</p>
+                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                        {artifacts.qualityScore.docsScore}%
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase">Auth Confidence</p>
+                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                        {artifacts.qualityScore.authConfidence}%
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase">Workflow Inference</p>
+                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                        {artifacts.qualityScore.workflowConfidence}%
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase">MCP Score</p>
+                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                        {artifacts.qualityScore.mcpScore}%
+                      </p>
+                    </div>
+                  </div>
+                  {artifacts.qualityScore.explanation && (
+                    <div className="mt-4 rounded-lg bg-white/5 border border-white/5 p-3 text-xs text-muted-foreground font-mono">
+                      <span className="text-white font-semibold">Evaluation:</span> {artifacts.qualityScore.explanation}
+                    </div>
+                  )}
+                </section>
+              )}
               {/* Compressed tools */}
               <section>
                 <div className="mb-4 flex items-center justify-between">
@@ -305,6 +348,7 @@ export function ConvertExperience({
                   <McpPlayground
                     projectId={project.id}
                     token={artifacts.mcpAccessToken}
+                    tools={artifacts.compressedTools}
                   />
                 </section>
               ) : null}

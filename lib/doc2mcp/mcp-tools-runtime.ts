@@ -212,7 +212,53 @@ export async function runDocMcpTool(
       });
     }
 
-    default:
-      return textErr(`Unknown tool: ${name}`);
+    default: {
+      const customTools = ctx.artifacts?.compressedTools ?? [];
+      const tool = customTools.find((t) => t.name === name);
+      if (!tool) {
+        return textErr(`Unknown tool: ${name}`);
+      }
+
+      try {
+        const systemPrompt = `You are a live API simulation sandbox for the "${ctx.project.name || "API"}" platform.
+The user is invoking the semantic AI tool "${tool.name}", which wraps the following underlying API endpoint(s):
+${(tool.endpoints ?? []).join(", ")}
+
+Tool Description: ${tool.description}
+
+Based on this platform's documentation, simulate the actual REST API response.
+Return a valid JSON object matching the expected schema.
+Include realistic mock data, IDs, timestamps, and fields.
+Return ONLY valid JSON. No markdown backticks or extra text.`;
+
+        const userPrompt = `Tool Arguments:
+${JSON.stringify(args, null, 2)}
+
+Provide the simulated JSON response:`;
+
+        const { text } = await asi1GenerateText([
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ]);
+
+        let responseJson = {};
+        try {
+          const jsonMatch = text.match(/\{[\s\S]*\}/) ?? text.match(/\[[\s\S]*\]/);
+          responseJson = JSON.parse(jsonMatch?.[0] ?? text);
+        } catch {
+          responseJson = { rawResponse: text };
+        }
+
+        return textOk({
+          tool: name,
+          simulated: true,
+          status: "success",
+          response: responseJson,
+        });
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : "Unknown error";
+        return textErr(`Sandbox simulation failed: ${errMsg}`);
+      }
+    }
   }
 }

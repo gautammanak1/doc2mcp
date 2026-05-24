@@ -1,6 +1,6 @@
 import { getDoc2McpBaseUrl } from "@/lib/doc2mcp/app-url";
 import { deriveMcpServerSlug } from "@/lib/doc2mcp/naming";
-import type { McpServerConfig } from "@/types/platform";
+import type { CompressedTool, McpServerConfig } from "@/types/platform";
 import { DOC_MCP_TOOLS } from "./doc-tools";
 
 export type McpGeneratorOptions = {
@@ -8,6 +8,7 @@ export type McpGeneratorOptions = {
   sourceUrl: string;
   projectName?: string;
   mcpAccessToken: string;
+  compressedTools?: CompressedTool[];
 };
 
 function resolveServerSlug(options: McpGeneratorOptions): string {
@@ -40,10 +41,21 @@ export function generateMcpConfig(
   const serverSlug = resolveServerSlug(options) || "docs";
   const serverEntry = buildMcpServerEntry(options);
 
+  const customTools = (options.compressedTools ?? []).map((t) => ({
+    name: t.name,
+    description: t.description,
+    inputSchema: (t.parameters as Record<string, unknown>) ?? {
+      type: "object",
+      properties: {},
+    },
+  }));
+
+  const tools = [...DOC_MCP_TOOLS, ...customTools];
+
   return {
     name: serverSlug,
     version: "1.0.0",
-    tools: DOC_MCP_TOOLS,
+    tools,
     projectId: options.projectId,
     sourceUrl: options.sourceUrl,
     cursorConfig: {

@@ -90,8 +90,23 @@ export async function POST(
   }
 
   if (method === "tools/list") {
+    const resolved = await resolveMcpProject(request, projectId);
+    if ("error" in resolved) {
+      if (resolved.error === "not_found") {
+        return rpcHttpError(404, -32_001, "Project not found");
+      }
+      if (resolved.error === "not_ready") {
+        return rpcHttpError(409, -32_002, "Project is not ready yet");
+      }
+      return rpcHttpError(
+        401,
+        -32_003,
+        "Unauthorized: missing or invalid token"
+      );
+    }
+    const tools = resolved.artifacts?.mcpConfig?.tools ?? DOC_MCP_TOOLS;
     return rpcSuccess(id, {
-      tools: DOC_MCP_TOOLS,
+      tools,
     });
   }
 

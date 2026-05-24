@@ -5,12 +5,13 @@ import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LABELS: Record<string, string> = {
-  crawl: "Crawl docs",
-  extract: "Extract APIs",
-  analyze: "ASI1 analyze",
-  compress: "Compress tools",
-  mcp: "Build MCP",
-  config: "Cursor config",
+  crawl: "Crawling docs",
+  auth: "Detecting auth",
+  extract: "Extracting APIs",
+  workflows: "Understanding workflows",
+  compress: "Compressing endpoints",
+  mcp: "Generating MCP",
+  config: "Exporting Cursor config",
 };
 
 export function PipelineProgress({

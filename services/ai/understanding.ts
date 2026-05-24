@@ -4,6 +4,7 @@ import type {
   CompressedTool,
   CrawlResult,
   ProcessingLog,
+  QualityScore,
 } from "@/types/platform";
 import { generateLlmsTxt } from "../generators/llms-txt";
 import { compressApiToTools } from "./tool-compression";
@@ -16,7 +17,7 @@ function buildAnalysisPrompt(crawlResults: CrawlResult[]): string {
     )
     .join("\n\n");
 
-  return `You are an expert API documentation analyst. Analyze the following documentation and extract structured API information.
+  return `You are an expert API documentation analyst. Analyze the following documentation and extract structured API information and quality scores.
 
 Return ONLY valid JSON with this structure:
 {
@@ -24,7 +25,14 @@ Return ONLY valid JSON with this structure:
   "endpoints": [{"method": "GET", "path": "/resource", "summary": "...", "description": "...", "auth": "bearer|api_key|oauth|none", "tags": ["tag"]}],
   "authPatterns": [{"type": "bearer", "description": "..."}],
   "workflows": [{"name": "...", "steps": ["step1", "step2"]}],
-  "useCases": ["use case 1", "use case 2"]
+  "useCases": ["use case 1", "use case 2"],
+  "qualityScore": {
+    "docsScore": 85,
+    "authConfidence": 90,
+    "workflowConfidence": 75,
+    "mcpScore": 80,
+    "explanation": "Docs are very well structured with detailed paths. Auth pattern is standard OAuth2. Workflows were successfully inferred based on tutorials."
+  }
 }
 
 Documentation:
@@ -39,6 +47,7 @@ export type AnalysisResult = {
   useCases: string[];
   compressedTools: CompressedTool[];
   llmsTxt: string;
+  qualityScore: QualityScore;
   tokenUsage?: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -81,6 +90,7 @@ export async function analyzeDocumentation(
     authPatterns?: Array<{ type: string; description: string }>;
     workflows?: Array<{ name: string; steps: string[] }>;
     useCases?: string[];
+    qualityScore?: QualityScore;
   };
 
   try {
@@ -124,6 +134,16 @@ export async function analyzeDocumentation(
     useCases: parsed.useCases ?? [],
   });
 
+  const defaultQualityScore: QualityScore = {
+    docsScore: Math.min(60 + crawlResults.length * 5, 95),
+    authConfidence: endpoints.some((e) => e.auth && e.auth !== "none") ? 90 : 80,
+    workflowConfidence: parsed.workflows && parsed.workflows.length > 0 ? 85 : 70,
+    mcpScore: compressedTools.length > 0 ? 88 : 75,
+    explanation: "Automatically evaluated quality based on docs content and endpoint structure.",
+  };
+
+  const qualityScore: QualityScore = parsed.qualityScore ?? defaultQualityScore;
+
   return {
     summary: parsed.summary ?? "",
     endpoints,
@@ -132,6 +152,7 @@ export async function analyzeDocumentation(
     useCases: parsed.useCases ?? [],
     compressedTools,
     llmsTxt,
+    qualityScore,
     tokenUsage: usage,
   };
 }

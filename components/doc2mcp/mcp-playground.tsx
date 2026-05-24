@@ -1,27 +1,20 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { Loader2, Play, Wand2 } from "lucide-react";
-import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
-type ToolKey =
-  | "list_documentation_pages"
-  | "get_documentation_page"
-  | "search_documentation"
-  | "get_documentation_overview"
-  | "read_full_documentation"
-  | "ask_documentation";
+import type { CompressedTool } from "@/types/platform";
 
 type ToolDef = {
-  key: ToolKey;
+  key: string;
   label: string;
   description: string;
   defaultArgs: Record<string, unknown>;
 };
 
-const TOOLS: ToolDef[] = [
+const DEFAULT_DOCS_TOOLS: ToolDef[] = [
   {
     key: "list_documentation_pages",
     label: "list_documentation_pages",
@@ -63,7 +56,7 @@ const TOOLS: ToolDef[] = [
 async function callMcp(
   projectId: string,
   token: string,
-  tool: ToolKey,
+  tool: string,
   args: Record<string, unknown>
 ): Promise<unknown> {
   const headers: HeadersInit = {
@@ -71,63 +64,89 @@ async function callMcp(
     "Content-Type": "application/json",
   };
 
-  if (tool === "list_documentation_pages") {
-    const res = await fetch(`/api/mcp/${projectId}/pages`, { headers });
-    return res.json();
-  }
-  if (tool === "get_documentation_page") {
-    const ref = String(args.url ?? args.id ?? "");
-    const res = await fetch(
-      `/api/mcp/${projectId}/pages?ref=${encodeURIComponent(ref)}`,
-      { headers }
-    );
-    return res.json();
-  }
-  if (tool === "search_documentation") {
-    const q = encodeURIComponent(String(args.query ?? ""));
-    const res = await fetch(`/api/mcp/${projectId}/search?q=${q}`, {
-      headers,
-    });
-    return res.json();
-  }
-  if (tool === "get_documentation_overview") {
-    const res = await fetch(`/api/mcp/${projectId}/overview`, { headers });
-    return res.json();
-  }
-  if (tool === "read_full_documentation") {
-    const max = args.maxPages
-      ? `?maxPages=${encodeURIComponent(String(args.maxPages))}`
-      : "";
-    const res = await fetch(`/api/mcp/${projectId}/full${max}`, { headers });
-    return res.json();
-  }
-  const res = await fetch(`/api/mcp/${projectId}/ask`, {
+  const response = await fetch(`/api/mcp/${projectId}/mcp`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ question: String(args.question ?? "") }),
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: "playground-call",
+      method: "tools/call",
+      params: {
+        name: tool,
+        arguments: args,
+      },
+    }),
   });
-  return res.json();
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`HTTP ${response.status}: ${errorText}`);
+  }
+
+  const json = await response.json();
+  if (json.error) {
+    throw new Error(json.error.message);
+  }
+  return json.result;
 }
 
 export type McpPlaygroundProps = {
   projectId: string;
   token: string;
+  tools?: CompressedTool[];
 };
 
-export function McpPlayground({ projectId, token }: McpPlaygroundProps) {
-  const [selected, setSelected] = useState<ToolKey>("list_documentation_pages");
-  const [args, setArgs] = useState<string>(
-    JSON.stringify(TOOLS[0]?.defaultArgs ?? {}, null, 2)
-  );
+export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
+  const TOOLS = useMemo(() => {
+    if (!tools || tools.length === 0) return DEFAULT_DOCS_TOOLS;
+    return tools.map((t) => {
+      const defaultArgs: Record<string, unknown> = {};
+      const properties = (t.parameters as any)?.properties ?? {};
+      for (const [k, v] of Object.entries(properties)) {
+        const val = v as { type?: string; description?: string; default?: any };
+        if (val.default !== undefined) {
+          defaultArgs[k] = val.default;
+        } else if (val.type === "string") {
+          defaultArgs[k] = val.description ? `<${val.description}>` : "";
+        } else if (val.type === "number" || val.type === "integer") {
+          defaultArgs[k] = 1;
+        } else if (val.type === "boolean") {
+          defaultArgs[k] = false;
+        } else if (val.type === "array") {
+          defaultArgs[k] = [];
+        } else {
+          defaultArgs[k] = {};
+        }
+      }
+      return {
+        key: t.name,
+        label: t.name,
+        description: t.description ?? "",
+        defaultArgs,
+      };
+    });
+  }, [tools]);
+
+  const [selected, setSelected] = useState<string>("");
+  const [args, setArgs] = useState<string>("{}");
   const [output, setOutput] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
 
+  useEffect(() => {
+    if (TOOLS.length > 0) {
+      const first = TOOLS[0];
+      setSelected(first.key);
+      setArgs(JSON.stringify(first.defaultArgs, null, 2));
+      setOutput(null);
+    }
+  }, [TOOLS]);
+
   const tool = useMemo(
-    () => TOOLS.find((t) => t.key === selected) ?? TOOLS[0],
-    [selected]
+    () => TOOLS.find((t) => t.key === selected) ?? TOOLS[0] ?? { key: "", label: "", description: "", defaultArgs: {} },
+    [selected, TOOLS]
   );
 
-  const setExample = (key: ToolKey) => {
+  const setExample = (key: string) => {
     setSelected(key);
     const def = TOOLS.find((t) => t.key === key);
     setArgs(JSON.stringify(def?.defaultArgs ?? {}, null, 2));
@@ -158,17 +177,17 @@ export function McpPlayground({ projectId, token }: McpPlaygroundProps) {
   };
 
   return (
-    <div className="grid gap-4 rounded-2xl border border-border/60 bg-card/70 p-5 backdrop-blur-xl lg:grid-cols-[260px_1fr]">
-      <div className="flex flex-col gap-1">
+    <div className="grid gap-4 rounded-2xl border border-white/5 bg-card/45 p-5 backdrop-blur-xl lg:grid-cols-[280px_1fr]">
+      <div className="flex flex-col gap-1 max-h-[500px] overflow-y-auto pr-2 no-scrollbar border-r border-white/5">
         <p className="mb-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
-          tools
+          semantic tools
         </p>
         {TOOLS.map((t) => (
           <button
-            className={`rounded-lg border px-3 py-2 text-left font-mono text-xs transition-colors ${
+            className={`rounded-lg border px-3 py-2 text-left font-mono text-xs transition-all ${
               selected === t.key
-                ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border/60 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                ? "border-violet-500/30 bg-violet-500/10 text-violet-300 shadow-[0_0_12px_rgba(139,92,246,0.15)]"
+                : "border-white/5 text-muted-foreground hover:bg-white/5 hover:text-foreground"
             }`}
             key={t.key}
             onClick={() => setExample(t.key)}
@@ -179,18 +198,18 @@ export function McpPlayground({ projectId, token }: McpPlaygroundProps) {
         ))}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-4">
         <div>
-          <p className="font-medium text-sm">{tool.label}</p>
-          <p className="text-muted-foreground text-xs">{tool.description}</p>
+          <p className="font-semibold text-sm text-white font-mono">{tool.label}()</p>
+          <p className="text-muted-foreground text-xs mt-1">{tool.description}</p>
         </div>
 
         <div>
-          <p className="mb-1 font-mono text-muted-foreground text-xs">
-            arguments (json)
+          <p className="mb-1.5 font-mono text-muted-foreground text-xs">
+            arguments (json schema)
           </p>
           <Textarea
-            className="min-h-24 border-border/60 bg-background/60 font-mono text-xs"
+            className="min-h-[110px] border-white/5 bg-black/40 font-mono text-xs text-violet-200 focus-visible:ring-violet-500"
             onChange={(e) => setArgs(e.target.value)}
             value={args}
           />
@@ -198,33 +217,35 @@ export function McpPlayground({ projectId, token }: McpPlaygroundProps) {
 
         <div className="flex flex-wrap gap-2">
           <Button
-            disabled={isRunning}
+            className="bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.25)] transition-all"
+            disabled={isRunning || !selected}
             onClick={runTool}
             size="sm"
             type="button"
           >
             {isRunning ? (
-              <Loader2 className="mr-1 size-3.5 animate-spin" />
+              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
             ) : (
-              <Play className="mr-1 size-3.5" />
+              <Play className="mr-1.5 size-3.5 fill-current" />
             )}
-            Run on live MCP
+            Run simulated sandbox call
           </Button>
           <Button
+            className="border-white/5 hover:bg-white/5 text-muted-foreground text-xs"
             onClick={() => setExample(selected)}
             size="sm"
             type="button"
             variant="ghost"
           >
-            <Wand2 className="mr-1 size-3.5" />
-            Reset example
+            <Wand2 className="mr-1.5 size-3.5" />
+            Reset parameters
           </Button>
         </div>
 
         <div>
-          <p className="mb-1 font-mono text-muted-foreground text-xs">output</p>
-          <pre className="min-h-[220px] overflow-auto rounded-xl border border-border/60 bg-background/60 p-4 font-mono text-[11px] leading-relaxed">
-            {output ?? "// Pick a tool and run it to see live JSON."}
+          <p className="mb-1.5 font-mono text-muted-foreground text-xs">live payload output</p>
+          <pre className="min-h-[220px] max-h-[300px] overflow-auto rounded-xl border border-white/5 bg-black/60 p-4 font-mono text-[11px] leading-relaxed text-cyan-300">
+            {output ?? "// Pick a semantic tool and run sandbox to inspect JSON-RPC output."}
           </pre>
         </div>
       </div>
