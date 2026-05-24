@@ -28,6 +28,10 @@ export async function auth() {
       session.user.user_metadata?.image,
   });
 
+  if (appUser.disabled) {
+    return null;
+  }
+
   const userType: UserType = guestRegex.test(appUser.email)
     ? "guest"
     : "regular";

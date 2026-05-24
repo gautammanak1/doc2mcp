@@ -19,6 +19,8 @@ export const user = pgTable("User", {
   emailVerified: boolean("emailVerified").notNull().default(false),
   image: text("image"),
   isAnonymous: boolean("isAnonymous").notNull().default(false),
+  disabled: boolean("disabled").notNull().default(false),
+  stripeCustomerId: text("stripeCustomerId"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
@@ -190,3 +192,28 @@ export const aiWorkflow = pgTable("AiWorkflow", {
 });
 
 export type AiWorkflow = InferSelectModel<typeof aiWorkflow>;
+
+export const subscription = pgTable("Subscription", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  plan: varchar("plan", { enum: ["starter", "pro", "team"] }).notNull(),
+  billingCycle: varchar("billingCycle", {
+    enum: ["monthly", "biannual", "yearly"],
+  }).notNull(),
+  status: varchar("status", {
+    enum: ["active", "past_due", "canceled", "incomplete", "trialing"],
+  })
+    .notNull()
+    .default("incomplete"),
+  stripeCustomerId: text("stripeCustomerId").notNull(),
+  stripeSubscriptionId: text("stripeSubscriptionId").notNull(),
+  currentPeriodStart: timestamp("currentPeriodStart"),
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  cancelAtPeriodEnd: boolean("cancelAtPeriodEnd").notNull().default(false),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type Subscription = InferSelectModel<typeof subscription>;

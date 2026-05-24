@@ -1,9 +1,9 @@
 "use client";
 
 import { Check, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { PlanSubscribeButton } from "@/components/billing/plan-subscribe-button";
+import type { PlanId } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 export type BillingCycle = "monthly" | "biannual" | "yearly";
@@ -16,7 +16,7 @@ type Plan = {
   badge?: string;
   highlight?: boolean;
   features: string[];
-  cta: { label: string; href: string };
+  ctaLabel: string;
 };
 
 const PLANS: Plan[] = [
@@ -33,7 +33,7 @@ const PLANS: Plan[] = [
       "Public projects",
       "Community support",
     ],
-    cta: { label: "Start", href: "/chat" },
+    ctaLabel: "Start",
   },
   {
     id: "pro",
@@ -50,7 +50,7 @@ const PLANS: Plan[] = [
       "Private projects",
       "Email support",
     ],
-    cta: { label: "Go Pro", href: "/chat?plan=pro" },
+    ctaLabel: "Go Pro",
   },
   {
     id: "team",
@@ -65,7 +65,7 @@ const PLANS: Plan[] = [
       "Custom domain for MCP endpoints",
       "Priority support (24h SLA)",
     ],
-    cta: { label: "Upgrade", href: "/chat?plan=team" },
+    ctaLabel: "Upgrade",
   },
 ];
 
@@ -208,19 +208,12 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Button
-                asChild
-                className={cn(
-                  "w-full",
-                  plan.highlight
-                    ? "bg-violet-500 text-white hover:bg-violet-500/90"
-                    : ""
-                )}
-                size="lg"
-                variant={plan.highlight ? "default" : "outline"}
-              >
-                <Link href={plan.cta.href}>{plan.cta.label}</Link>
-              </Button>
+              <PlanSubscribeButton
+                cycle={cycle}
+                highlight={plan.highlight}
+                label={plan.ctaLabel}
+                planId={plan.id as PlanId}
+              />
             </div>
           ))}
         </div>

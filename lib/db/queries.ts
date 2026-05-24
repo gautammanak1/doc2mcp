@@ -15,6 +15,7 @@ import {
 import { drizzle } from "drizzle-orm/postgres-js";
 import type { ArtifactKind } from "@/components/chat/artifact";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
+import type { BillingCycle, PlanId } from "@/lib/billing/plans";
 import { ChatbotError } from "../errors";
 import { generateUUID } from "../utils";
 import { getPostgresClient } from "./client";
@@ -28,8 +29,10 @@ import {
   message,
   type PlatformProject,
   platformProject,
+  type Subscription,
   type Suggestion,
   stream,
+  subscription,
   suggestion,
   type User,
   user,
@@ -48,6 +51,11 @@ export async function getUser(email: string): Promise<User[]> {
       "Failed to get user by email"
     );
   }
+}
+
+export async function getUserById(id: string) {
+  const rows = await db.select().from(user).where(eq(user.id, id)).limit(1);
+  return rows[0] ?? null;
 }
 
 export async function createUser(email: string, password: string) {
@@ -922,4 +930,223 @@ export async function getUserProjects(userId: string) {
       "Failed to get user projects"
     );
   }
+}
+
+export async function getActiveSubscriptionByUserId(userId: string) {
+  try {
+    const rows = await db
+      .select()
+      .from(subscription)
+      .where(
+        and(
+          eq(subscription.userId, userId),
+          inArray(subscription.status, ["active", "trialing", "past_due"])
+        )
+      )
+      .orderBy(desc(subscription.updatedAt))
+      .limit(1);
+    return rows[0] ?? null;
+  } catch (_error) {
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to get subscription"
+    );
+  }
+}
+
+export async function upsertSubscriptionFromStripe({
+  userId,
+  plan,
+  billingCycle,
+  status,
+  stripeCustomerId,
+  stripeSubscriptionId,
+  currentPeriodStart,
+  currentPeriodEnd,
+  cancelAtPeriodEnd,
+}: {
+  userId: string;
+  plan: PlanId;
+  billingCycle: BillingCycle;
+  status: Subscription["status"];
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+  cancelAtPeriodEnd: boolean;
+}) {
+  try {
+    const existing = await db
+      .select()
+      .from(subscription)
+      .where(eq(subscription.stripeSubscriptionId, stripeSubscriptionId))
+      .limit(1);
+
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(subscription)
+        .set({
+          plan,
+          billingCycle,
+          status,
+          currentPeriodStart,
+          currentPeriodEnd,
+          cancelAtPeriodEnd,
+          updatedAt: new Date(),
+        })
+        .where(eq(subscription.id, existing[0].id))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db
+      .insert(subscription)
+      .values({
+        userId,
+        plan,
+        billingCycle,
+        status,
+        stripeCustomerId,
+        stripeSubscriptionId,
+        currentPeriodStart,
+        currentPeriodEnd,
+        cancelAtPeriodEnd,
+      })
+      .returning();
+    return created;
+  } catch (error) {
+    console.error("upsertSubscriptionFromStripe:", error);
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to upsert subscription"
+    );
+  }
+}
+
+export async function getUserByStripeCustomerId(stripeCustomerId: string) {
+  const rows = await db
+    .select()
+    .from(user)
+    .where(eq(user.stripeCustomerId, stripeCustomerId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+export async function setUserStripeCustomerId(
+  userId: string,
+  stripeCustomerId: string
+) {
+  await db
+    .update(user)
+    .set({ stripeCustomerId, updatedAt: new Date() })
+    .where(eq(user.id, userId));
+}
+
+export async function countUserConversionsThisMonth(userId: string) {
+  const startOfMonth = new Date();
+  startOfMonth.setUTCDate(1);
+  startOfMonth.setUTCHours(0, 0, 0, 0);
+
+  const result = await db
+    .select({ count: count() })
+    .from(platformProject)
+    .where(
+      and(
+        eq(platformProject.userId, userId),
+        gte(platformProject.createdAt, startOfMonth)
+      )
+    );
+
+  return result[0]?.count ?? 0;
+}
+
+// biome-ignore lint/suspicious/useAwait: drizzle query returns a thenable promise
+export async function getAllSubscriptionsWithUser(limit = 100) {
+  return db
+    .select({
+      subscription,
+      userEmail: user.email,
+      userName: user.name,
+    })
+    .from(subscription)
+    .innerJoin(user, eq(subscription.userId, user.id))
+    .orderBy(desc(subscription.updatedAt))
+    .limit(limit);
+}
+
+// biome-ignore lint/suspicious/useAwait: drizzle query returns a thenable promise
+export async function getAllProjectsWithUser(limit = 100) {
+  return db
+    .select({
+      project: platformProject,
+      userEmail: user.email,
+    })
+    .from(platformProject)
+    .innerJoin(user, eq(platformProject.userId, user.id))
+    .orderBy(desc(platformProject.createdAt))
+    .limit(limit);
+}
+
+export async function getAllUsersWithStats(limit = 100) {
+  const users = await db
+    .select()
+    .from(user)
+    .orderBy(desc(user.createdAt))
+    .limit(limit);
+
+  const enriched = await Promise.all(
+    users.map(async (u) => {
+      const [projectCount, activeSub] = await Promise.all([
+        db
+          .select({ count: count() })
+          .from(platformProject)
+          .where(eq(platformProject.userId, u.id)),
+        getActiveSubscriptionByUserId(u.id),
+      ]);
+      return {
+        ...u,
+        projectCount: projectCount[0]?.count ?? 0,
+        plan: activeSub?.plan ?? "free",
+        subscriptionStatus: activeSub?.status ?? null,
+        periodEnd: activeSub?.currentPeriodEnd ?? null,
+      };
+    })
+  );
+
+  return enriched;
+}
+
+export async function disableUser(userId: string) {
+  await db
+    .update(user)
+    .set({ disabled: true, updatedAt: new Date() })
+    .where(eq(user.id, userId));
+}
+
+export async function hardDeleteProject(projectId: string) {
+  await db.delete(mcpServer).where(eq(mcpServer.projectId, projectId));
+  await db.delete(platformProject).where(eq(platformProject.id, projectId));
+}
+
+export async function hardDeleteUser(userId: string) {
+  const userProjects = await db
+    .select({ id: platformProject.id })
+    .from(platformProject)
+    .where(eq(platformProject.userId, userId));
+
+  for (const p of userProjects) {
+    await hardDeleteProject(p.id);
+  }
+
+  await db.delete(subscription).where(eq(subscription.userId, userId));
+  await db.delete(user).where(eq(user.id, userId));
+}
+
+export async function getSubscriptionByStripeId(stripeSubscriptionId: string) {
+  const rows = await db
+    .select()
+    .from(subscription)
+    .where(eq(subscription.stripeSubscriptionId, stripeSubscriptionId))
+    .limit(1);
+  return rows[0] ?? null;
 }

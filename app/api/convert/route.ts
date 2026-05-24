@@ -1,6 +1,10 @@
 import { after } from "next/server";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import {
+  assertCanStartConversion,
+  EntitlementError,
+} from "@/lib/billing/entitlements";
 import { createPlatformProject } from "@/lib/db/queries";
 import { detectSourceTypeFromUrl } from "@/lib/doc2mcp/detect-source-type";
 import { deriveMcpServerSlug } from "@/lib/doc2mcp/naming";
@@ -28,6 +32,8 @@ export async function POST(request: Request) {
   }
 
   try {
+    await assertCanStartConversion(session.user.id);
+
     const { sourceUrl } = bodySchema.parse(await request.json());
     const sourceType = detectSourceTypeFromUrl(sourceUrl);
     const name = deriveMcpServerSlug(sourceUrl);
@@ -51,6 +57,12 @@ export async function POST(request: Request) {
 
     return Response.json({ id: project.id });
   } catch (error) {
+    if (error instanceof EntitlementError) {
+      return Response.json(
+        { error: "entitlement", message: error.message },
+        { status: 403 }
+      );
+    }
     console.error("Convert API error:", error);
     return new ChatbotError("bad_request:api").toResponse();
   }
