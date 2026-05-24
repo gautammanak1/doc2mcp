@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { guestRegex } from "./lib/constants";
 
 const PUBLIC_PATHS = [
@@ -44,7 +44,11 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: {
+          name: string;
+          value: string;
+          options: CookieOptions;
+        }[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
             supabaseResponse.cookies.set(name, value, options);
           });
@@ -75,7 +79,7 @@ export async function proxy(request: NextRequest) {
 
   // Protect admin routes
   if (pathname.startsWith("/admin")) {
-    if (!user || user.email !== process.env.ADMIN_EMAIL) {
+    if (!user || user.email !== (process.env.ADMIN_EMAIL ?? "doc2mcp@gmail.com")) {
       return NextResponse.redirect(new URL(`${base}/login`, request.url));
     }
   }

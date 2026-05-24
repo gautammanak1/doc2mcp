@@ -48,4 +48,4 @@ We will, in good faith, attempt to reach out before terminating accounts unless 
 
 ## Report abuse
 
-Found a project that violates this policy? Email abuse@doc2mcp.dev with the project URL.
+Found a project that violates this policy? Email doc2mcp@gmail.com with the project URL.

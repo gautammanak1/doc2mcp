@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
@@ -30,17 +31,18 @@ export const login = async (
     });
 
     if (error) {
-      console.error("[v0] Login error:", error.message);
+      console.error("Login error:", error.message);
       return { status: "failed" };
     }
 
+    revalidatePath("/", "layout");
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
 
-    console.error("[v0] Login exception:", error);
+    console.error("Login exception:", error);
     return { status: "failed" };
   }
 };
@@ -67,46 +69,46 @@ export const register = async (
 
     const supabase = await createClient();
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from("User")
-      .select("id")
-      .eq("email", validatedData.email)
-      .single();
-
-    if (existingUser) {
-      return { status: "user_exists" };
-    }
-
-    // Sign up with Supabase Auth
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data, error: signUpError } = await supabase.auth.signUp({
       email: validatedData.email,
       password: validatedData.password,
     });
 
     if (signUpError) {
-      console.error("[v0] Sign up error:", signUpError.message);
+      const message = signUpError.message.toLowerCase();
+      if (
+        message.includes("already registered") ||
+        message.includes("already exists")
+      ) {
+        return { status: "user_exists" };
+      }
+      console.error("Sign up error:", signUpError.message);
       return { status: "failed" };
     }
 
-    // Sign in after successful registration
+    if (data.session) {
+      revalidatePath("/", "layout");
+      return { status: "success" };
+    }
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
       password: validatedData.password,
     });
 
     if (signInError) {
-      console.error("[v0] Sign in error after registration:", signInError.message);
+      console.error("Sign in after registration:", signInError.message);
       return { status: "failed" };
     }
 
+    revalidatePath("/", "layout");
     return { status: "success" };
   } catch (error) {
     if (error instanceof z.ZodError) {
       return { status: "invalid_data" };
     }
 
-    console.error("[v0] Register exception:", error);
+    console.error("Register exception:", error);
     return { status: "failed" };
   }
 };

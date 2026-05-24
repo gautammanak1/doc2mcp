@@ -287,7 +287,11 @@ export function buildConceptMap(
 
     // Find related documents
     for (const doc of analysis.documents) {
-      if (doc.content.includes(concept)) {
+      const haystack = [
+        doc.summary,
+        ...doc.sections.map((section) => section.content),
+      ].join("\n");
+      if (haystack.includes(concept)) {
         conceptMap[concept].add(doc.title);
       }
     }

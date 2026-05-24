@@ -135,11 +135,11 @@ export function PricingSection() {
             and re-crawl more often.
           </p>
 
-          <div className="mt-8 inline-flex items-center rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl">
+          <div className="mt-8 flex w-full max-w-md flex-wrap items-center justify-center gap-2 rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl sm:max-w-none sm:flex-nowrap sm:justify-center">
             {(Object.keys(CYCLE_LABEL) as BillingCycle[]).map((c) => (
               <button
                 className={cn(
-                  "rounded-full px-4 py-2 font-medium transition-all",
+                  "min-w-0 flex-1 rounded-full px-3 py-2 font-medium transition-all sm:flex-none sm:px-4",
                   cycle === c
                     ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground"
@@ -191,7 +191,7 @@ export function PricingSection() {
               </div>
 
               <div className="flex items-baseline gap-1">
-                <span className="font-display font-bold text-5xl tracking-tight">
+                <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
                   ${plan.price[cycle]}
                 </span>
                 <span className="text-muted-foreground text-xs">

@@ -58,4 +58,4 @@ We may update these terms. Material changes will be announced at least 14 days b
 
 ## 11. Contact
 
-Questions or notices: hello@doc2mcp.dev
+Questions or notices: doc2mcp@gmail.com

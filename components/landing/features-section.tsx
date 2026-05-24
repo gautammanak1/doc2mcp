@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FEATURE_ICONS } from "./feature-icons";
 
 const features = [
   {
@@ -34,7 +33,7 @@ const features = [
   },
 ];
 
-function _DeployVisual() {
+function DeployVisual() {
   return (
     <svg className="w-full h-full" viewBox="0 0 200 160">
       <defs>
@@ -109,7 +108,7 @@ const AI_ORBIT_NODES = [
   { x2: 125, y2: 36.7 },
 ] as const;
 
-function _AIVisual() {
+function AIVisual() {
   return (
     <svg className="w-full h-full" viewBox="0 0 200 160">
       {/* Central node */}
@@ -191,7 +190,7 @@ function _AIVisual() {
   );
 }
 
-function _CollabVisual() {
+function CollabVisual() {
   return (
     <svg className="w-full h-full" viewBox="0 0 200 160">
       {/* User A */}
@@ -305,7 +304,7 @@ function _CollabVisual() {
   );
 }
 
-function _SecurityVisual() {
+function SecurityVisual() {
   return (
     <svg className="w-full h-full" viewBox="0 0 200 160">
       {/* Shield */}
@@ -378,10 +377,18 @@ function _SecurityVisual() {
 }
 
 function AnimatedVisual({ type }: { type: string }) {
-  const Icon =
-    (FEATURE_ICONS as Record<string, React.ComponentType>)[type] ??
-    FEATURE_ICONS.deploy;
-  return <Icon />;
+  switch (type) {
+    case "deploy":
+      return <DeployVisual />;
+    case "ai":
+      return <AIVisual />;
+    case "collab":
+      return <CollabVisual />;
+    case "security":
+      return <SecurityVisual />;
+    default:
+      return <DeployVisual />;
+  }
 }
 
 function FeatureCard({
@@ -418,28 +425,25 @@ function FeatureCard({
       ref={cardRef}
       style={{ transitionDelay: `${index * 100}ms` }}
     >
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 py-12 lg:py-20 border-b border-foreground/10">
-        {/* Number */}
+      <div className="flex flex-col gap-6 border-b border-foreground/10 py-8 sm:gap-8 sm:py-12 lg:flex-row lg:gap-16 lg:py-20">
         <div className="shrink-0">
           <span className="font-mono text-sm text-muted-foreground">
             {feature.number}
           </span>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 grid lg:grid-cols-2 gap-8 items-center">
+        <div className="grid flex-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
           <div>
-            <h3 className="text-3xl lg:text-4xl font-display mb-4 group-hover:translate-x-2 transition-transform duration-500">
+            <h3 className="mb-3 font-display text-2xl group-hover:translate-x-2 transition-transform duration-500 sm:mb-4 sm:text-3xl lg:text-4xl">
               {feature.title}
             </h3>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
               {feature.description}
             </p>
           </div>
 
-          {/* Visual */}
           <div className="flex justify-center lg:justify-end">
-            <div className="w-48 h-40 text-foreground">
+            <div className="h-36 w-full max-w-[12rem] text-foreground sm:h-40 sm:max-w-[14rem]">
               <AnimatedVisual type={feature.visual} />
             </div>
           </div>

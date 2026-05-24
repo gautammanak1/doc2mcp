@@ -98,4 +98,4 @@ Web search and Jina are **optional**. With no keys set, only Source docs, ASI1, 
 
 ## Reporting
 
-Found a security issue? Email security@doc2mcp.dev. Please do not file a public GitHub issue.
+Found a security issue? Email doc2mcp@gmail.com. Please do not file a public GitHub issue.

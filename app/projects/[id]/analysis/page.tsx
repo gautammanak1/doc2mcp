@@ -9,6 +9,14 @@ import type { AuthMethod } from "@/lib/ai/auth-inference";
 import type { DetectedWorkflow } from "@/lib/ai/workflow-detector";
 
 export default function AnalysisPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <AnalysisPageContent />
+    </Suspense>
+  );
+}
+
+function AnalysisPageContent() {
   const params = useParams();
   const projectId = params.id as string;
 

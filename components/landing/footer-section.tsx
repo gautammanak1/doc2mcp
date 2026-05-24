@@ -4,7 +4,7 @@ import { Github, Linkedin, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
-import { GITHUB_REPO_URL } from "@/lib/config/site";
+import { CONTACT_EMAIL, GITHUB_REPO_URL } from "@/lib/config/site";
 
 const FEATURES_LINKS = [
   { label: "Chat", href: "/chat" },
@@ -114,7 +114,10 @@ export function FooterSection() {
             © {currentYear} doc2mcp. All rights reserved.
           </p>
           <p className="font-mono text-[11px] text-muted-foreground/80">
-            Powered by ASI1 · hosted on Vercel
+            <a className="hover:text-foreground" href={`mailto:${CONTACT_EMAIL}`}>
+              {CONTACT_EMAIL}
+            </a>
+            {" · "}Powered by ASI1 · hosted on Vercel
           </p>
         </div>
       </div>
@@ -123,7 +126,7 @@ export function FooterSection() {
         aria-hidden="true"
         className="pointer-events-none mt-12 select-none overflow-hidden text-center"
       >
-        <p className="-mb-6 sm:-mb-10 lg:-mb-16 bg-gradient-to-b from-foreground/10 to-foreground/0 bg-clip-text font-display font-bold leading-none tracking-tight text-transparent text-[clamp(5rem,18vw,18rem)]">
+        <p className="-mb-4 bg-gradient-to-b from-foreground/10 to-foreground/0 bg-clip-text font-display font-bold leading-none tracking-tight text-transparent text-[clamp(3rem,14vw,18rem)] sm:-mb-10 lg:-mb-16">
           doc2mcp
         </p>
       </div>

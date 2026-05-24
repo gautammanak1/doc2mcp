@@ -41,7 +41,7 @@ You may:
 - Export all project data via the dashboard.
 - Delete a project (irreversibly deletes its crawled content, chunks, and token).
 - Delete your account (removes all projects and personal data).
-- Request a copy of your data: privacy@doc2mcp.dev
+- Request a copy of your data: doc2mcp@gmail.com
 
 GDPR / UK GDPR / CCPA requests are honoured within 30 days.
 
@@ -59,4 +59,4 @@ We will notify users by email of material changes at least 14 days before they t
 
 ## Contact
 
-Privacy questions: privacy@doc2mcp.dev
+Privacy questions: doc2mcp@gmail.com

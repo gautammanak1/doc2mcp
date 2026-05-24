@@ -59,7 +59,7 @@ export function HeroSection() {
         </div>
 
         <h1
-          className={`max-w-[12ch] font-display text-[clamp(2.75rem,9vw,8.5rem)] leading-[0.95] tracking-tight transition-all duration-1000 ${
+          className={`max-w-none font-display text-[clamp(2.25rem,8vw,8.5rem)] leading-[0.95] tracking-tight transition-all duration-1000 sm:max-w-[14ch] ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
@@ -118,7 +118,7 @@ export function HeroSection() {
           </Button>
         </div>
 
-        <div className="mt-14 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
           {marqueeStats.map((stat) => (
             <div
               className="rounded-xl border border-border/40 bg-card/30 px-4 py-4 backdrop-blur-xl"
