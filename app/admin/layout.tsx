@@ -1,5 +1,5 @@
-import { connection } from "next/server";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
@@ -21,7 +21,9 @@ async function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     redirect("/login?redirectUrl=/admin");
   }
 
-  return <AdminShell userEmail={session?.user?.email ?? ""}>{children}</AdminShell>;
+  return (
+    <AdminShell userEmail={session?.user?.email ?? ""}>{children}</AdminShell>
+  );
 }
 
 export default function AdminLayout({

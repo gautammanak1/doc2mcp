@@ -89,7 +89,6 @@ export async function getJobMetricSummary(
   windowHours = 24
 ): Promise<JobMetricSummary[]> {
   const cutoff = new Date(Date.now() - windowHours * 60 * 60 * 1000);
-  // biome-ignore lint/suspicious/noExplicitAny: drizzle returns generic Record
   const rows = (await db.execute(sql`
     SELECT
       "jobType" AS "jobType",

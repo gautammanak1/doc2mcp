@@ -6,6 +6,8 @@
 
 No install, no API keys to share, no local clone. Powered by ASI1.
 
+![doc2mcp social preview](./public/og-image.png)
+
 [Live](https://doc2mcp.dev) · [Docs](https://doc2mcp.dev/docs) · [Pricing](https://doc2mcp.dev/pricing)
 
 </div>

@@ -68,9 +68,7 @@ function isRefreshTokenError(err: unknown): boolean {
  * Other errors still pass through.
  */
 async function withMutedRefreshLogs<T>(fn: () => Promise<T>): Promise<T> {
-  // biome-ignore lint/suspicious/noConsole: intentional console interception
   const original = console.error;
-  // biome-ignore lint/suspicious/noConsole: intentional console interception
   console.error = (...args: unknown[]) => {
     const first = args[0];
     const stringified =
@@ -87,7 +85,6 @@ async function withMutedRefreshLogs<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } finally {
-    // biome-ignore lint/suspicious/noConsole: intentional console restore
     console.error = original;
   }
 }

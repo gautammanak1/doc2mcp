@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { LoaderIcon } from "@/components/chat/icons";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,20 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-export function LoginForm({ className }: { className?: string }) {
+export function LoginForm({
+  className,
+  redirectUrl,
+}: {
+  className?: string;
+  redirectUrl?: string | null;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const explicitRedirect = searchParams.get("redirectUrl");
-  const postLoginUrl = explicitRedirect
-    ? `/post-login?redirectUrl=${encodeURIComponent(explicitRedirect)}`
+  const postLoginUrl = redirectUrl
+    ? `/post-login?redirectUrl=${encodeURIComponent(redirectUrl)}`
     : "/post-login";
 
   const handleLogin = async (event: React.FormEvent) => {

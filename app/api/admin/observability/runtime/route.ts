@@ -2,8 +2,6 @@ import { requireAdmin } from "@/lib/admin/require-admin";
 import { getCacheMetrics } from "@/lib/observability/cache";
 import { getCircuitMetrics } from "@/lib/observability/circuit-breaker";
 
-export const runtime = "nodejs";
-
 export async function GET() {
   const session = await requireAdmin();
   if (!session) {

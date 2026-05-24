@@ -326,7 +326,9 @@ export function ConvertExperience({
                         config={artifact.content}
                         hint={artifact.installHint}
                         key={artifact.id}
-                        onCopy={() => copyText(artifact.content, artifact.label)}
+                        onCopy={() =>
+                          copyText(artifact.content, artifact.label)
+                        }
                         onDownload={() =>
                           download(artifact.filename, artifact.content)
                         }
@@ -430,7 +432,9 @@ function ConfigPanel({
           </Button>
         </div>
       </div>
-      {hint ? <p className="mt-2 text-muted-foreground text-xs">{hint}</p> : null}
+      {hint ? (
+        <p className="mt-2 text-muted-foreground text-xs">{hint}</p>
+      ) : null}
       <pre className="mt-3 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 font-mono text-[10px]">
         {config}
       </pre>

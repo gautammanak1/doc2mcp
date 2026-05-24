@@ -132,13 +132,10 @@ function emit(
   }
   const line = format(payload);
   if (level === "error") {
-    // biome-ignore lint/suspicious/noConsole: structured logger is the sanctioned console surface
     console.error(line);
   } else if (level === "warn") {
-    // biome-ignore lint/suspicious/noConsole: structured logger is the sanctioned console surface
     console.warn(line);
   } else {
-    // biome-ignore lint/suspicious/noConsole: structured logger is the sanctioned console surface
     console.log(line);
   }
 }

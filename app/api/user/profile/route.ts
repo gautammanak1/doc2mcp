@@ -46,9 +46,6 @@ export async function PATCH(request: Request) {
     });
   } catch (error) {
     console.error("Profile name update failed:", error);
-    return Response.json(
-      { error: "Failed to update name" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Failed to update name" }, { status: 500 });
   }
 }

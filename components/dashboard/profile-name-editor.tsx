@@ -89,7 +89,7 @@ export function ProfileNameEditor({
   };
 
   if (!editing) {
-    const display = (name && name.trim()) || fallback;
+    const display = name?.trim() || fallback;
     return (
       <div className="flex items-center justify-between gap-2">
         <span className="truncate text-sm">{display}</span>
@@ -112,7 +112,7 @@ export function ProfileNameEditor({
       className="flex items-center gap-2"
       onSubmit={(event) => {
         event.preventDefault();
-        void handleSave();
+        handleSave().catch(() => toast.error("Network error updating name"));
       }}
     >
       <Input

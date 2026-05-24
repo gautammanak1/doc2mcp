@@ -141,7 +141,7 @@ export function describeDiscoveredSpec(crawl: CrawlResult[]): string | null {
     return null;
   }
   const overview = crawl[0];
-  if (!overview || !overview.url) {
+  if (!overview?.url) {
     return null;
   }
   return `${overview.url} (${crawl.length - 1} endpoints)`;

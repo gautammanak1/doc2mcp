@@ -32,10 +32,12 @@ export type McpExportBundle = {
 
 function serverEntry(config: McpServerConfig) {
   const name = config.name || "doc2mcp";
-  const entry = (config.cursorConfig?.mcpServers as Record<
-    string,
-    { url?: string; headers?: Record<string, string> }
-  > | null)?.[name];
+  const entry = (
+    config.cursorConfig?.mcpServers as Record<
+      string,
+      { url?: string; headers?: Record<string, string> }
+    > | null
+  )?.[name];
 
   return {
     name,
@@ -83,7 +85,8 @@ function validationReport(
       mcpProtocol: "passed",
       toolsDeclared: tools.length,
       schemasPresent: tools.every((tool) => Boolean(tool.inputSchema)),
-      uniqueToolNames: new Set(tools.map((tool) => tool.name)).size === tools.length,
+      uniqueToolNames:
+        new Set(tools.map((tool) => tool.name)).size === tools.length,
     },
     generationReport: report ?? null,
     tools: tools.map((tool) => ({
@@ -148,7 +151,8 @@ export function generateMcpExportBundle(options: {
       filename: "mcp.json",
       mimeType: "application/json",
       content: json(cursorConfig),
-      installHint: "Paste into Cursor Settings -> MCP or project .cursor/mcp.json.",
+      installHint:
+        "Paste into Cursor Settings -> MCP or project .cursor/mcp.json.",
     },
     {
       id: "claude-desktop",

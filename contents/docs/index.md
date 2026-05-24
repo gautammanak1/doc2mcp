@@ -5,6 +5,8 @@ description: Paste any docs URL. Get a Cursor-ready MCP server. No install, no c
 
 # doc2mcp
 
+![doc2mcp social preview](/og-image.png)
+
 doc2mcp turns any documentation site into a hosted MCP (Model Context Protocol) server that Cursor, Claude Desktop, Windsurf, and other AI clients can read.
 
 ## How it works
