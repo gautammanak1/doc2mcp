@@ -50,7 +50,8 @@ export async function POST(request: Request) {
     });
 
     return Response.json({ id: project.id });
-  } catch {
+  } catch (error) {
+    console.error("Convert API error:", error);
     return new ChatbotError("bad_request:api").toResponse();
   }
 }

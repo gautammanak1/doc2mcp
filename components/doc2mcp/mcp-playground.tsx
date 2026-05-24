@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import { Loader2, Play, Wand2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -98,7 +98,9 @@ export type McpPlaygroundProps = {
 
 export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
   const TOOLS = useMemo(() => {
-    if (!tools || tools.length === 0) return DEFAULT_DOCS_TOOLS;
+    if (!tools || tools.length === 0) {
+      return DEFAULT_DOCS_TOOLS;
+    }
     return tools.map((t) => {
       const defaultArgs: Record<string, unknown> = {};
       const properties = (t.parameters as any)?.properties ?? {};
@@ -142,7 +144,9 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
   }, [TOOLS]);
 
   const tool = useMemo(
-    () => TOOLS.find((t) => t.key === selected) ?? TOOLS[0] ?? { key: "", label: "", description: "", defaultArgs: {} },
+    () =>
+      TOOLS.find((t) => t.key === selected) ??
+      TOOLS[0] ?? { key: "", label: "", description: "", defaultArgs: {} },
     [selected, TOOLS]
   );
 
@@ -200,8 +204,12 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
 
       <div className="flex min-w-0 flex-col gap-4">
         <div>
-          <p className="font-semibold text-sm text-white font-mono">{tool.label}()</p>
-          <p className="text-muted-foreground text-xs mt-1">{tool.description}</p>
+          <p className="font-semibold text-sm text-white font-mono">
+            {tool.label}()
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">
+            {tool.description}
+          </p>
         </div>
 
         <div>
@@ -243,9 +251,12 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
         </div>
 
         <div>
-          <p className="mb-1.5 font-mono text-muted-foreground text-xs">live payload output</p>
+          <p className="mb-1.5 font-mono text-muted-foreground text-xs">
+            live payload output
+          </p>
           <pre className="min-h-[220px] max-h-[300px] overflow-auto rounded-xl border border-white/5 bg-black/60 p-4 font-mono text-[11px] leading-relaxed text-cyan-300">
-            {output ?? "// Pick a semantic tool and run sandbox to inspect JSON-RPC output."}
+            {output ??
+              "// Pick a semantic tool and run sandbox to inspect JSON-RPC output."}
           </pre>
         </div>
       </div>

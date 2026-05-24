@@ -238,12 +238,13 @@ Provide the simulated JSON response:`;
 
         const { text } = await asi1GenerateText([
           { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
+          { role: "user", content: userPrompt },
         ]);
 
         let responseJson = {};
         try {
-          const jsonMatch = text.match(/\{[\s\S]*\}/) ?? text.match(/\[[\s\S]*\]/);
+          const jsonMatch =
+            text.match(/\{[\s\S]*\}/) ?? text.match(/\[[\s\S]*\]/);
           responseJson = JSON.parse(jsonMatch?.[0] ?? text);
         } catch {
           responseJson = { rawResponse: text };

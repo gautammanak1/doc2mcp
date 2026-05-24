@@ -187,7 +187,7 @@ export function ChatShell() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                window.location.href = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/dashboard/settings`;
+                window.location.href = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/`;
               }}
             >
               Settings

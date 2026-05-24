@@ -106,6 +106,49 @@ export async function getOrCreateOAuthUser(
   }
 }
 
+export async function ensureAppUserFromSupabase({
+  id,
+  email,
+  name,
+  image,
+}: {
+  id: string;
+  email: string;
+  name?: string | null;
+  image?: string | null;
+}) {
+  try {
+    const byId = await db.select().from(user).where(eq(user.id, id));
+    if (byId.length > 0) {
+      return byId[0];
+    }
+
+    const byEmail = await db.select().from(user).where(eq(user.email, email));
+    if (byEmail.length > 0) {
+      return byEmail[0];
+    }
+
+    const [created] = await db
+      .insert(user)
+      .values({
+        id,
+        email,
+        name: name ?? null,
+        image: image ?? null,
+        emailVerified: true,
+      })
+      .returning();
+
+    return created;
+  } catch (error) {
+    console.error("ensureAppUserFromSupabase failed:", error);
+    throw new ChatbotError(
+      "bad_request:database",
+      "Failed to sync Supabase user"
+    );
+  }
+}
+
 export async function saveChat({
   id,
   userId,

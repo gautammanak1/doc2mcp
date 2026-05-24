@@ -136,10 +136,14 @@ export async function analyzeDocumentation(
 
   const defaultQualityScore: QualityScore = {
     docsScore: Math.min(60 + crawlResults.length * 5, 95),
-    authConfidence: endpoints.some((e) => e.auth && e.auth !== "none") ? 90 : 80,
-    workflowConfidence: parsed.workflows && parsed.workflows.length > 0 ? 85 : 70,
+    authConfidence: endpoints.some((e) => e.auth && e.auth !== "none")
+      ? 90
+      : 80,
+    workflowConfidence:
+      parsed.workflows && parsed.workflows.length > 0 ? 85 : 70,
     mcpScore: compressedTools.length > 0 ? 88 : 75,
-    explanation: "Automatically evaluated quality based on docs content and endpoint structure.",
+    explanation:
+      "Automatically evaluated quality based on docs content and endpoint structure.",
   };
 
   const qualityScore: QualityScore = parsed.qualityScore ?? defaultQualityScore;

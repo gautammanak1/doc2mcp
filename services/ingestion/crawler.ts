@@ -627,12 +627,14 @@ function recursiveParsePostman(
       recursiveParsePostman(item.item, results, sourceUrl);
     } else if (item.request) {
       const method = item.request.method ?? "GET";
-      const desc = typeof item.request.description === "object"
-        ? item.request.description.content ?? ""
-        : item.request.description ?? "";
-      const rawUrl = typeof item.request.url === "object"
-        ? item.request.url.raw ?? ""
-        : item.request.url ?? "";
+      const desc =
+        typeof item.request.description === "object"
+          ? (item.request.description.content ?? "")
+          : (item.request.description ?? "");
+      const rawUrl =
+        typeof item.request.url === "object"
+          ? (item.request.url.raw ?? "")
+          : (item.request.url ?? "");
       const body = item.request.body?.raw ?? "";
 
       const content = `### Endpoint: ${item.name}

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -9,17 +8,16 @@ import {
   MiniMap,
   type Node,
   ReactFlow,
-  useEdgesState,
-  useNodesState,
 } from "@xyflow/react";
+import { useMemo, useState } from "react";
 import "@xyflow/react/dist/style.css";
+import { Cpu, FolderGit, ShieldCheck, Workflow } from "lucide-react";
 import type { ApiGraphEdge, ApiGraphNode } from "@/types/platform";
-import { ShieldCheck, Workflow, FolderGit, Cpu } from "lucide-react";
 
 const nodeColors: Record<string, string> = {
   endpoint: "#a78bfa", // violet
   resource: "#06b6d4", // cyan
-  auth: "#f59e0b",     // amber
+  auth: "#f59e0b", // amber
   workflow: "#10b981", // emerald
 };
 
@@ -36,7 +34,9 @@ export function ApiGraph({
   nodes: ApiGraphNode[];
   edges: ApiGraphEdge[];
 }) {
-  const [activeTab, setActiveTab] = useState<"topology" | "auth" | "workflows">("topology");
+  const [activeTab, setActiveTab] = useState<"topology" | "auth" | "workflows">(
+    "topology"
+  );
 
   // Dynamically compute nodes/edges based on the active tab for a magical experience!
   const { filteredNodes, filteredEdges } = useMemo(() => {
@@ -49,13 +49,15 @@ export function ApiGraph({
         }
       }
 
-      const authNodes: ApiGraphNode[] = Array.from(authTypes).map((type, idx) => ({
-        id: `auth-gate-${type}`,
-        type: "auth",
-        label: `${type.toUpperCase()} Auth Gate`,
-        position: { x: 300, y: 150 + idx * 120 },
-        data: {},
-      }));
+      const authNodes: ApiGraphNode[] = Array.from(authTypes).map(
+        (type, idx) => ({
+          id: `auth-gate-${type}`,
+          type: "auth",
+          label: `${type.toUpperCase()} Auth Gate`,
+          position: { x: 300, y: 150 + idx * 120 },
+          data: {},
+        })
+      );
 
       const endpointNodes: ApiGraphNode[] = initialNodes
         .filter((n) => n.type === "endpoint")
@@ -134,7 +136,7 @@ export function ApiGraph({
         label: (
           <div className="px-3 py-2 text-left relative overflow-hidden group">
             {/* Custom Neon Border/Glow effect */}
-            <div 
+            <div
               className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-300"
               style={{ background: color }}
             />
@@ -179,20 +181,16 @@ export function ApiGraph({
     target: e.target,
     label: e.label,
     animated: e.animated ?? true,
-    style: { 
-      stroke: activeTab === "auth" ? "#f59e0b80" : activeTab === "workflows" ? "#10b98180" : "#a78bfa80", 
-      strokeWidth: 1.5 
+    style: {
+      stroke:
+        activeTab === "auth"
+          ? "#f59e0b80"
+          : activeTab === "workflows"
+            ? "#10b98180"
+            : "#a78bfa80",
+      strokeWidth: 1.5,
     },
   }));
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(flowNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(flowEdges);
-
-  // Synchronize state when nodes/edges filter updates
-  useEffect(() => {
-    setNodes(flowNodes);
-    setEdges(flowEdges);
-  }, [filteredNodes, filteredEdges, setNodes, setEdges]);
 
   return (
     <div className="h-full w-full bg-black/45 relative flex flex-col">
@@ -213,18 +211,18 @@ export function ApiGraph({
               type="button"
             >
               <Icon className="size-3.5" />
-              {tab === "topology" ? "API Topology" : tab === "auth" ? "Auth Flows" : "Inferred Workflows"}
+              {tab === "topology"
+                ? "API Topology"
+                : tab === "auth"
+                  ? "Auth Flows"
+                  : "Inferred Workflows"}
             </button>
           );
         })}
       </div>
 
       <div className="flex-1 min-h-0">
-        <ReactFlow
-          edges={flowEdges}
-          fitView
-          nodes={flowNodes}
-        >
+        <ReactFlow edges={flowEdges} fitView nodes={flowNodes}>
           <Background
             color="#ffffff03"
             gap={20}

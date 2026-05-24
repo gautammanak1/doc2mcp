@@ -1,14 +1,16 @@
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
+import { AdminDashboard } from "@/components/admin/admin-dashboard";
 import { CONTACT_EMAIL } from "@/lib/config/site";
 import { getAdminStats, getAllProjects } from "@/lib/db/queries";
-import { AdminDashboard } from "@/components/admin/admin-dashboard";
 
 function AdminFallback() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background">
-      <p className="text-muted-foreground text-sm">Loading admin control center…</p>
+      <p className="text-muted-foreground text-sm">
+        Loading admin control center…
+      </p>
     </main>
   );
 }
@@ -28,9 +30,8 @@ async function AdminLoader() {
 
   return (
     <AdminDashboard
-      initialStats={stats}
       initialProjects={projects}
-      adminEmail={adminEmail}
+      initialStats={stats}
       userEmail={session.user.email}
     />
   );
