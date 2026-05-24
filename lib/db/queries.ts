@@ -11,6 +11,7 @@ import {
   inArray,
   lt,
   type SQL,
+  sql,
 } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import type { ArtifactKind } from "@/components/chat/artifact";
@@ -872,19 +873,28 @@ export async function saveWorkflow({
 // Admin Analytics Queries
 export async function getAdminStats() {
   try {
-    const totalUsers = await db.select({ count: count() }).from(user);
-    const totalProjects = await db
-      .select({ count: count() })
-      .from(platformProject);
-    const totalMCPs = await db.select({ count: count() }).from(mcpServer);
+    const rows = (await db.execute(sql`
+      SELECT relname, GREATEST(reltuples::bigint, 0)::int AS estimate
+      FROM pg_class
+      WHERE relkind = 'r'
+        AND relname IN ('User', 'PlatformProject', 'McpServer')
+    `)) as Array<{ relname: string; estimate: number }>;
+
+    const estimates = new Map(
+      rows.map((row) => [row.relname, Number(row.estimate) || 0])
+    );
 
     return {
-      totalUsers: totalUsers[0]?.count || 0,
-      totalProjects: totalProjects[0]?.count || 0,
-      totalMCPs: totalMCPs[0]?.count || 0,
+      totalUsers: estimates.get("User") ?? 0,
+      totalProjects: estimates.get("PlatformProject") ?? 0,
+      totalMCPs: estimates.get("McpServer") ?? 0,
     };
   } catch (_error) {
-    throw new ChatbotError("bad_request:database", "Failed to get admin stats");
+    return {
+      totalUsers: 0,
+      totalProjects: 0,
+      totalMCPs: 0,
+    };
   }
 }
 
@@ -1040,6 +1050,17 @@ export async function setUserStripeCustomerId(
     .update(user)
     .set({ stripeCustomerId, updatedAt: new Date() })
     .where(eq(user.id, userId));
+}
+
+export async function updateUserName(userId: string, name: string | null) {
+  const normalized =
+    typeof name === "string" && name.trim().length > 0 ? name.trim() : null;
+  const [updated] = await db
+    .update(user)
+    .set({ name: normalized, updatedAt: new Date() })
+    .where(eq(user.id, userId))
+    .returning();
+  return updated ?? null;
 }
 
 export async function countUserConversionsThisMonth(userId: string) {

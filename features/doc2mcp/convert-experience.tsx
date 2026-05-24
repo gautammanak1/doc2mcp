@@ -15,10 +15,7 @@ import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
 import { ToolCard } from "@/components/doc2mcp/tool-card";
 import { Button } from "@/components/ui/button";
 import type { PlatformProject } from "@/lib/db/schema";
-import {
-  generateClaudeDesktopConfig,
-  generateCursorMcpJson,
-} from "@/services/mcp/generator";
+import { generateMcpExportBundle } from "@/services/mcp/exports";
 import type {
   CompressedTool,
   ProcessingLog,
@@ -97,12 +94,12 @@ export function ConvertExperience({
     URL.revokeObjectURL(url);
   };
 
-  const cursorConfig = artifacts?.mcpConfig
-    ? generateCursorMcpJson(artifacts.mcpConfig)
-    : "{}";
-  const claudeConfig = artifacts?.mcpConfig
-    ? generateClaudeDesktopConfig(artifacts.mcpConfig)
-    : "{}";
+  const exportBundle = artifacts?.mcpConfig
+    ? generateMcpExportBundle({
+        config: artifacts.mcpConfig,
+        generationReport: artifacts.generationReport,
+      })
+    : null;
 
   return (
     <div className="relative min-h-dvh">
@@ -311,22 +308,34 @@ export function ConvertExperience({
                 ) : null}
               </section>
 
-              <section className="grid gap-4 lg:grid-cols-2">
-                <ConfigPanel
-                  config={cursorConfig}
-                  onCopy={() => copyText(cursorConfig, "Cursor config")}
-                  onDownload={() => download("cursor-mcp.json", cursorConfig)}
-                  title="Cursor MCP"
-                />
-                <ConfigPanel
-                  config={claudeConfig}
-                  onCopy={() => copyText(claudeConfig, "Claude config")}
-                  onDownload={() =>
-                    download("claude-desktop.json", claudeConfig)
-                  }
-                  title="Claude Desktop"
-                />
-              </section>
+              {exportBundle ? (
+                <section className="space-y-4">
+                  <div>
+                    <h2 className="font-display font-semibold text-xl">
+                      One-click IDE exports
+                    </h2>
+                    <p className="mt-1 text-muted-foreground text-sm">
+                      Installable configs for Cursor, Claude Desktop, VSCode,
+                      Windsurf, OpenAI Agents SDK, hosted MCP endpoints, and
+                      validation reports.
+                    </p>
+                  </div>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    {exportBundle.artifacts.map((artifact) => (
+                      <ConfigPanel
+                        config={artifact.content}
+                        hint={artifact.installHint}
+                        key={artifact.id}
+                        onCopy={() => copyText(artifact.content, artifact.label)}
+                        onDownload={() =>
+                          download(artifact.filename, artifact.content)
+                        }
+                        title={artifact.label}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
 
               {/* API Graph */}
               {artifacts.graphNodes?.length > 0 && (
@@ -398,11 +407,13 @@ export function ConvertExperience({
 function ConfigPanel({
   title,
   config,
+  hint,
   onCopy,
   onDownload,
 }: {
   title: string;
   config: string;
+  hint?: string;
   onCopy: () => void;
   onDownload: () => void;
 }) {
@@ -419,6 +430,7 @@ function ConfigPanel({
           </Button>
         </div>
       </div>
+      {hint ? <p className="mt-2 text-muted-foreground text-xs">{hint}</p> : null}
       <pre className="mt-3 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 font-mono text-[10px]">
         {config}
       </pre>

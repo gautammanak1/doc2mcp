@@ -6,6 +6,7 @@ const PUBLIC_PATHS = [
   "/login",
   "/register",
   "/auth",
+  "/post-login",
   "/pricing",
   "/demo",
   "/api/auth",
@@ -16,6 +17,29 @@ const PUBLIC_PATHS = [
 ];
 
 const AUTH_PAGES = ["/login", "/register"];
+
+function splitEmails(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isAdminEmail(email: string | null | undefined): boolean {
+  if (!email) {
+    return false;
+  }
+
+  const configured = [
+    ...splitEmails(process.env.ADMIN_EMAILS),
+    ...splitEmails(process.env.ADMIN_EMAIL),
+    ...splitEmails(process.env.NEXT_PUBLIC_ADMIN_EMAIL),
+  ];
+  const adminEmails =
+    configured.length > 0 ? configured : ["doc2mcp@gmail.com"];
+
+  return adminEmails.includes(email.toLowerCase());
+}
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATHS.some(
@@ -55,11 +79,14 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  if (
-    pathname.startsWith("/admin") &&
-    (!user || user.email !== (process.env.ADMIN_EMAIL ?? "doc2mcp@gmail.com"))
-  ) {
+  if (pathname.startsWith("/admin") && (!user || !isAdminEmail(user.email))) {
     return NextResponse.redirect(new URL(`${base}/login`, request.url));
+  }
+
+  if (pathname.startsWith("/dashboard") && !user) {
+    const redirectUrl = new URL(`${base}/login`, request.url);
+    redirectUrl.searchParams.set("redirectUrl", pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
   return supabaseResponse;

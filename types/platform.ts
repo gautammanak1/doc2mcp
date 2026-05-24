@@ -31,6 +31,8 @@ export type CompressedTool = {
   description: string;
   parameters: Record<string, unknown>;
   endpoints: string[];
+  /** 0..100 confidence assigned by the MCP correctness layer. */
+  confidence?: number;
 };
 
 export type McpToolDefinition = {
@@ -78,6 +80,10 @@ export type CrawlResult = {
   title: string;
   content: string;
   type: "page" | "api" | "auth" | "workflow";
+  /** SHA-256 of raw content. Used for incremental sync / changed-page detection. */
+  contentHash?: string;
+  /** ISO timestamp of crawl. */
+  crawledAt?: string;
 };
 
 export type QualityScore = {
@@ -86,6 +92,34 @@ export type QualityScore = {
   workflowConfidence: number;
   mcpScore: number;
   explanation?: string;
+};
+
+export type GenerationReport = {
+  source: {
+    discoveredSpecUrl?: string;
+    extractionMode: "openapi" | "ai-html";
+  };
+  endpoints: {
+    inputCount: number;
+    uniqueCount: number;
+    collapsed: number;
+  };
+  tools: {
+    total: number;
+    kept: number;
+    dropped: number;
+    averageConfidence: number;
+  };
+  smoke: {
+    passed: number;
+    failed: number;
+  };
+  issues: Array<{
+    toolName: string;
+    severity: "error" | "warning";
+    code: string;
+    message: string;
+  }>;
 };
 
 export type ProjectArtifacts = {
@@ -103,6 +137,7 @@ export type ProjectArtifacts = {
   mcpTokenHash?: string;
   docsPageCount?: number;
   qualityScore?: QualityScore;
+  generationReport?: GenerationReport;
 };
 
 export type ProcessingLog = {

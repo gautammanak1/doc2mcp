@@ -1,9 +1,15 @@
 import { getAdminStats, getAllProjects } from "@/lib/db/queries";
 export async function AdminOverview() {
-  const [stats, projects] = await Promise.all([
+  const [statsResult, projectsResult] = await Promise.allSettled([
     getAdminStats(),
     getAllProjects(10),
   ]);
+  const stats =
+    statsResult.status === "fulfilled"
+      ? statsResult.value
+      : { totalUsers: 0, totalProjects: 0, totalMCPs: 0 };
+  const projects =
+    projectsResult.status === "fulfilled" ? projectsResult.value : [];
 
   let failedJobs = 0;
   let successfulJobs = 0;

@@ -66,6 +66,7 @@ const runMigrate = async () => {
   console.log("Running migrations...");
 
   const start = Date.now();
+  await connection`SET statement_timeout = 0`;
   await migrate(db, { migrationsFolder: "./lib/db/migrations" });
   const end = Date.now();
 

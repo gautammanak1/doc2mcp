@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { AdminShell } from "@/components/admin/admin-shell";
-import { CONTACT_EMAIL } from "@/lib/config/site";
+import { isAdminEmail } from "@/lib/admin/admin-access";
 
 function AdminLayoutFallback() {
   return (
@@ -16,13 +16,12 @@ function AdminLayoutFallback() {
 async function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   await connection();
   const session = await auth();
-  const adminEmail = process.env.ADMIN_EMAIL ?? CONTACT_EMAIL;
 
-  if (!session?.user?.email || session.user.email !== adminEmail) {
+  if (!isAdminEmail(session?.user?.email)) {
     redirect("/login?redirectUrl=/admin");
   }
 
-  return <AdminShell userEmail={session.user.email}>{children}</AdminShell>;
+  return <AdminShell userEmail={session?.user?.email ?? ""}>{children}</AdminShell>;
 }
 
 export default function AdminLayout({

@@ -82,9 +82,11 @@ export async function POST(request: Request) {
       ? selectedChatModel
       : DEFAULT_CHAT_MODEL;
 
-    await checkIpRateLimit(ipAddress(request));
-
     const userType: UserType = session.user.type;
+
+    if (userType === "guest") {
+      await checkIpRateLimit(ipAddress(request));
+    }
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,

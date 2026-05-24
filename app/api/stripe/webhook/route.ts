@@ -12,12 +12,35 @@ import {
   upsertSubscriptionFromStripe,
 } from "@/lib/db/queries";
 
+/**
+ * STRIPE_WEBHOOK_SECRET must be the `whsec_*` signing secret obtained from:
+ *   Stripe Dashboard → Developers → Webhooks → (your endpoint) → Signing secret
+ * It is NOT the webhook URL. A malformed secret silently breaks signature
+ * verification for every event, so we sanity-check the shape on each request
+ * and surface a clear configuration error instead of generic 400s.
+ */
+function isValidWebhookSecret(value: string | undefined): value is string {
+  return Boolean(value?.startsWith("whsec_") && value.length > 20);
+}
+
 export async function POST(request: Request) {
   const stripe = getStripe();
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-  if (!webhookSecret) {
-    return Response.json({ error: "Webhook not configured" }, { status: 500 });
+  if (!isValidWebhookSecret(webhookSecret)) {
+    const raw: string = process.env.STRIPE_WEBHOOK_SECRET ?? "";
+    const preview = raw.length > 0 ? `${raw.slice(0, 8)}…` : "(empty)";
+    console.error(
+      "STRIPE_WEBHOOK_SECRET is missing or malformed. Expected a value starting with `whsec_` from the Stripe Dashboard. Got:",
+      preview
+    );
+    return Response.json(
+      {
+        error:
+          "Webhook misconfigured: STRIPE_WEBHOOK_SECRET must be a whsec_* signing secret from the Stripe Dashboard, not the endpoint URL.",
+      },
+      { status: 500 }
+    );
   }
 
   const body = await request.text();

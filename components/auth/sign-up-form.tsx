@@ -51,7 +51,7 @@ export function SignUpForm({ className }: { className?: string }) {
       }
 
       if (data.session) {
-        router.push("/");
+        router.replace("/post-login");
         router.refresh();
         return;
       }

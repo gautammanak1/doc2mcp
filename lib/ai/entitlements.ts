@@ -9,6 +9,6 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
     maxMessagesPerHour: 10,
   },
   regular: {
-    maxMessagesPerHour: 10,
+    maxMessagesPerHour: Number.POSITIVE_INFINITY,
   },
 };

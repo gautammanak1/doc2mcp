@@ -217,3 +217,34 @@ export const subscription = pgTable("Subscription", {
 });
 
 export type Subscription = InferSelectModel<typeof subscription>;
+
+/**
+ * JobMetric — observability table for pipeline runs.
+ *
+ * One row per pipeline execution (per project, per retry). Used by the
+ * observability dashboard to compute success rates, latency percentiles,
+ * error-class distribution, and recent failures.
+ */
+export const jobMetric = pgTable("JobMetric", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  jobType: varchar("jobType", {
+    enum: ["pipeline", "crawl", "extract", "validate"],
+  }).notNull(),
+  projectId: uuid("projectId").references(() => platformProject.id, {
+    onDelete: "set null",
+  }),
+  userId: uuid("userId").references(() => user.id, { onDelete: "set null" }),
+  status: varchar("status", {
+    enum: ["queued", "running", "success", "failed", "cancelled"],
+  }).notNull(),
+  attempt: varchar("attempt", { length: 4 }).notNull().default("1"),
+  durationMs: varchar("durationMs", { length: 20 }),
+  errorClass: varchar("errorClass", { length: 64 }),
+  errorMessage: text("errorMessage"),
+  traceId: varchar("traceId", { length: 64 }),
+  metadata: json("metadata"),
+  startedAt: timestamp("startedAt").notNull().defaultNow(),
+  finishedAt: timestamp("finishedAt"),
+});
+
+export type JobMetric = InferSelectModel<typeof jobMetric>;

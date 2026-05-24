@@ -54,12 +54,6 @@ export class EntitlementError extends Error {
 export async function assertCanStartConversion(userId: string) {
   const plan = await getUserPlan(userId);
 
-  if (plan.planId === "free") {
-    throw new EntitlementError(
-      "An active subscription is required. Choose a plan at /pricing."
-    );
-  }
-
   const limit = plan.entitlements.mcpConversionsPerMonth;
   if (limit < 0) {
     return plan;

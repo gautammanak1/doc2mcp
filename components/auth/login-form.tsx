@@ -18,7 +18,10 @@ export function LoginForm({ className }: { className?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirectUrl") ?? "/";
+  const explicitRedirect = searchParams.get("redirectUrl");
+  const postLoginUrl = explicitRedirect
+    ? `/post-login?redirectUrl=${encodeURIComponent(explicitRedirect)}`
+    : "/post-login";
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -35,7 +38,7 @@ export function LoginForm({ className }: { className?: string }) {
         throw signInError;
       }
 
-      router.push(redirectUrl);
+      router.replace(postLoginUrl);
       router.refresh();
     } catch (loginError: unknown) {
       setError(
@@ -55,7 +58,7 @@ export function LoginForm({ className }: { className?: string }) {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/oauth?next=${encodeURIComponent(redirectUrl)}`,
+          redirectTo: `${window.location.origin}/auth/oauth?next=${encodeURIComponent(postLoginUrl)}`,
         },
       });
       if (oauthError) {

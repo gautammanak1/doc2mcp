@@ -6,7 +6,10 @@ import type {
   ProcessingLog,
   QualityScore,
 } from "@/types/platform";
+import { dedupeEndpoints } from "../extraction/endpoint-dedupe";
+import { extractEndpointsFromOpenApi } from "../extraction/openapi-endpoint-extractor";
 import { generateLlmsTxt } from "../generators/llms-txt";
+import { parseOpenApiText } from "../ingestion/openapi-source";
 import { compressApiToTools } from "./tool-compression";
 
 function buildAnalysisPrompt(crawlResults: CrawlResult[]): string {
@@ -48,12 +51,43 @@ export type AnalysisResult = {
   compressedTools: CompressedTool[];
   llmsTxt: string;
   qualityScore: QualityScore;
+  extractionMode: "openapi" | "ai-html";
+  dedupeReport: {
+    inputCount: number;
+    uniqueCount: number;
+    collapsed: number;
+  };
   tokenUsage?: {
     prompt_tokens: number;
     completion_tokens: number;
     total_tokens: number;
   };
 };
+
+/**
+ * Reconstruct an OpenAPI spec text from the first CrawlResult if it carries
+ * one (the discovery layer stores the raw spec text in the overview content).
+ * Returns null if no spec text is detected.
+ */
+function tryExtractOpenApiFromCrawl(
+  crawlResults: CrawlResult[]
+): ApiEndpoint[] | null {
+  for (const result of crawlResults) {
+    const head = result.content.trimStart().slice(0, 200);
+    if (
+      !(head.startsWith("{") && /"(openapi|swagger)"\s*:/.test(head)) &&
+      !/^(openapi|swagger)\s*:\s*['"]?[0-9]/m.test(head)
+    ) {
+      continue;
+    }
+    const spec = parseOpenApiText(result.content);
+    if (!spec?.paths || Object.keys(spec.paths).length === 0) {
+      continue;
+    }
+    return extractEndpointsFromOpenApi(spec);
+  }
+  return null;
+}
 
 export async function analyzeDocumentation(
   crawlResults: CrawlResult[],
@@ -71,18 +105,10 @@ export async function analyzeDocumentation(
     });
   };
 
-  log("Sending documentation to ASI1 for analysis...");
-
-  const { text, usage } = await asi1GenerateText([
-    {
-      role: "system",
-      content:
-        "You are a world-class API architect. Extract precise API structures from documentation. Always return valid JSON only.",
-    },
-    { role: "user", content: buildAnalysisPrompt(crawlResults) },
-  ]);
-
-  log("Parsing AI analysis results...", "success");
+  const openApiEndpoints = tryExtractOpenApiFromCrawl(crawlResults);
+  const extractionMode: "openapi" | "ai-html" = openApiEndpoints
+    ? "openapi"
+    : "ai-html";
 
   let parsed: {
     summary?: string;
@@ -91,22 +117,49 @@ export async function analyzeDocumentation(
     workflows?: Array<{ name: string; steps: string[] }>;
     useCases?: string[];
     qualityScore?: QualityScore;
-  };
+  } = {};
 
-  try {
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    parsed = JSON.parse(jsonMatch?.[0] ?? "{}");
-  } catch {
+  let usage: AnalysisResult["tokenUsage"];
+
+  if (openApiEndpoints) {
+    log(
+      `Found verified OpenAPI spec — extracted ${openApiEndpoints.length} endpoints deterministically (skipping AI extraction).`,
+      "success"
+    );
     parsed = {
-      summary: "API documentation analyzed",
-      endpoints: [],
+      summary: `${projectName} API reference`,
+      endpoints: openApiEndpoints,
       authPatterns: [],
       workflows: [],
       useCases: [],
     };
+  } else {
+    log("Sending documentation to ASI1 for analysis...");
+    const aiResult = await asi1GenerateText([
+      {
+        role: "system",
+        content:
+          "You are a world-class API architect. Extract precise API structures from documentation. Always return valid JSON only.",
+      },
+      { role: "user", content: buildAnalysisPrompt(crawlResults) },
+    ]);
+    usage = aiResult.usage;
+    log("Parsing AI analysis results...", "success");
+    try {
+      const jsonMatch = aiResult.text.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(jsonMatch?.[0] ?? "{}");
+    } catch {
+      parsed = {
+        summary: "API documentation analyzed",
+        endpoints: [],
+        authPatterns: [],
+        workflows: [],
+        useCases: [],
+      };
+    }
   }
 
-  const endpoints: ApiEndpoint[] = (parsed.endpoints ?? []).map((e, i) => ({
+  const rawEndpoints: ApiEndpoint[] = (parsed.endpoints ?? []).map((e, i) => ({
     id: `endpoint-${i}`,
     method: e.method ?? "GET",
     path: e.path ?? "/",
@@ -115,6 +168,14 @@ export async function analyzeDocumentation(
     auth: e.auth as ApiEndpoint["auth"],
     tags: e.tags,
   }));
+
+  const { endpoints, report: dedupeReport } = dedupeEndpoints(rawEndpoints);
+  if (dedupeReport.collapsed > 0) {
+    log(
+      `Deduplicated ${dedupeReport.collapsed} endpoint(s) → ${dedupeReport.uniqueCount} unique`,
+      "info"
+    );
+  }
 
   log(`Detected ${endpoints.length} API endpoints`, "success");
   log("Compressing API into AI-native tools...");
@@ -157,6 +218,8 @@ export async function analyzeDocumentation(
     compressedTools,
     llmsTxt,
     qualityScore,
+    extractionMode,
+    dedupeReport,
     tokenUsage: usage,
   };
 }

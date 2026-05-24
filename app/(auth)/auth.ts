@@ -7,25 +7,22 @@ export { createClient as getSupabaseClient } from "@/lib/supabase/server";
 
 import { guestRegex } from "@/lib/constants";
 import { ensureAppUserFromSupabase } from "@/lib/db/queries";
+import { getSafeUser } from "@/lib/supabase/safe-session";
 import { createClient } from "@/lib/supabase/server";
 
 export async function auth() {
   const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const user = await getSafeUser(supabase);
 
-  if (!session?.user?.email) {
+  if (!user?.email) {
     return null;
   }
 
   const appUser = await ensureAppUserFromSupabase({
-    id: session.user.id,
-    email: session.user.email,
-    name: session.user.user_metadata?.name,
-    image:
-      session.user.user_metadata?.avatar_url ??
-      session.user.user_metadata?.image,
+    id: user.id,
+    email: user.email,
+    name: user.user_metadata?.name,
+    image: user.user_metadata?.avatar_url ?? user.user_metadata?.image,
   });
 
   if (appUser.disabled) {
@@ -40,8 +37,8 @@ export async function auth() {
     user: {
       id: appUser.id,
       email: appUser.email,
-      name: appUser.name ?? session.user.user_metadata?.name,
-      image: appUser.image ?? session.user.user_metadata?.image,
+      name: appUser.name ?? user.user_metadata?.name,
+      image: appUser.image ?? user.user_metadata?.image,
       type: userType,
     },
   };

@@ -1,6 +1,11 @@
 "use client";
 
-import { ChevronUp } from "lucide-react";
+import {
+  ChevronUp,
+  LayoutDashboard,
+  ShieldCheck,
+  UserCircle,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
@@ -15,6 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { isAdminEmail } from "@/lib/admin/admin-access";
 import { guestRegex } from "@/lib/constants";
 import { useSupabaseAuth } from "@/lib/supabase/auth";
 import { LoaderIcon } from "./icons";
@@ -34,6 +40,7 @@ export function SidebarUserNav() {
   const { setTheme, resolvedTheme } = useTheme();
 
   const isGuest = user ? guestRegex.test(user.email ?? "") : false;
+  const isAdmin = !isGuest && isAdminEmail(user?.email);
 
   return (
     <SidebarMenu>
@@ -75,6 +82,33 @@ export function SidebarUserNav() {
             data-testid="user-nav-menu"
             side="top"
           >
+            {isGuest ? null : (
+              <>
+                <DropdownMenuItem
+                  className="cursor-pointer gap-2 text-[13px]"
+                  data-testid="user-nav-item-dashboard"
+                  onSelect={() =>
+                    router.push(isAdmin ? "/admin" : "/dashboard")
+                  }
+                >
+                  {isAdmin ? (
+                    <ShieldCheck className="size-3.5" />
+                  ) : (
+                    <LayoutDashboard className="size-3.5" />
+                  )}
+                  {isAdmin ? "Admin dashboard" : "Dashboard"}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer gap-2 text-[13px]"
+                  data-testid="user-nav-item-profile"
+                  onSelect={() => router.push("/dashboard/profile")}
+                >
+                  <UserCircle className="size-3.5" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               className="cursor-pointer text-[13px]"
               data-testid="user-nav-item-theme"

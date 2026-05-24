@@ -1,22 +1,23 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { Suspense, useEffect } from "react";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { auth } from "@/app/(auth)/auth";
 import { LoginForm } from "@/components/auth/login-form";
-import { useSupabaseAuth } from "@/lib/supabase/auth";
+import { isAdminEmail } from "@/lib/admin/admin-access";
 
-function LoginContent() {
-  const router = useRouter();
-  const { user, loading } = useSupabaseAuth();
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ redirectUrl?: string }>;
+}) {
+  await connection();
+  const { redirectUrl } = await searchParams;
+  const session = await auth();
 
-  useEffect(() => {
-    if (!loading && user) {
-      router.replace("/");
+  if (session?.user?.email) {
+    if (redirectUrl?.startsWith("/") && !redirectUrl.startsWith("//")) {
+      redirect(redirectUrl);
     }
-  }, [user, loading, router]);
-
-  if (loading) {
-    return <p className="text-muted-foreground">Loading...</p>;
+    redirect(isAdminEmail(session.user.email) ? "/admin" : "/chat");
   }
 
   return (
@@ -27,13 +28,5 @@ function LoginContent() {
       </p>
       <LoginForm />
     </>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense fallback={<p className="text-muted-foreground">Loading...</p>}>
-      <LoginContent />
-    </Suspense>
   );
 }

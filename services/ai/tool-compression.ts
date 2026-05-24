@@ -1,22 +1,9 @@
 import { asi1GenerateText } from "@/lib/asi1/client";
 import type { ApiEndpoint, CompressedTool } from "@/types/platform";
-
-function groupEndpointsByResource(
-  endpoints: ApiEndpoint[]
-): Record<string, ApiEndpoint[]> {
-  const groups: Record<string, ApiEndpoint[]> = {};
-
-  for (const endpoint of endpoints) {
-    const segments = endpoint.path.split("/").filter(Boolean);
-    const resource = segments.at(0) ?? "default";
-    if (!groups[resource]) {
-      groups[resource] = [];
-    }
-    groups[resource].push(endpoint);
-  }
-
-  return groups;
-}
+import {
+  groupEndpoints,
+  renderGroupsForPrompt,
+} from "../extraction/endpoint-grouping";
 
 export async function compressApiToTools(
   endpoints: ApiEndpoint[],
@@ -59,22 +46,27 @@ export async function compressApiToTools(
     ];
   }
 
-  const grouped = groupEndpointsByResource(endpoints);
-  const endpointList = endpoints
-    .map((e) => `${e.method} ${e.path}${e.summary ? ` - ${e.summary}` : ""}`)
-    .join("\n");
+  const groups = groupEndpoints(endpoints);
+  const groupsPrompt = renderGroupsForPrompt(groups);
 
   const { text } = await asi1GenerateText([
     {
       role: "system",
-      content: `You compress REST APIs into human-friendly AI tools. Instead of raw HTTP endpoints, create semantic function names like create_customer(), list_orders(), authenticate_user().
+      content: `You compress REST APIs into human-friendly AI tools.
 
-Return ONLY valid JSON array:
-[{"name": "create_customer", "description": "Create a new customer", "parameters": {"type":"object","properties":{...},"required":[]}, "endpoints": ["POST /customers"]}]`,
+Rules:
+- One tool per resource action (e.g. create_customer, list_customers, update_customer).
+- Tool names: snake_case, 2-4 segments, ASCII letters/digits/underscores only, max 48 chars.
+- Each tool MUST map to ≥ 1 real endpoint listed below — never invent endpoints.
+- Each tool MUST have a JSON Schema inputSchema with type: "object" and concrete properties (id, query, body, …) inferred from the endpoint paths and methods.
+- If you cannot infer a useful tool for a group, skip it. Quality over quantity.
+
+Return ONLY a valid JSON array of:
+{"name": "create_customer", "description": "Create a new customer record.", "parameters": {"type":"object","properties":{"name":{"type":"string"},"email":{"type":"string"}},"required":["name"]}, "endpoints": ["POST /customers"]}`,
     },
     {
       role: "user",
-      content: `Compress these ${projectName} API endpoints into 5-15 semantic AI tools:\n\n${endpointList}\n\nResource groups: ${Object.keys(grouped).join(", ")}`,
+      content: `Compress these ${projectName} API endpoints into 5-20 semantic AI tools, grouped by resource:\n\n${groupsPrompt}\n\nReturn ONLY the JSON array.`,
     },
   ]);
 

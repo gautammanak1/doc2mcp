@@ -69,8 +69,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 };
 
 export const FREE_ENTITLEMENTS: PlanEntitlements = {
-  mcpConversionsPerMonth: 0,
-  maxPagesPerSite: 0,
+  mcpConversionsPerMonth: 20,
+  maxPagesPerSite: 80,
   privateProjects: false,
   recrawlHours: null,
   teammates: 1,

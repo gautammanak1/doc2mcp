@@ -1,22 +1,15 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
+import { auth } from "@/app/(auth)/auth";
 import { SignUpForm } from "@/components/auth/sign-up-form";
-import { useSupabaseAuth } from "@/lib/supabase/auth";
+import { isAdminEmail } from "@/lib/admin/admin-access";
 
-export default function Page() {
-  const router = useRouter();
-  const { user, loading } = useSupabaseAuth();
+export default async function RegisterPage() {
+  await connection();
+  const session = await auth();
 
-  useEffect(() => {
-    if (!loading && user) {
-      router.replace("/");
-    }
-  }, [user, loading, router]);
-
-  if (loading) {
-    return <p className="text-muted-foreground">Loading...</p>;
+  if (session?.user?.email) {
+    redirect(isAdminEmail(session.user.email) ? "/admin" : "/chat");
   }
 
   return (

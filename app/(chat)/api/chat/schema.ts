@@ -15,7 +15,7 @@ const filePartSchema = z.object({
 const partSchema = z.union([textPartSchema, filePartSchema]);
 
 const userMessageSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1),
   role: z.enum(["user"]),
   parts: z.array(partSchema),
 });
@@ -27,7 +27,7 @@ const toolApprovalMessageSchema = z.object({
 });
 
 export const postRequestBodySchema = z.object({
-  id: z.string().uuid(),
+  id: z.string().min(1),
   message: userMessageSchema.optional(),
   messages: z.array(toolApprovalMessageSchema).optional(),
   selectedChatModel: z.string(),

@@ -1,6 +1,15 @@
+import { recordJobFinish, recordJobStart } from "@/lib/db/job-metrics";
 import { createMcpServerRecord, updatePlatformProject } from "@/lib/db/queries";
+import { DOC_MCP_TOOL_NAMES } from "@/lib/doc2mcp/doc-tools-registry";
 import { createMcpProjectToken, hashMcpToken } from "@/lib/doc2mcp/mcp-access";
+import { createLogger } from "@/lib/observability/logger";
+import {
+  addSpanAttributes,
+  currentTraceId,
+  withSpan,
+} from "@/lib/observability/tracing";
 import type {
+  GenerationReport,
   ProcessingLog,
   ProjectArtifacts,
   SourceType,
@@ -8,14 +17,67 @@ import type {
 import { analyzeDocumentation } from "../ai/understanding";
 import { buildApiGraph } from "../graph/builder";
 import { crawlDocsSource } from "../ingestion/crawler";
+import { smokeTestTools } from "../mcp/correctness";
 import {
   generateClaudeDesktopConfig,
   generateCursorMcpJson,
   generateMcpConfig,
   generateMcpServerCode,
 } from "../mcp/generator";
+import { validateMcpTools } from "../mcp/validator";
 
-export async function processProjectPipeline({
+const log = createLogger("pipeline");
+
+function classifyError(err: unknown): string {
+  if (!err) {
+    return "unknown";
+  }
+  if (err instanceof Error) {
+    if (err.name && err.name !== "Error") {
+      return err.name;
+    }
+    const msg = err.message ?? "";
+    if (/timeout/i.test(msg)) {
+      return "TimeoutError";
+    }
+    if (/ECONN|ENOTFOUND|EHOSTUNREACH|fetch failed/i.test(msg)) {
+      return "NetworkError";
+    }
+    if (/rate.?limit|429/i.test(msg)) {
+      return "RateLimitError";
+    }
+    if (/401|unauthor/i.test(msg)) {
+      return "AuthError";
+    }
+    if (/parse|invalid (json|yaml|spec)/i.test(msg)) {
+      return "ParseError";
+    }
+    return "PipelineError";
+  }
+  return "UnknownError";
+}
+
+export async function processProjectPipeline(args: {
+  projectId: string;
+  userId: string;
+  sourceUrl: string;
+  sourceType: SourceType;
+  projectName: string;
+}) {
+  return await withSpan(
+    "pipeline.run",
+    {
+      attributes: {
+        "doc2mcp.project_id": args.projectId,
+        "doc2mcp.source_type": args.sourceType,
+        "doc2mcp.source_url": args.sourceUrl,
+      },
+    },
+    () => runPipeline(args)
+  );
+}
+
+async function runPipeline({
   projectId,
   userId,
   sourceUrl,
@@ -29,6 +91,17 @@ export async function processProjectPipeline({
   projectName: string;
 }) {
   const logs: ProcessingLog[] = [];
+  const startMs = performance.now();
+  const traceId = currentTraceId();
+  const jobLog = log.child(`run.${projectId.slice(0, 8)}`);
+  const metricId = await recordJobStart({
+    jobType: "pipeline",
+    projectId,
+    userId,
+    traceId,
+    metadata: { sourceType, sourceUrl, projectName },
+  });
+
   const addLog = (
     message: string,
     level: ProcessingLog["level"] = "info",
@@ -42,10 +115,18 @@ export async function processProjectPipeline({
       phase,
     };
     logs.push(entry);
+    if (level === "error") {
+      jobLog.error(`phase.${phase ?? "unknown"}`, undefined, { message });
+    } else if (level === "warn") {
+      jobLog.warn(`phase.${phase ?? "unknown"}`, { message });
+    } else {
+      jobLog.info(`phase.${phase ?? "unknown"}`, { message });
+    }
     return entry;
   };
 
   try {
+    jobLog.info("pipeline.start", { sourceType, sourceUrl, projectName });
     await updatePlatformProject({
       id: projectId,
       userId,
@@ -53,7 +134,12 @@ export async function processProjectPipeline({
     });
 
     addLog("Starting documentation crawl...", "info", "crawl");
-    const crawlResults = await crawlDocsSource(sourceUrl, sourceType);
+    const crawlResults = await withSpan(
+      "pipeline.crawl",
+      { attributes: { "doc2mcp.source_type": sourceType } },
+      () => crawlDocsSource(sourceUrl, sourceType)
+    );
+    addSpanAttributes({ "doc2mcp.pages_crawled": crawlResults.length });
     addLog(`Crawled ${crawlResults.length} pages`, "success", "crawl");
 
     await updatePlatformProject({
@@ -63,12 +149,22 @@ export async function processProjectPipeline({
     });
 
     addLog("Analyzing documentation with ASI1...", "info", "ai");
-    const analysis = await analyzeDocumentation(
-      crawlResults,
-      projectName,
-      sourceUrl,
-      (log) => logs.push(log)
+    const analysis = await withSpan(
+      "pipeline.analyze",
+      { attributes: { "doc2mcp.page_count": crawlResults.length } },
+      () =>
+        analyzeDocumentation(crawlResults, projectName, sourceUrl, (l) =>
+          logs.push(l)
+        )
     );
+    addSpanAttributes({
+      "doc2mcp.endpoints_detected": analysis.endpoints.length,
+      "doc2mcp.tools_compressed": analysis.compressedTools.length,
+      "doc2mcp.extraction_mode": analysis.extractionMode,
+      "doc2mcp.tokens.prompt": analysis.tokenUsage?.prompt_tokens ?? 0,
+      "doc2mcp.tokens.completion": analysis.tokenUsage?.completion_tokens ?? 0,
+      "doc2mcp.tokens.total": analysis.tokenUsage?.total_tokens ?? 0,
+    });
 
     await updatePlatformProject({
       id: projectId,
@@ -80,13 +176,72 @@ export async function processProjectPipeline({
     const mcpAccessToken = createMcpProjectToken();
     const mcpTokenHash = hashMcpToken(mcpAccessToken);
 
-    const mcpConfig = generateMcpConfig({
+    const draftMcpConfig = generateMcpConfig({
       projectId,
       sourceUrl,
       projectName,
       mcpAccessToken,
       compressedTools: analysis.compressedTools,
     });
+
+    addLog(
+      "Validating MCP tool schemas + confidence scoring...",
+      "info",
+      "validate"
+    );
+    const validation = validateMcpTools(draftMcpConfig.tools, {
+      compressed: analysis.compressedTools,
+      builtinNames: DOC_MCP_TOOL_NAMES,
+    });
+    const keptCompressed = analysis.compressedTools
+      .filter((t) =>
+        validation.results.find((r) => r.tool.name === t.name && !r.dropped)
+      )
+      .map((t) => ({
+        ...t,
+        confidence:
+          validation.results.find((r) => r.tool.name === t.name)?.confidence ??
+          0,
+      }));
+
+    if (validation.report.dropped > 0) {
+      addLog(
+        `Dropped ${validation.report.dropped} low-confidence / invalid tool(s)`,
+        "warn",
+        "validate"
+      );
+    }
+    addLog(
+      `Kept ${validation.report.kept} tools (avg confidence ${validation.report.averageConfidence}%)`,
+      "success",
+      "validate"
+    );
+
+    const mcpConfig = generateMcpConfig({
+      projectId,
+      sourceUrl,
+      projectName,
+      mcpAccessToken,
+      compressedTools: keptCompressed,
+    });
+
+    addLog("Running MCP runtime smoke tests...", "info", "smoke");
+    const smoke = smokeTestTools(mcpConfig.tools, keptCompressed, {
+      pages: crawlResults,
+    });
+    if (smoke.failed > 0) {
+      addLog(
+        `${smoke.failed} tool(s) failed smoke tests — see report`,
+        "warn",
+        "smoke"
+      );
+    } else {
+      addLog(
+        `All ${smoke.passed} tools passed smoke tests`,
+        "success",
+        "smoke"
+      );
+    }
 
     addLog("Building API graph visualization...", "info", "graph");
     const { nodes, edges } = buildApiGraph(
@@ -96,9 +251,31 @@ export async function processProjectPipeline({
 
     const mcpServerCode = generateMcpServerCode(mcpConfig);
 
+    const generationReport: GenerationReport = {
+      source: {
+        extractionMode: analysis.extractionMode,
+        discoveredSpecUrl:
+          analysis.extractionMode === "openapi"
+            ? crawlResults[0]?.url
+            : undefined,
+      },
+      endpoints: analysis.dedupeReport,
+      tools: {
+        total: validation.report.total,
+        kept: validation.report.kept,
+        dropped: validation.report.dropped,
+        averageConfidence: validation.report.averageConfidence,
+      },
+      smoke: {
+        passed: smoke.passed,
+        failed: smoke.failed,
+      },
+      issues: validation.report.issues,
+    };
+
     const artifacts: ProjectArtifacts = {
       endpoints: analysis.endpoints,
-      compressedTools: analysis.compressedTools,
+      compressedTools: keptCompressed,
       mcpConfig,
       llmsTxt: analysis.llmsTxt,
       sdkTypescript: "",
@@ -109,6 +286,7 @@ export async function processProjectPipeline({
       mcpTokenHash,
       docsPageCount: crawlResults.length,
       qualityScore: analysis.qualityScore,
+      generationReport,
       cursorConfig: {
         mcp: JSON.parse(generateCursorMcpJson(mcpConfig)),
         claude: JSON.parse(generateClaudeDesktopConfig(mcpConfig)),
@@ -125,7 +303,7 @@ export async function processProjectPipeline({
     });
 
     addLog(
-      `Ready — ${crawlResults.length} pages in MCP. Copy token from result page.`,
+      `Ready — ${crawlResults.length} pages, ${keptCompressed.length} validated tools (${analysis.extractionMode} extraction).`,
       "success",
       "done"
     );
@@ -141,14 +319,43 @@ export async function processProjectPipeline({
       },
     });
 
+    const durationMs = performance.now() - startMs;
+    await recordJobFinish({
+      id: metricId,
+      status: "success",
+      durationMs,
+      metadata: {
+        pages: crawlResults.length,
+        tools: keptCompressed.length,
+        avgConfidence: validation.report.averageConfidence,
+        smokeFailed: smoke.failed,
+        extractionMode: analysis.extractionMode,
+        tokens: analysis.tokenUsage,
+      },
+    });
+    jobLog.info("pipeline.success", {
+      durationMs: Math.round(durationMs),
+      pages: crawlResults.length,
+      tools: keptCompressed.length,
+    });
+
     return { success: true, artifacts };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    const errorClass = classifyError(error);
     addLog(`Pipeline failed: ${message}`, "error", "error");
+    jobLog.error("pipeline.failed", error, { errorClass });
     await updatePlatformProject({
       id: projectId,
       userId,
       data: { status: "error", logs },
+    });
+    await recordJobFinish({
+      id: metricId,
+      status: "failed",
+      durationMs: performance.now() - startMs,
+      errorClass,
+      errorMessage: message,
     });
     throw error;
   }

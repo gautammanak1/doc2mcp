@@ -1,8 +1,13 @@
 import { parseGitHubRepoUrl } from "@/lib/doc2mcp/detect-source-type";
 import { discoverExtraDocUrls } from "@/lib/search/discover";
 import type { CrawlResult, SourceType } from "@/types/platform";
+import { CrawlQueue } from "./crawl-queue";
 import { crawlGitHubRepo } from "./github-source";
+import { discoverOpenApiSpec } from "./openapi-discovery";
 import { expandOpenApiSpec, parseOpenApiText } from "./openapi-source";
+import { contentHash, DuplicateFilter } from "./page-dedupe";
+import { fetchRobotsRules, isPathAllowed } from "./robots";
+import { discoverSitemapUrls } from "./sitemap";
 
 const MAX_PAGES = 80;
 const PER_PAGE_CHARS = 50_000;
@@ -746,6 +751,14 @@ export async function crawlDocsSource(
   }
 
   const normalizedSourceUrl = await normalizeDocsUrl(sourceUrl);
+
+  if (sourceType === "url") {
+    const specCrawl = await discoverOpenApiSpec(normalizedSourceUrl);
+    if (specCrawl.length > 0) {
+      return specCrawl;
+    }
+  }
+
   const sourceOrigin = (() => {
     try {
       return new URL(normalizedSourceUrl).origin;
@@ -762,59 +775,97 @@ export async function crawlDocsSource(
     }
   })();
 
-  const visited = new Set<string>();
-  const queue: string[] = [];
+  const robots = sourceOrigin
+    ? await fetchRobotsRules(sourceOrigin)
+    : { allow: [], disallow: [], sitemaps: [], crawlDelayMs: 0 };
+
+  const queue = new CrawlQueue(sourceOrigin || "", {
+    maxDepth: 4,
+    sameOrigin: true,
+    sourcePathPrefix: sourcePath,
+  });
+  queue.enqueue({ url: normalizedSourceUrl, depth: 0, baseScore: 100 });
 
   if (sourceOrigin) {
-    const manifest = await fetchLlmsManifest(sourceOrigin);
-    for (const url of manifest) {
-      queue.push(url);
+    const sitemapUrls = await discoverSitemapUrls(
+      sourceOrigin,
+      robots.sitemaps
+    );
+    for (const url of sitemapUrls) {
+      queue.enqueue({ url, depth: 1 });
     }
 
-    if (manifest.length === 0) {
-      const fromSearch = await discoverExtraDocUrls(sourceOrigin);
-      for (const url of fromSearch) {
-        queue.push(url);
+    if (sitemapUrls.length === 0) {
+      const manifest = await fetchLlmsManifest(sourceOrigin);
+      for (const url of manifest) {
+        queue.enqueue({ url, depth: 1 });
+      }
+
+      if (manifest.length === 0) {
+        const fromSearch = await discoverExtraDocUrls(sourceOrigin);
+        for (const url of fromSearch) {
+          queue.enqueue({ url, depth: 1 });
+        }
       }
     }
   }
-  queue.push(normalizedSourceUrl);
 
+  const dedupe = new DuplicateFilter();
   const results: CrawlResult[] = [];
   const seenTitles = new Map<string, number>();
 
-  while (queue.length > 0 && results.length < MAX_PAGES) {
-    const url = queue.shift();
-    if (!url || visited.has(url)) {
-      continue;
+  while (results.length < MAX_PAGES) {
+    const entry = queue.dequeue();
+    if (!entry) {
+      break;
     }
-    visited.add(url);
 
-    const doc = await fetchOneDoc(url);
+    if (entry.url !== normalizedSourceUrl) {
+      try {
+        const pathname = new URL(entry.url).pathname;
+        if (!isPathAllowed(robots, pathname)) {
+          continue;
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    const doc = await fetchOneDoc(entry.url);
     if (!doc || doc.content.trim().length < 80) {
       continue;
     }
 
-    let title = doc.title || titleFromUrl(url);
+    if (dedupe.isDuplicate(entry.url, doc.content)) {
+      continue;
+    }
+
+    let title = doc.title || titleFromUrl(entry.url);
     const titleKey = title.toLowerCase().trim();
     const count = (seenTitles.get(titleKey) ?? 0) + 1;
     seenTitles.set(titleKey, count);
     if (count > 1) {
-      title = `${title} — ${titleFromUrl(url)}`;
+      title = `${title} — ${titleFromUrl(entry.url)}`;
     }
 
+    const content = doc.content.slice(0, PER_PAGE_CHARS);
     results.push({
-      url,
+      url: entry.url,
       title,
-      content: doc.content.slice(0, PER_PAGE_CHARS),
-      type: detectPageType(doc.content, url),
+      content,
+      type: detectPageType(doc.content, entry.url),
+      contentHash: contentHash(content),
+      crawledAt: new Date().toISOString(),
     });
 
-    // Only follow links from HTML pages (markdown sources don't have nav)
+    if (robots.crawlDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, robots.crawlDelayMs));
+    }
+
     const html =
       (doc as { html?: string }).html ??
       (await (async () => {
-        const fallback = await fetchPageHtml(url);
+        const fallback = await fetchPageHtml(entry.url);
         return fallback?.html;
       })());
 
@@ -822,36 +873,12 @@ export async function crawlDocsSource(
       continue;
     }
 
-    const links = extractLinks(html, url);
-    const priority: string[] = [];
-    const regular: string[] = [];
-
+    const links = extractLinks(html, entry.url);
     for (const link of links) {
-      if (visited.has(link) || queue.includes(link)) {
-        continue;
-      }
       if (!isDocLink(link, sourcePath)) {
         continue;
       }
-      const lower = link.toLowerCase();
-      if (
-        lower.includes("/api") ||
-        lower.includes("/reference") ||
-        lower.includes("/sdk") ||
-        lower.endsWith(".md") ||
-        lower.endsWith(".mdx")
-      ) {
-        priority.push(link);
-      } else {
-        regular.push(link);
-      }
-    }
-
-    for (const link of [...priority, ...regular]) {
-      if (queue.length >= MAX_PAGES * 3) {
-        break;
-      }
-      queue.push(link);
+      queue.enqueue({ url: link, depth: entry.depth + 1 });
     }
   }
 
