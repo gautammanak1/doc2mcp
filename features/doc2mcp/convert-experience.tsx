@@ -1,7 +1,15 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Check, Copy, Download, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Brain,
+  Check,
+  Copy,
+  Download,
+  Loader2,
+  Workflow,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -20,6 +28,7 @@ import type {
   CompressedTool,
   ProcessingLog,
   ProjectArtifacts,
+  SuggestedWorkflow,
 } from "@/types/platform";
 
 const PIPELINE_STEPS = [
@@ -114,7 +123,7 @@ export function ConvertExperience({
             <ThemeToggle />
             <Link
               className="flex items-center gap-1 text-muted-foreground text-sm hover:text-foreground"
-              href="/"
+              href="/chat"
             >
               <ArrowLeft className="size-3.5" />
               New conversion
@@ -216,6 +225,62 @@ export function ConvertExperience({
                   )}
                 </section>
               )}
+
+              {artifacts.workflows && artifacts.workflows.length > 0 ? (
+                <section className="glass-card rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="flex items-center gap-2 font-mono text-emerald-300 text-xs uppercase tracking-wider">
+                        <Workflow className="size-3.5" />
+                        Workflow AI Engine
+                      </p>
+                      <h2 className="mt-2 font-display font-semibold text-xl text-white">
+                        Suggested AI Workflows
+                      </h2>
+                      <p className="mt-1 text-muted-foreground text-sm">
+                        Inferred from docs, endpoint relationships, auth
+                        signals, and semantic MCP tools.
+                      </p>
+                    </div>
+                    {artifacts.workflowDetection ? (
+                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-right">
+                        <p className="font-mono text-[10px] text-emerald-300 uppercase">
+                          Confidence
+                        </p>
+                        <p className="mt-1 font-display font-semibold text-2xl text-emerald-200">
+                          {artifacts.workflowDetection.confidence}%
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                    {artifacts.workflows.map((workflow) => (
+                      <WorkflowCard key={workflow.id} workflow={workflow} />
+                    ))}
+                  </div>
+
+                  {artifacts.workflowDetection?.recommendations.length ? (
+                    <div className="mt-5 rounded-xl border border-white/5 bg-white/5 p-4">
+                      <p className="mb-2 flex items-center gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                        <Brain className="size-3.5 text-violet-300" />
+                        AI recommendations
+                      </p>
+                      <ul className="space-y-1.5 text-muted-foreground text-xs">
+                        {artifacts.workflowDetection.recommendations.map(
+                          (recommendation) => (
+                            <li className="flex gap-2" key={recommendation}>
+                              <span className="text-emerald-300">•</span>
+                              <span>{recommendation}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
+
               {/* Compressed tools */}
               <section>
                 <div className="mb-4 flex items-center justify-between">
@@ -402,6 +467,99 @@ export function ConvertExperience({
           )}
         </AnimatePresence>
       </main>
+    </div>
+  );
+}
+
+function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
+  const relatedTools = workflow.relatedTools.slice(0, 4);
+  const visibleSteps = workflow.steps.slice(0, 4);
+
+  return (
+    <div className="rounded-2xl border border-white/5 bg-black/25 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-display font-semibold text-white">
+              {workflow.name}
+            </h3>
+            <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300 uppercase">
+              {workflow.category}
+            </span>
+          </div>
+          <p className="mt-1 text-muted-foreground text-sm leading-relaxed">
+            {workflow.description}
+          </p>
+        </div>
+        <div className="shrink-0 rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-right">
+          <p className="font-mono text-[9px] text-muted-foreground uppercase">
+            score
+          </p>
+          <p className="font-semibold text-emerald-300 text-sm">
+            {workflow.confidence}%
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.03] p-3">
+        <p className="font-mono text-[10px] text-muted-foreground uppercase">
+          Agent use case
+        </p>
+        <p className="mt-1 text-foreground/80 text-xs leading-relaxed">
+          {workflow.useCase}
+        </p>
+      </div>
+
+      <div className="mt-4 space-y-2">
+        {visibleSteps.map((step, index) => (
+          <div className="flex gap-3" key={step.id}>
+            <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 font-mono text-[10px] text-emerald-300">
+              {index + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-sm">{step.name}</p>
+                <span className="rounded-full bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground uppercase">
+                  {step.type}
+                </span>
+              </div>
+              <p className="mt-0.5 text-muted-foreground text-xs leading-relaxed">
+                {step.description}
+              </p>
+              {step.toolName ? (
+                <p className="mt-1 font-mono text-[10px] text-violet-300">
+                  tool: {step.toolName}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-1.5">
+        {relatedTools.map((tool) => (
+          <span
+            className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 font-mono text-[10px] text-violet-200"
+            key={tool}
+          >
+            {tool}
+          </span>
+        ))}
+        {workflow.relatedTools.length > relatedTools.length ? (
+          <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+            +{workflow.relatedTools.length - relatedTools.length} more
+          </span>
+        ) : null}
+      </div>
+
+      <details className="mt-4 rounded-xl border border-white/5 bg-black/30 p-3">
+        <summary className="cursor-pointer font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          Agent prompt
+        </summary>
+        <pre className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap font-mono text-[10px] text-foreground/80 leading-relaxed">
+          {workflow.agentPrompt}
+        </pre>
+      </details>
     </div>
   );
 }

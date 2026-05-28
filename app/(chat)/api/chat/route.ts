@@ -24,6 +24,7 @@ import { editDocument } from "@/lib/ai/tools/edit-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
+import { webSearchTool } from "@/lib/ai/tools/web-search";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   deleteChatById,
@@ -38,6 +39,7 @@ import {
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatbotError } from "@/lib/errors";
 import { checkIpRateLimit } from "@/lib/ratelimit";
+import { isWebSearchEnabled } from "@/lib/search/providers";
 import type { ChatMessage } from "@/lib/types";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
@@ -185,30 +187,46 @@ export async function POST(request: Request) {
     const capabilities = modelCapabilities[chatModel];
     const isReasoningModel = capabilities?.reasoning === true;
     const supportsTools = capabilities?.tools === true;
+    const webSearchAvailable = isWebSearchEnabled();
 
     const modelMessages = await convertToModelMessages(uiMessages);
+
+    type ChatToolName =
+      | "getWeather"
+      | "webSearch"
+      | "createDocument"
+      | "editDocument"
+      | "updateDocument"
+      | "requestSuggestions";
+    const baseActiveTools: ChatToolName[] = [
+      "getWeather",
+      "createDocument",
+      "editDocument",
+      "updateDocument",
+      "requestSuggestions",
+    ];
+    if (webSearchAvailable) {
+      baseActiveTools.push("webSearch");
+    }
 
     const stream = createUIMessageStream({
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
       execute: async ({ writer: dataStream }) => {
         const result = streamText({
           model: getLanguageModel(chatModel),
-          system: systemPrompt({ requestHints, supportsTools }),
+          system: systemPrompt({
+            requestHints,
+            supportsTools,
+            webSearchAvailable,
+          }),
           messages: modelMessages,
           stopWhen: stepCountIs(5),
           experimental_activeTools:
-            isReasoningModel && !supportsTools
-              ? []
-              : [
-                  "getWeather",
-                  "createDocument",
-                  "editDocument",
-                  "updateDocument",
-                  "requestSuggestions",
-                ],
+            isReasoningModel && !supportsTools ? [] : baseActiveTools,
           providerOptions: {},
           tools: {
             getWeather,
+            webSearch: webSearchTool,
             createDocument: createDocument({
               session,
               dataStream,

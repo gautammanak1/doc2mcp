@@ -41,27 +41,27 @@
 :root {
   color-scheme: light;
   --radius: 0.75rem;
-  --neon-violet: oklch(0.62 0.22 280);
-  --neon-cyan: oklch(0.75 0.14 200);
-  --background: oklch(0.99 0.005 280);
-  --foreground: oklch(0.18 0.02 280);
+  --neon-violet: oklch(0.55 0.22 280);
+  --neon-cyan: oklch(0.65 0.16 200);
+  --background: oklch(0.995 0.003 280);
+  --foreground: oklch(0.16 0.02 280);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 280);
+  --card-foreground: oklch(0.16 0.02 280);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 280);
-  --primary: oklch(0.55 0.22 280);
+  --popover-foreground: oklch(0.16 0.02 280);
+  --primary: oklch(0.52 0.22 280);
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.01 280);
+  --secondary: oklch(0.96 0.008 280);
   --secondary-foreground: oklch(0.22 0.02 280);
-  --muted: oklch(0.96 0.005 280);
-  --muted-foreground: oklch(0.48 0.02 280);
+  --muted: oklch(0.965 0.005 280);
+  --muted-foreground: oklch(0.42 0.02 280);
   --accent: oklch(0.94 0.02 280);
   --accent-foreground: oklch(0.22 0.02 280);
   --destructive: oklch(0.55 0.2 25);
-  --border: oklch(0.9 0.01 280);
-  --input: oklch(0.94 0.01 280);
-  --ring: oklch(0.55 0.18 280);
-  --shadow-glow: 0 0 40px oklch(0.55 0.2 280 / 18%);
+  --border: oklch(0.88 0.008 280);
+  --input: oklch(0.93 0.008 280);
+  --ring: oklch(0.52 0.18 280);
+  --shadow-glow: 0 0 40px oklch(0.55 0.2 280 / 14%);
 }
 
 .dark {
@@ -95,9 +95,13 @@
     @apply bg-background text-foreground;
     font-feature-settings: "ss01", "ss02";
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   .font-display {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
 }
 

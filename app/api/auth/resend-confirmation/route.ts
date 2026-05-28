@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     type: "signup",
     email,
     options: {
-      emailRedirectTo: `${baseUrl}/auth/confirm`,
+      emailRedirectTo: `${baseUrl}/auth/confirm?next=${encodeURIComponent("/chat")}`,
     },
   });
 

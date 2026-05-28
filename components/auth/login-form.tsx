@@ -53,52 +53,8 @@ export function LoginForm({
     }
   };
 
-  const handleSocialLogin = async () => {
-    const supabase = createClient();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/oauth?next=${encodeURIComponent(postLoginUrl)}`,
-        },
-      });
-      if (oauthError) {
-        throw oauthError;
-      }
-    } catch (oauthError: unknown) {
-      setError(
-        oauthError instanceof Error
-          ? oauthError.message
-          : "An OAuth error occurred"
-      );
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <Button
-        className="w-full"
-        disabled={isLoading}
-        onClick={handleSocialLogin}
-        type="button"
-        variant="outline"
-      >
-        Sign in with Google
-      </Button>
-
-      <div className="relative my-1">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border/50" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or</span>
-        </div>
-      </div>
-
       <form className="flex flex-col gap-4" onSubmit={handleLogin}>
         <div className="flex flex-col gap-2">
           <Label className="font-normal text-muted-foreground" htmlFor="email">

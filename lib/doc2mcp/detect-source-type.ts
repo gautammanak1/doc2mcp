@@ -108,13 +108,20 @@ export function sniffSourceTypeFromContent(
 }
 
 /**
- * GitHub repo URL → { owner, repo, branch?, path? }
+ * GitHub repo URL → { owner, repo, branch?, path?, ambiguousTail? }
+ *
+ * branch + path is ambiguous when the branch itself contains a "/", e.g.
+ * https://github.com/foo/bar/tree/feat/add-docs/docs — here the branch is
+ * "feat/add-docs" and the path is "docs", not branch="feat" path="add-docs/docs".
+ * In that case we return all segments after /tree/ as `ambiguousTail` so the
+ * crawler can resolve the real branch via the GitHub API.
  */
 export function parseGitHubRepoUrl(url: string): {
   owner: string;
   repo: string;
   branch?: string;
   path?: string;
+  ambiguousTail?: string[];
 } | null {
   try {
     const parsed = new URL(url);
@@ -137,23 +144,22 @@ export function parseGitHubRepoUrl(url: string): {
       return null;
     }
 
-    // /owner/repo/tree/branch/path...
-    if (parts[2] === "tree" && parts[3]) {
+    // /owner/repo/tree/<branch>/<...path>
+    // /owner/repo/blob/<branch>/<...path>
+    if ((parts[2] === "tree" || parts[2] === "blob") && parts[3]) {
+      const tail = parts.slice(3);
+      // If tail is a single segment, it's definitely the branch.
+      if (tail.length === 1) {
+        return { owner, repo, branch: tail[0] };
+      }
+      // Ambiguous: branch could be "tail[0]" with path "tail[1..]",
+      // or "tail[0]/tail[1]" with path "tail[2..]", etc.
       return {
         owner,
         repo,
-        branch: parts[3],
-        path: parts.slice(4).join("/") || undefined,
-      };
-    }
-
-    // /owner/repo/blob/branch/path...
-    if (parts[2] === "blob" && parts[3]) {
-      return {
-        owner,
-        repo,
-        branch: parts[3],
-        path: parts.slice(4).join("/") || undefined,
+        branch: tail[0],
+        path: tail.slice(1).join("/") || undefined,
+        ambiguousTail: tail,
       };
     }
 

@@ -12,7 +12,7 @@ import { discoverSitemapUrls } from "./sitemap";
 const MAX_PAGES = 80;
 const PER_PAGE_CHARS = 50_000;
 const FETCH_TIMEOUT_MS = 15_000;
-const USER_AGENT = "doc2mcp/1.0 (+https://doc2mcp.dev)";
+const USER_AGENT = "doc2mcp/1.0 (+https://doc2mcp.site)";
 
 function decodeEntities(text: string): string {
   return text

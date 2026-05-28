@@ -21,7 +21,7 @@ No local install, no `npx`, no API keys for the original docs vendor.
 {
   "mcpServers": {
     "stripe": {
-      "url": "https://doc2mcp.dev/api/mcp/<projectId>/mcp",
+      "url": "https://doc2mcp.site/api/mcp/<projectId>/mcp",
       "headers": {
         "Authorization": "Bearer <project-token>"
       }

@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  Check,
   Clock,
   Crown,
   FileText,
@@ -10,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type Feature = {
   icon: typeof Crown;
@@ -18,31 +18,11 @@ type Feature = {
 };
 
 const PRO_FEATURES: Feature[] = [
-  {
-    icon: Zap,
-    label: "Unlimited conversions",
-    sub: "No monthly cap",
-  },
-  {
-    icon: FileText,
-    label: "500+ pages per site",
-    sub: "Deep documentation",
-  },
-  {
-    icon: Lock,
-    label: "Private projects",
-    sub: "Hide from public listing",
-  },
-  {
-    icon: Clock,
-    label: "Auto re-crawl every 24h",
-    sub: "Always fresh",
-  },
-  {
-    icon: Users,
-    label: "Team workspace ready",
-    sub: "Invite teammates",
-  },
+  { icon: Zap, label: "Unlimited conversions", sub: "No monthly cap" },
+  { icon: FileText, label: "Up to 750 pages / site", sub: "Deep docs" },
+  { icon: Lock, label: "Private projects", sub: "Hide from public" },
+  { icon: Clock, label: "Auto re-crawl 24h", sub: "Always fresh" },
+  { icon: Users, label: "Workflow AI + playground", sub: "Test tools live" },
 ];
 
 export function UpgradeBanner({
@@ -56,50 +36,54 @@ export function UpgradeBanner({
     100,
     Math.round((conversionsUsed / Math.max(1, conversionLimit)) * 100)
   );
+  const isOverLimit = conversionsUsed >= conversionLimit;
   const isNearLimit = percentUsed >= 80;
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/5 to-background p-6 sm:p-8">
-      <div
-        aria-hidden="true"
-        className="-top-32 -right-32 pointer-events-none absolute size-72 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 opacity-20 blur-3xl"
-      />
-
-      <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-violet-500/20 text-violet-300">
-              <Crown className="size-4" />
+    <section className="rounded-2xl border border-border/50 bg-card/40 p-5 sm:p-6">
+      <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-start">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <Crown className="size-3.5" />
             </span>
-            <p className="font-mono text-violet-300 text-xs uppercase tracking-wider">
-              You&apos;re on the Free plan
-            </p>
+            <span className="rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+              Current plan · Free
+            </span>
+            {isOverLimit ? (
+              <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 font-mono text-[10px] text-amber-700 uppercase tracking-wider dark:text-amber-300">
+                Limit reached
+              </span>
+            ) : null}
           </div>
-          <h2 className="mt-3 font-display font-bold text-2xl tracking-tight sm:text-3xl">
-            Unlock Pro and ship without limits.
+
+          <h2 className="mt-3 font-display font-semibold text-xl tracking-tight sm:text-2xl">
+            {isOverLimit
+              ? "You've hit your Free monthly limit."
+              : "You're on Free."}
           </h2>
-          <p className="mt-1.5 text-muted-foreground text-sm">
-            {isNearLimit
-              ? `You've used ${percentUsed}% of your monthly conversions. Upgrade now to keep building without hitting the cap.`
-              : `Free covers ${conversionLimit} conversions / month and ${80} pages per site. Pro lifts both caps and adds private projects + auto re-crawl.`}
+          <p className="mt-1 text-muted-foreground text-sm">
+            {isOverLimit
+              ? `${conversionsUsed} / ${conversionLimit} conversions used this month. Upgrade to Pro for unlimited conversions and bigger crawls.`
+              : `${conversionLimit} conversions / month and 50 pages per site. Pro lifts both caps, adds private projects, auto re-crawl, and the live MCP playground.`}
           </p>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {PRO_FEATURES.map((feat) => {
               const Icon = feat.icon;
               return (
                 <div
-                  className="flex items-start gap-2.5 rounded-xl border border-border/40 bg-background/40 p-3"
+                  className="flex items-start gap-2.5 rounded-lg border border-border/40 bg-background/40 p-2.5"
                   key={feat.label}
                 >
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-violet-300">
-                    <Icon className="size-3.5" />
+                  <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                    <Icon className="size-3" />
                   </span>
                   <div className="min-w-0">
-                    <p className="font-medium text-sm leading-tight">
+                    <p className="font-medium text-foreground text-xs leading-tight">
                       {feat.label}
                     </p>
-                    <p className="mt-0.5 text-muted-foreground text-xs leading-tight">
+                    <p className="mt-0.5 text-muted-foreground text-[11px] leading-tight">
                       {feat.sub}
                     </p>
                   </div>
@@ -108,46 +92,64 @@ export function UpgradeBanner({
             })}
           </div>
 
-          {isNearLimit ? (
-            <div className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-amber-200 text-xs">
-                  {conversionsUsed} / {conversionLimit} conversions used this
-                  month
-                </p>
-                <p className="font-mono font-semibold text-amber-200 text-xs">
-                  {percentUsed}%
-                </p>
-              </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-amber-900/40">
-                <div
-                  className="h-full bg-amber-400 transition-all duration-300"
-                  style={{ width: `${percentUsed}%` }}
-                />
-              </div>
+          <div className="mt-5">
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                Conversions this month
+              </p>
+              <p
+                className={cn(
+                  "font-mono text-xs",
+                  isOverLimit
+                    ? "text-amber-700 dark:text-amber-300"
+                    : isNearLimit
+                      ? "text-amber-700 dark:text-amber-300"
+                      : "text-foreground/80"
+                )}
+              >
+                {conversionsUsed} / {conversionLimit} · {percentUsed}%
+              </p>
             </div>
-          ) : null}
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className={cn(
+                  "h-full transition-all duration-300",
+                  isOverLimit
+                    ? "bg-amber-500/80"
+                    : isNearLimit
+                      ? "bg-amber-500/70"
+                      : "bg-foreground/60"
+                )}
+                style={{ width: `${Math.max(2, percentUsed)}%` }}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-3 lg:items-end">
-          <div className="rounded-2xl border border-violet-500/30 bg-background/60 p-4 text-center lg:min-w-[200px]">
-            <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-wider">
-              Pro plan
+        <aside className="flex flex-col gap-3 lg:w-[220px] lg:items-stretch">
+          <div className="rounded-xl border border-border/50 bg-background/40 p-4">
+            <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+              Offer · Pro plan
             </p>
-            <p className="mt-1 flex items-baseline justify-center gap-1">
-              <span className="font-display font-bold text-3xl">$20</span>
-              <span className="text-muted-foreground text-xs">/ month</span>
+            <p className="mt-1 flex items-baseline gap-1">
+              <span className="font-display font-semibold text-2xl">
+                $14.99
+              </span>
+              <span className="text-muted-foreground text-xs">/ mo</span>
             </p>
-            <p className="mt-1 text-muted-foreground text-xs">Cancel anytime</p>
+            <p className="text-muted-foreground text-[11px]">
+              Cancel anytime · 1-click upgrade
+            </p>
           </div>
+
           <Button
             asChild
-            className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white hover:from-violet-600 hover:to-fuchsia-600 lg:w-auto"
-            size="lg"
+            className="w-full bg-foreground text-background hover:bg-foreground/90"
+            size="sm"
           >
             <Link href="/pricing">
               Upgrade to Pro
-              <ArrowRight className="ml-1 size-4" />
+              <ArrowRight className="ml-1 size-3.5" />
             </Link>
           </Button>
           <Link
@@ -156,21 +158,7 @@ export function UpgradeBanner({
           >
             Compare all plans
           </Link>
-        </div>
-      </div>
-
-      <div className="relative mt-6 flex flex-wrap items-center gap-3 border-border/30 border-t pt-4 text-muted-foreground text-xs">
-        <span className="flex items-center gap-1">
-          <Check className="size-3 text-emerald-400" /> No credit card to start
-        </span>
-        <span>·</span>
-        <span className="flex items-center gap-1">
-          <Check className="size-3 text-emerald-400" /> Cancel anytime
-        </span>
-        <span>·</span>
-        <span className="flex items-center gap-1">
-          <Check className="size-3 text-emerald-400" /> Money-back guarantee
-        </span>
+        </aside>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getDoc2McpBaseUrl } from "@/lib/doc2mcp/app-url";
 import { createClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
@@ -68,10 +69,14 @@ export const register = async (
     });
 
     const supabase = await createClient();
+    const baseUrl = getDoc2McpBaseUrl();
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: validatedData.email,
       password: validatedData.password,
+      options: {
+        emailRedirectTo: `${baseUrl}/auth/confirm?next=${encodeURIComponent("/chat")}`,
+      },
     });
 
     if (signUpError) {

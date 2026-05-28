@@ -9,7 +9,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
+import { CheckoutSuccessHandler } from "@/components/billing/checkout-success-handler";
+import { RefreshSubscriptionButton } from "@/components/dashboard/settings-actions";
 import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,6 +92,10 @@ export default async function DashboardOverviewPage() {
 
   return (
     <div className="space-y-8">
+      <Suspense fallback={null}>
+        <CheckoutSuccessHandler />
+      </Suspense>
+
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-muted-foreground text-xs uppercase tracking-wider">
@@ -102,7 +109,7 @@ export default async function DashboardOverviewPage() {
           </p>
         </div>
         <Button asChild type="button">
-          <Link href="/">
+          <Link href="/chat">
             <Zap className="mr-1 size-4" />
             New conversion
           </Link>
@@ -204,12 +211,19 @@ export default async function DashboardOverviewPage() {
               />
             </div>
             <div className="flex flex-wrap gap-2 pt-2">
-              <Button asChild type="button" variant="outline">
-                <Link href="/pricing">Upgrade plan</Link>
-              </Button>
+              {plan.planId === "free" ? (
+                <Button asChild type="button" variant="outline">
+                  <Link href="/pricing">Upgrade plan</Link>
+                </Button>
+              ) : (
+                <Button asChild type="button" variant="outline">
+                  <Link href="/dashboard/settings">Manage billing</Link>
+                </Button>
+              )}
               <Button asChild type="button" variant="ghost">
                 <Link href="/dashboard/usage">View usage</Link>
               </Button>
+              <RefreshSubscriptionButton size="sm" variant="ghost" />
             </div>
           </CardContent>
         </Card>

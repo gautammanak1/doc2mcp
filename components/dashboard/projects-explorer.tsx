@@ -163,7 +163,7 @@ export function ProjectsExplorer({
                 : "Try a different search term or filter."}
             </p>
             <Button asChild className="mt-2" type="button" variant="outline">
-              <Link href="/">Start a new conversion</Link>
+              <Link href="/chat">Start a new conversion</Link>
             </Button>
           </CardContent>
         </Card>

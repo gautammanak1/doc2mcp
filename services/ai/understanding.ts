@@ -5,12 +5,14 @@ import type {
   CrawlResult,
   ProcessingLog,
   QualityScore,
+  WorkflowDetection,
 } from "@/types/platform";
 import { dedupeEndpoints } from "../extraction/endpoint-dedupe";
 import { extractEndpointsFromOpenApi } from "../extraction/openapi-endpoint-extractor";
 import { generateLlmsTxt } from "../generators/llms-txt";
 import { parseOpenApiText } from "../ingestion/openapi-source";
 import { compressApiToTools } from "./tool-compression";
+import { inferWorkflowDetection } from "./workflow-engine";
 
 function buildAnalysisPrompt(crawlResults: CrawlResult[]): string {
   const docsSummary = crawlResults
@@ -27,7 +29,23 @@ Return ONLY valid JSON with this structure:
   "summary": "Brief platform summary",
   "endpoints": [{"method": "GET", "path": "/resource", "summary": "...", "description": "...", "auth": "bearer|api_key|oauth|none", "tags": ["tag"]}],
   "authPatterns": [{"type": "bearer", "description": "..."}],
-  "workflows": [{"name": "...", "steps": ["step1", "step2"]}],
+  "workflows": [{
+    "name": "Customer Support Agent",
+    "description": "What the agent accomplishes",
+    "useCase": "When an AI agent should use this workflow",
+    "category": "auth|payment|upload|webhook|crud|subscription|support|automation|custom",
+    "complexity": "simple|moderate|complex",
+    "confidence": 85,
+    "steps": [
+      {
+        "name": "Resolve customer",
+        "description": "Find the customer record",
+        "type": "auth|api|payment|upload|webhook|condition|ai|human|data",
+        "inputs": ["email"],
+        "outputs": ["customer_id"]
+      }
+    ]
+  }],
   "useCases": ["use case 1", "use case 2"],
   "qualityScore": {
     "docsScore": 85,
@@ -46,7 +64,8 @@ export type AnalysisResult = {
   summary: string;
   endpoints: ApiEndpoint[];
   authPatterns: Array<{ type: string; description: string }>;
-  workflows: Array<{ name: string; steps: string[] }>;
+  workflows: WorkflowDetection["workflows"];
+  workflowDetection: WorkflowDetection;
   useCases: string[];
   compressedTools: CompressedTool[];
   llmsTxt: string;
@@ -183,6 +202,21 @@ export async function analyzeDocumentation(
   const compressedTools = await compressApiToTools(endpoints, projectName);
 
   log(`Generated ${compressedTools.length} compressed tools`, "success");
+  log("Inferring AI workflow engine patterns...");
+
+  const workflowDetection = inferWorkflowDetection({
+    parsedWorkflows: parsed.workflows ?? [],
+    endpoints,
+    tools: compressedTools,
+    authPatterns: parsed.authPatterns ?? [],
+    useCases: parsed.useCases ?? [],
+    projectName,
+  });
+
+  log(
+    `Inferred ${workflowDetection.workflows.length} AI workflow(s) with ${workflowDetection.confidence}% confidence`,
+    "success"
+  );
   log("Generating llms.txt for agent consumption...");
 
   const llmsTxt = generateLlmsTxt({
@@ -200,20 +234,25 @@ export async function analyzeDocumentation(
     authConfidence: endpoints.some((e) => e.auth && e.auth !== "none")
       ? 90
       : 80,
-    workflowConfidence:
-      parsed.workflows && parsed.workflows.length > 0 ? 85 : 70,
+    workflowConfidence: workflowDetection.confidence,
     mcpScore: compressedTools.length > 0 ? 88 : 75,
     explanation:
-      "Automatically evaluated quality based on docs content and endpoint structure.",
+      "Automatically evaluated quality based on docs depth, auth clarity, inferred workflows, and generated MCP tool structure.",
   };
 
-  const qualityScore: QualityScore = parsed.qualityScore ?? defaultQualityScore;
+  const qualityScore: QualityScore = {
+    ...defaultQualityScore,
+    ...parsed.qualityScore,
+    workflowConfidence:
+      parsed.qualityScore?.workflowConfidence ?? workflowDetection.confidence,
+  };
 
   return {
     summary: parsed.summary ?? "",
     endpoints,
     authPatterns: parsed.authPatterns ?? [],
-    workflows: parsed.workflows ?? [],
+    workflows: workflowDetection.workflows,
+    workflowDetection,
     useCases: parsed.useCases ?? [],
     compressedTools,
     llmsTxt,

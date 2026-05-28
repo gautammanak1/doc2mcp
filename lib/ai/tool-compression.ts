@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { asi1GenerateText } from "@/lib/asi1/client";
 
 export interface ToolSignature {
   name: string;
@@ -23,8 +23,6 @@ export interface CompressionResult {
   overallReduction: number;
   recommendations: string[];
 }
-
-const client = new Anthropic();
 
 // Estimate tokens (rough approximation)
 function estimateTokens(text: string): number {
@@ -64,19 +62,24 @@ Return as JSON:
   "recommendations": ["consolidate X and Y", "batch operation Z"]
 }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2048,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You are an expert at optimizing tool definitions for AI/LLM use. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 2048,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
   const totalTokensOriginal = estimateTokens(toolsJson);
 
   try {
@@ -134,8 +137,14 @@ Return as JSON:
         recommendations: parsed.recommendations || [],
       };
     }
-  } catch (error) {
-    console.error("[v0] Failed to parse compression result:", error);
+  } catch {
+    return {
+      tools: [],
+      totalTokensOriginal,
+      totalTokensCompressed: totalTokensOriginal,
+      overallReduction: 0,
+      recommendations: [],
+    };
   }
 
   return {
@@ -206,27 +215,35 @@ Return JSON:
   "standalone": ["tool_names"]
 }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1024,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You are an expert at consolidating AI tool definitions. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 1024,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-  } catch (error) {
-    console.error("[v0] Failed to parse consolidation suggestions:", error);
+  } catch {
+    return {
+      consolidations: [],
+      standalone: tools.map((t) => t.name),
+    };
   }
 
   return {

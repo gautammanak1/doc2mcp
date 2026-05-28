@@ -19,35 +19,57 @@ type Plan = {
   ctaLabel: string;
 };
 
+type FreePlan = {
+  id: "free";
+  name: string;
+  tagline: string;
+  features: string[];
+  ctaLabel: string;
+};
+
+const FREE_PLAN: FreePlan = {
+  id: "free",
+  name: "Free",
+  tagline: "For tinkering, demos, and one-off experiments.",
+  features: [
+    "5 MCP conversions / month",
+    "Up to 50 pages per docs site",
+    "Remote HTTP MCP for Cursor + Claude",
+    "ask_documentation with ASI1",
+    "Community support",
+  ],
+  ctaLabel: "Start free",
+};
+
 const PLANS: Plan[] = [
   {
     id: "starter",
     name: "Starter",
-    tagline: "For trying doc2mcp on personal projects.",
-    price: { monthly: 5, biannual: 4, yearly: 3 },
+    tagline: "For solo devs shipping side-projects.",
+    price: { monthly: 3.99, biannual: 3.19, yearly: 2.39 },
     features: [
-      "20 MCP conversions / month",
-      "Up to 80 pages per docs site",
+      "50 MCP conversions / month",
+      "Up to 150 pages per docs site",
       "Remote HTTP MCP for Cursor + Claude + Windsurf",
-      "ask_documentation with ASI1",
+      "Semantic toolkits + workflow inference",
       "Public projects",
       "Community support",
     ],
-    ctaLabel: "Start",
+    ctaLabel: "Start Starter",
   },
   {
     id: "pro",
     name: "Pro",
-    tagline: "For builders shipping AI products.",
-    price: { monthly: 20, biannual: 16, yearly: 13 },
+    tagline: "For builders shipping AI-native products.",
+    price: { monthly: 14.99, biannual: 11.99, yearly: 9.99 },
     badge: "Most popular",
     highlight: true,
     features: [
       "Unlimited MCP conversions",
-      "Up to 500 pages per docs site",
-      "Deep markdown extraction (.md, .mdx, llms.txt)",
-      "Auto re-crawl every 24 hours",
-      "Private projects",
+      "Up to 750 pages per docs site",
+      "Workflow AI (auth, payment, upload, webhook flows)",
+      "Visual API graph + MCP playground",
+      "Auto re-crawl every 24h · private projects",
       "Email support",
     ],
     ctaLabel: "Go Pro",
@@ -56,12 +78,12 @@ const PLANS: Plan[] = [
     id: "team",
     name: "Team",
     tagline: "For teams operating internal docs at scale.",
-    price: { monthly: 50, biannual: 40, yearly: 33 },
+    price: { monthly: 39.99, biannual: 31.99, yearly: 25.99 },
     features: [
       "Everything in Pro",
-      "Up to 2 000 pages per docs site",
-      "Auto re-crawl every 6 hours",
-      "Up to 5 teammates",
+      "Up to 2,500 pages per docs site",
+      "Auto re-crawl every 6h",
+      "5 teammates · role-based access",
       "Custom domain for MCP endpoints",
       "Priority support (24h SLA)",
     ],
@@ -78,7 +100,7 @@ const CYCLE_LABEL: Record<BillingCycle, string> = {
 const CYCLE_DISCOUNT: Record<BillingCycle, string | null> = {
   monthly: null,
   biannual: "Save 20%",
-  yearly: "Save 35%",
+  yearly: "Save 33%",
 };
 
 const CYCLE_SUFFIX: Record<BillingCycle, string> = {
@@ -150,7 +172,7 @@ export function PricingSection() {
               >
                 {CYCLE_LABEL[c]}
                 {CYCLE_DISCOUNT[c] ? (
-                  <span className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 font-mono text-[10px] text-violet-300">
+                  <span className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 font-mono text-[10px] text-violet-700 dark:text-violet-300">
                     {CYCLE_DISCOUNT[c]}
                   </span>
                 ) : null}
@@ -159,7 +181,50 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div
+            className={cn(
+              "relative flex flex-col gap-6 rounded-2xl border border-border/40 bg-card/30 p-6 backdrop-blur-xl transition-all duration-500 hover:border-border/60",
+              isVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-6 opacity-0"
+            )}
+          >
+            <div>
+              <h3 className="font-display font-semibold text-2xl">
+                {FREE_PLAN.name}
+              </h3>
+              <p className="mt-1 text-muted-foreground text-sm">
+                {FREE_PLAN.tagline}
+              </p>
+            </div>
+
+            <div className="flex items-baseline gap-1">
+              <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
+                $0
+              </span>
+              <span className="text-muted-foreground text-xs">
+                forever · no card
+              </span>
+            </div>
+
+            <ul className="flex flex-1 flex-col gap-2 text-sm">
+              {FREE_PLAN.features.map((feature) => (
+                <li className="flex items-start gap-2" key={feature}>
+                  <Check className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-muted-foreground">{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <a
+              className="inline-flex h-10 items-center justify-center rounded-full border border-border/60 bg-background/40 px-5 font-medium text-sm transition-colors hover:bg-foreground/5"
+              href="/register"
+            >
+              {FREE_PLAN.ctaLabel}
+            </a>
+          </div>
+
           {PLANS.map((plan, index) => (
             <div
               className={cn(
@@ -172,7 +237,7 @@ export function PricingSection() {
                   : "translate-y-6 opacity-0"
               )}
               key={plan.id}
-              style={{ transitionDelay: `${index * 80}ms` }}
+              style={{ transitionDelay: `${(index + 1) * 80}ms` }}
             >
               {plan.badge ? (
                 <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-violet-500 px-3 py-1 font-medium text-white text-xs">
@@ -192,7 +257,7 @@ export function PricingSection() {
 
               <div className="flex items-baseline gap-1">
                 <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
-                  ${plan.price[cycle]}
+                  ${plan.price[cycle].toFixed(2)}
                 </span>
                 <span className="text-muted-foreground text-xs">
                   {CYCLE_SUFFIX[cycle]}
@@ -202,7 +267,7 @@ export function PricingSection() {
               <ul className="flex flex-1 flex-col gap-2 text-sm">
                 {plan.features.map((feature) => (
                   <li className="flex items-start gap-2" key={feature}>
-                    <Check className="mt-0.5 size-4 shrink-0 text-violet-400" />
+                    <Check className="mt-0.5 size-4 shrink-0 text-violet-600 dark:text-violet-400" />
                     <span className="text-muted-foreground">{feature}</span>
                   </li>
                 ))}

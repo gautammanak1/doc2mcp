@@ -160,6 +160,8 @@ async function runPipeline({
     addSpanAttributes({
       "doc2mcp.endpoints_detected": analysis.endpoints.length,
       "doc2mcp.tools_compressed": analysis.compressedTools.length,
+      "doc2mcp.workflows_inferred": analysis.workflows.length,
+      "doc2mcp.workflow_confidence": analysis.workflowDetection.confidence,
       "doc2mcp.extraction_mode": analysis.extractionMode,
       "doc2mcp.tokens.prompt": analysis.tokenUsage?.prompt_tokens ?? 0,
       "doc2mcp.tokens.completion": analysis.tokenUsage?.completion_tokens ?? 0,
@@ -246,7 +248,8 @@ async function runPipeline({
     addLog("Building API graph visualization...", "info", "graph");
     const { nodes, edges } = buildApiGraph(
       analysis.endpoints,
-      analysis.authPatterns
+      analysis.authPatterns,
+      analysis.workflows
     );
 
     const mcpServerCode = generateMcpServerCode(mcpConfig);
@@ -276,6 +279,8 @@ async function runPipeline({
     const artifacts: ProjectArtifacts = {
       endpoints: analysis.endpoints,
       compressedTools: keptCompressed,
+      workflows: analysis.workflows,
+      workflowDetection: analysis.workflowDetection,
       mcpConfig,
       llmsTxt: analysis.llmsTxt,
       sdkTypescript: "",
@@ -327,6 +332,8 @@ async function runPipeline({
       metadata: {
         pages: crawlResults.length,
         tools: keptCompressed.length,
+        workflows: analysis.workflows.length,
+        workflowConfidence: analysis.workflowDetection.confidence,
         avgConfidence: validation.report.averageConfidence,
         smokeFailed: smoke.failed,
         extractionMode: analysis.extractionMode,
@@ -337,6 +344,7 @@ async function runPipeline({
       durationMs: Math.round(durationMs),
       pages: crawlResults.length,
       tools: keptCompressed.length,
+      workflows: analysis.workflows.length,
     });
 
     return { success: true, artifacts };

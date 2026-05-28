@@ -1,6 +1,7 @@
 import { after } from "next/server";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import { isAdminEmail } from "@/lib/admin/admin-access";
 import {
   assertCanStartConversion,
   EntitlementError,
@@ -14,6 +15,13 @@ import { processProjectPipeline } from "@/services/pipeline/process-project";
 const bodySchema = z.object({
   sourceUrl: z.string().url(),
 });
+
+function shouldBypassLimits(email: string | null | undefined): boolean {
+  if (process.env.DOC2MCP_BYPASS_LIMITS === "1") {
+    return true;
+  }
+  return isAdminEmail(email);
+}
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -32,7 +40,9 @@ export async function POST(request: Request) {
   }
 
   try {
-    await assertCanStartConversion(session.user.id);
+    if (!shouldBypassLimits(session.user.email)) {
+      await assertCanStartConversion(session.user.id);
+    }
 
     const { sourceUrl } = bodySchema.parse(await request.json());
     const sourceType = detectSourceTypeFromUrl(sourceUrl);

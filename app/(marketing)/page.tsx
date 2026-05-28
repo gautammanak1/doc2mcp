@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ComparisonSection } from "@/components/landing/comparison-section";
 import { FlowShowcase } from "@/components/landing/conversion-demo";
 import { CtaSection } from "@/components/landing/cta-section";
 import { FeaturesSection } from "@/components/landing/features-section";
@@ -19,6 +20,7 @@ export default function Page() {
       <FlowShowcase />
       <FeaturesSection />
       <HowItWorksSection />
+      <ComparisonSection />
       <PricingSection />
       <CtaSection />
       <FooterSection />

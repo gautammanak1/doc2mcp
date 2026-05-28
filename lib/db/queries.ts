@@ -1115,26 +1115,55 @@ export async function getAllUsersWithStats(limit = 100) {
     .orderBy(desc(user.createdAt))
     .limit(limit);
 
-  const enriched = await Promise.all(
-    users.map(async (u) => {
-      const [projectCount, activeSub] = await Promise.all([
-        db
-          .select({ count: count() })
-          .from(platformProject)
-          .where(eq(platformProject.userId, u.id)),
-        getActiveSubscriptionByUserId(u.id),
-      ]);
-      return {
-        ...u,
-        projectCount: projectCount[0]?.count ?? 0,
-        plan: activeSub?.plan ?? "free",
-        subscriptionStatus: activeSub?.status ?? null,
-        periodEnd: activeSub?.currentPeriodEnd ?? null,
-      };
-    })
-  );
+  if (users.length === 0) {
+    return [];
+  }
 
-  return enriched;
+  const userIds = users.map((u) => u.id);
+
+  const [projectCounts, activeSubs] = await Promise.all([
+    db
+      .select({
+        userId: platformProject.userId,
+        count: count(),
+      })
+      .from(platformProject)
+      .where(inArray(platformProject.userId, userIds))
+      .groupBy(platformProject.userId),
+    db
+      .select()
+      .from(subscription)
+      .where(
+        and(
+          inArray(subscription.userId, userIds),
+          inArray(subscription.status, ["active", "trialing", "past_due"])
+        )
+      )
+      .orderBy(desc(subscription.updatedAt)),
+  ]);
+
+  const projectCountByUser = new Map<string, number>();
+  for (const row of projectCounts) {
+    projectCountByUser.set(row.userId, Number(row.count) || 0);
+  }
+
+  const subByUser = new Map<string, Subscription>();
+  for (const sub of activeSubs) {
+    if (!subByUser.has(sub.userId)) {
+      subByUser.set(sub.userId, sub);
+    }
+  }
+
+  return users.map((u) => {
+    const activeSub = subByUser.get(u.id);
+    return {
+      ...u,
+      projectCount: projectCountByUser.get(u.id) ?? 0,
+      plan: activeSub?.plan ?? "free",
+      subscriptionStatus: activeSub?.status ?? null,
+      periodEnd: activeSub?.currentPeriodEnd ?? null,
+    };
+  });
 }
 
 export async function disableUser(userId: string) {

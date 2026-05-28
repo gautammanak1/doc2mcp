@@ -62,7 +62,7 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${baseUrl}/chat?checkout=success`,
+      success_url: `${baseUrl}/dashboard?checkout=success`,
       cancel_url: `${baseUrl}/pricing?checkout=canceled`,
       metadata: {
         userId: session.user.id,

@@ -32,7 +32,7 @@ export default async function DashboardProjectsPage() {
           </p>
         </div>
         <Button asChild type="button">
-          <Link href="/">
+          <Link href="/chat">
             <Plus className="mr-1 size-4" />
             New conversion
           </Link>

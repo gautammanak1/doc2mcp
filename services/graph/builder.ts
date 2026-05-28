@@ -1,8 +1,14 @@
-import type { ApiEndpoint, ApiGraphEdge, ApiGraphNode } from "@/types/platform";
+import type {
+  ApiEndpoint,
+  ApiGraphEdge,
+  ApiGraphNode,
+  SuggestedWorkflow,
+} from "@/types/platform";
 
 export function buildApiGraph(
   endpoints: ApiEndpoint[],
-  authPatterns: Array<{ type: string; description: string }>
+  authPatterns: Array<{ type: string; description: string }>,
+  workflows: SuggestedWorkflow[] = []
 ): { nodes: ApiGraphNode[]; edges: ApiGraphEdge[] } {
   const nodes: ApiGraphNode[] = [];
   const edges: ApiGraphEdge[] = [];
@@ -59,6 +65,7 @@ export function buildApiGraph(
           method: endpoint.method,
           path: endpoint.path,
           summary: endpoint.summary,
+          auth: endpoint.auth,
         },
         position: {
           x: xBase + (i % 2) * 100,
@@ -76,6 +83,41 @@ export function buildApiGraph(
 
     resourceIndex++;
   }
+
+  workflows.forEach((workflow, workflowIndex) => {
+    const workflowNodeId = `workflow-${workflow.id}`;
+    const workflowX = 120 + (workflowIndex % 3) * 300;
+    const workflowY =
+      260 + Math.ceil(resourceGroups.size / 4) * 180 + workflowIndex * 36;
+
+    nodes.push({
+      id: workflowNodeId,
+      type: "workflow",
+      label: workflow.name,
+      data: {
+        category: workflow.category,
+        confidence: workflow.confidence,
+        description: workflow.description,
+        complexity: workflow.complexity,
+        stepCount: workflow.steps.length,
+      },
+      position: { x: workflowX, y: workflowY },
+    });
+
+    workflow.relatedEndpoints.slice(0, 4).forEach((endpointId, stepIndex) => {
+      const endpointNodeId = `endpoint-${endpointId}`;
+      if (!nodes.some((node) => node.id === endpointNodeId)) {
+        return;
+      }
+      edges.push({
+        id: `${workflowNodeId}-${endpointNodeId}-${String(stepIndex)}`,
+        source: workflowNodeId,
+        target: endpointNodeId,
+        label: `step ${String(stepIndex + 1)}`,
+        animated: true,
+      });
+    });
+  });
 
   return { nodes, edges };
 }

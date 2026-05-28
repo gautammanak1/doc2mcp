@@ -95,10 +95,10 @@ export default async function DashboardProfilePage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Activity className="size-4 text-violet-300" />
+              <Activity className="size-4 text-violet-700 dark:text-violet-300" />
               Lifetime activity
             </CardTitle>
-            <CardDescription>Your impact on doc2mcp</CardDescription>
+            <CardDescription>Your lifetime usage</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 pt-0">
             <Stat label="Conversions" value={projects.length} />
@@ -111,7 +111,7 @@ export default async function DashboardProfilePage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <ShieldCheck className="size-4 text-violet-300" />
+              <ShieldCheck className="size-4 text-violet-700 dark:text-violet-300" />
               Account
             </CardTitle>
             <CardDescription>Identity & permissions</CardDescription>
@@ -129,14 +129,14 @@ export default async function DashboardProfilePage() {
             <Row label="Verified">
               {appUser?.emailVerified ? (
                 <Badge
-                  className="gap-1 bg-emerald-500/15 text-emerald-300"
+                  className="gap-1 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                   variant="outline"
                 >
                   <Check className="size-3" /> Yes
                 </Badge>
               ) : (
                 <Badge
-                  className="gap-1 bg-amber-500/15 text-amber-300"
+                  className="gap-1 bg-amber-500/15 text-amber-700 dark:text-amber-300"
                   variant="outline"
                 >
                   <AlertCircle className="size-3" /> Pending
@@ -152,7 +152,7 @@ export default async function DashboardProfilePage() {
               <Badge
                 className={
                   isAdmin
-                    ? "bg-violet-500/15 text-violet-300"
+                    ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
                     : "bg-muted text-muted-foreground"
                 }
                 variant="outline"
@@ -166,7 +166,7 @@ export default async function DashboardProfilePage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <KeyRound className="size-4 text-violet-300" />
+              <KeyRound className="size-4 text-violet-700 dark:text-violet-300" />
               Plan benefits
             </CardTitle>
             <CardDescription>What your plan unlocks</CardDescription>
@@ -246,9 +246,9 @@ function Stat({
 }) {
   const valueClass =
     tone === "good"
-      ? "text-emerald-300"
+      ? "text-emerald-700 dark:text-emerald-300"
       : tone === "bad"
-        ? "text-red-300"
+        ? "text-red-700 dark:text-red-300"
         : "text-foreground";
   return (
     <div className="rounded-xl border border-border/40 bg-background/40 p-3">
@@ -283,7 +283,7 @@ function Benefit({ label, included }: { label: string; included: boolean }) {
       <span
         className={
           included
-            ? "flex size-4 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300"
+            ? "flex size-4 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
             : "flex size-4 items-center justify-center rounded-full bg-muted text-muted-foreground"
         }
       >

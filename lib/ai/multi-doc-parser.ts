@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { asi1GenerateText } from "@/lib/asi1/client";
 
 export interface ParsedDocument {
   title: string;
@@ -39,8 +39,6 @@ export interface DataFlow {
   dataFormat: string;
 }
 
-const client = new Anthropic();
-
 export async function parseMultipleDocs(
   documents: Array<{ title: string; content: string; source: string }>
 ): Promise<MultiDocAnalysis> {
@@ -77,19 +75,24 @@ Return JSON:
   ]
 }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2048,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You are a multi-document API architecture analyst. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 2048,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
 
   const parsed: ParsedDocument[] = [];
   for (const doc of documents) {
@@ -120,8 +123,14 @@ Return JSON:
         dataFlows: analysis.dataFlows || [],
       };
     }
-  } catch (error) {
-    console.error("[v0] Failed to parse multi-doc analysis:", error);
+  } catch {
+    return {
+      documents: parsed,
+      commonThemes: [],
+      integrationMap: new Map(),
+      conceptGlossary: {},
+      dataFlows: [],
+    };
   }
 
   return {
@@ -193,19 +202,23 @@ ${content.slice(0, 1000)}
 
 Return JSON: { "keywords": ["term1", "term2"] }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 256,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content: "Extract concise technical keywords. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 256,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -213,8 +226,8 @@ Return JSON: { "keywords": ["term1", "term2"] }`;
       const parsed = JSON.parse(jsonMatch[0]);
       return parsed.keywords || [];
     }
-  } catch (error) {
-    console.error("[v0] Failed to extract keywords:", error);
+  } catch {
+    return [];
   }
 
   return [];
@@ -224,18 +237,23 @@ async function generateSummary(content: string): Promise<string> {
   const prompt = `Create a 1-2 sentence summary of this documentation:
 ${content.slice(0, 1500)}`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 256,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content: "Summarize API documentation clearly and concisely.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 256,
+    }
+  );
 
-  return response.content[0].type === "text" ? response.content[0].text : "";
+  return response.text;
 }
 
 async function detectContentType(
@@ -246,19 +264,23 @@ ${content.slice(0, 1000)}
 
 Return JSON: { "type": "api|guide|reference|tutorial|unknown" }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 128,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content: "Classify documentation type. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 128,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -269,8 +291,8 @@ Return JSON: { "type": "api|guide|reference|tutorial|unknown" }`;
         return type;
       }
     }
-  } catch (error) {
-    console.error("[v0] Failed to detect content type:", error);
+  } catch {
+    return "unknown";
   }
 
   return "unknown";
@@ -317,16 +339,21 @@ Include:
 
 Return markdown format.`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2048,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content: "Generate practical integration guides in markdown.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 2048,
+    }
+  );
 
-  return response.content[0].type === "text" ? response.content[0].text : "";
+  return response.text;
 }

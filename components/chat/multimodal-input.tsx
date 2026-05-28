@@ -44,7 +44,7 @@ import {
   type ModelCapabilities,
 } from "@/lib/ai/models";
 import { guestRegex } from "@/lib/constants";
-import { extractDocsUrl } from "@/lib/doc2mcp/detect-url";
+import { detectDoc2McpIntent, extractDocsUrl } from "@/lib/doc2mcp/detect-url";
 import { useSupabaseAuth } from "@/lib/supabase/auth";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -236,14 +236,20 @@ function PureMultimodalInput({
     async (url: string) => {
       if (isGuest) {
         toast.error("Sign in to generate an MCP server");
-        const _target = `/api/auth/guest?redirectUrl=${encodeURIComponent(
-          "/login"
-        )}`;
         router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
         return;
       }
 
       setDoc2mcpLoading(true);
+      // Clear input immediately so the user sees the chat reset while the
+      // conversion starts. The actual navigation happens as soon as the
+      // server returns a project id (the heavy pipeline runs in `after()`).
+      setInput("");
+      setLocalStorageInput("");
+      const startToast = toast.loading("Starting doc2mcp pipeline…", {
+        description: "Crawl → analyze → MCP server",
+      });
+
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/convert`,
@@ -254,19 +260,53 @@ function PureMultimodalInput({
           }
         );
         if (res.status === 401) {
+          toast.dismiss(startToast);
           toast.error("Sign in to generate an MCP server");
           router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
           return;
         }
         if (!res.ok) {
-          throw new Error("Conversion failed");
+          toast.dismiss(startToast);
+          let serverMessage: string | null = null;
+          let errorKind: string | null = null;
+          try {
+            const body = (await res.json()) as {
+              error?: string;
+              message?: string;
+            };
+            errorKind = body.error ?? null;
+            serverMessage = body.message ?? null;
+          } catch {
+            // body wasn't JSON, fall through to generic message
+          }
+
+          if (res.status === 403 && errorKind === "entitlement") {
+            toast.error("Upgrade your plan to keep building MCPs", {
+              description:
+                serverMessage ??
+                "You've hit the Free plan limit (5 conversions / month). Upgrade to Pro for unlimited conversions.",
+              duration: 12_000,
+              action: {
+                label: "Upgrade",
+                onClick: () => router.push("/pricing"),
+              },
+            });
+            return;
+          }
+
+          toast.error("Could not start doc2mcp conversion", {
+            description: serverMessage ?? "Please try again in a moment.",
+          });
+          return;
         }
-        const { id } = await res.json();
-        toast.success("doc2mcp pipeline started");
+        const { id } = (await res.json()) as { id: string };
+        toast.dismiss(startToast);
+        toast.success("Pipeline started", {
+          description: "Live progress streaming on the conversion page.",
+        });
         router.push(`/convert/${id}`);
-        setInput("");
-        setLocalStorageInput("");
       } catch {
+        toast.dismiss(startToast);
         toast.error("Could not start doc2mcp conversion");
       } finally {
         setDoc2mcpLoading(false);
@@ -274,6 +314,12 @@ function PureMultimodalInput({
     },
     [router, setInput, setLocalStorageInput, isGuest]
   );
+
+  // Prefetch the conversion route so navigation feels instant when the
+  // server returns the project id.
+  useEffect(() => {
+    router.prefetch("/convert/_");
+  }, [router]);
 
   const submitForm = useCallback(() => {
     if (doc2mcpMode) {
@@ -290,6 +336,24 @@ function PureMultimodalInput({
         return;
       }
       toast.error("Paste a documentation URL (https://…)");
+      return;
+    }
+
+    // Auto-detect: even with the toggle off, phrases like
+    // "Build an MCP from https://github.com/..." should trigger conversion
+    // and flip the doc2mcp toggle on for visual feedback.
+    const intent = detectDoc2McpIntent(input);
+    if (intent.shouldAutoConvert && intent.url) {
+      if (isGuest) {
+        toast.error("Sign in to generate an MCP server");
+        router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
+        return;
+      }
+      setDoc2mcpMode(true);
+      toast.message("doc2mcp mode on — generating MCP from your URL");
+      runDoc2McpConversion(intent.url).catch(() => {
+        // already toasted inside runDoc2McpConversion
+      });
       return;
     }
 
@@ -332,6 +396,7 @@ function PureMultimodalInput({
     width,
     chatId,
     doc2mcpMode,
+    setDoc2mcpMode,
     runDoc2McpConversion,
     isGuest,
     router,

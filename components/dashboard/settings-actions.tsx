@@ -1,6 +1,7 @@
 "use client";
 
-import { ExternalLink, Loader2, Mail } from "lucide-react";
+import { ExternalLink, Loader2, Mail, RefreshCw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -54,6 +55,90 @@ export function BillingPortalButton({
         <ExternalLink className="mr-1 size-3.5" />
       )}
       Open billing portal
+    </Button>
+  );
+}
+
+type SyncResponse = {
+  ok?: boolean;
+  synced?: number;
+  planId?: string;
+  status?: string;
+  reason?: string;
+  message?: string;
+  error?: string;
+};
+
+export function RefreshSubscriptionButton({
+  variant = "outline",
+  size = "default",
+}: {
+  variant?: "outline" | "ghost" | "default" | "secondary";
+  size?: "default" | "sm";
+}) {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    const toastId = toast.loading("Refreshing subscription from Stripe…");
+    try {
+      const res = await fetch("/api/stripe/sync", { method: "POST" });
+      const data = (await res.json().catch(() => ({}))) as SyncResponse;
+      if (!res.ok) {
+        toast.error(data.message ?? data.error ?? "Sync failed", {
+          id: toastId,
+        });
+        return;
+      }
+      if (data.ok && data.planId && data.planId !== "free") {
+        toast.success(
+          `Plan updated to ${data.planId.charAt(0).toUpperCase()}${data.planId.slice(1)}`,
+          {
+            id: toastId,
+            description: data.status ? `Status: ${data.status}` : undefined,
+          }
+        );
+        router.refresh();
+      } else if (data.reason === "no_subscriptions") {
+        toast.message("No active subscription in Stripe yet", {
+          id: toastId,
+          description:
+            "If you just checked out, give Stripe a minute and try again.",
+        });
+      } else if (data.reason === "no_stripe_customer") {
+        toast.message("No checkout on record", {
+          id: toastId,
+          description: "Start a plan from /pricing to subscribe.",
+        });
+      } else {
+        toast.message("Nothing to refresh", {
+          id: toastId,
+          description: data.message ?? "Subscription is already up to date.",
+        });
+        router.refresh();
+      }
+    } catch {
+      toast.error("Network error talking to Stripe", { id: toastId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      disabled={loading}
+      onClick={handleRefresh}
+      size={size}
+      type="button"
+      variant={variant}
+    >
+      {loading ? (
+        <Loader2 className="mr-1 size-3.5 animate-spin" />
+      ) : (
+        <RefreshCw className="mr-1 size-3.5" />
+      )}
+      Refresh subscription
     </Button>
   );
 }

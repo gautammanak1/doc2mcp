@@ -145,7 +145,9 @@ export function ConversionDemo() {
                 doc2mcp toggle: ON
               </p>
               <div className="mt-2 flex items-center gap-2 rounded-lg border border-violet-500/40 bg-violet-500/5 px-3 py-2">
-                <span className="font-mono text-violet-300 text-xs">→</span>
+                <span className="font-mono text-violet-700 text-xs dark:text-violet-300">
+                  →
+                </span>
                 <span className="font-mono text-foreground text-xs sm:text-sm">
                   {typed}
                   <span className="ml-px inline-block h-3 w-px animate-pulse bg-foreground/80 align-middle" />
@@ -184,7 +186,7 @@ export function ConversionDemo() {
                       status === "done"
                         ? "text-foreground"
                         : status === "active"
-                          ? "text-violet-300"
+                          ? "text-violet-700 dark:text-violet-300"
                           : "text-muted-foreground/60"
                     }`}
                     key={step}
@@ -192,9 +194,9 @@ export function ConversionDemo() {
                     <span
                       className={`flex size-4 items-center justify-center rounded-full border ${
                         status === "done"
-                          ? "border-emerald-400/60 bg-emerald-400/20 text-emerald-300"
+                          ? "border-emerald-400/60 bg-emerald-400/20 text-emerald-700 dark:text-emerald-300"
                           : status === "active"
-                            ? "border-violet-400/60 bg-violet-500/20 text-violet-300"
+                            ? "border-violet-400/60 bg-violet-500/20 text-violet-700 dark:text-violet-300"
                             : "border-border/40 text-muted-foreground"
                       }`}
                     >
@@ -217,7 +219,7 @@ export function ConversionDemo() {
             <span
               className={`rounded-full px-2 py-0.5 font-mono text-[10px] transition-colors ${
                 phase === "ready"
-                  ? "bg-emerald-500/15 text-emerald-300"
+                  ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                   : "bg-muted text-muted-foreground"
               }`}
             >
@@ -231,8 +233,10 @@ export function ConversionDemo() {
             <p className="font-mono text-[10px] text-muted-foreground">
               {phase === "ready" ? (
                 <>
-                  <span className="text-emerald-300">●</span> Paste into Cursor
-                  → Settings → MCP and reload.
+                  <span className="text-emerald-700 dark:text-emerald-300">
+                    ●
+                  </span>{" "}
+                  Paste into Cursor → Settings → MCP and reload.
                 </>
               ) : (
                 <>Generating remote endpoint + Bearer token…</>
@@ -259,7 +263,7 @@ function renderConfig(slug: string, phase: Phase): string {
     return `{
   "mcpServers": {
     "${slug}": {
-      "url": "https://doc2mcp.dev/api/mcp/…/mcp",
+      "url": "https://doc2mcp.site/api/mcp/…/mcp",
       "headers": {
         "Authorization": "Bearer …"
       }
@@ -270,7 +274,7 @@ function renderConfig(slug: string, phase: Phase): string {
   return `{
   "mcpServers": {
     "${slug}": {
-      "url": "https://doc2mcp.dev/api/mcp/<projectId>/mcp",
+      "url": "https://doc2mcp.site/api/mcp/<projectId>/mcp",
       "headers": {
         "Authorization": "Bearer d2mcp_…"
       }

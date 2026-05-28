@@ -21,11 +21,39 @@ function buildErrorUrl(params: {
   return `/auth/error?${search.toString()}#${hash.toString()}`;
 }
 
+function safeNext(raw: string | null): string {
+  if (!raw || !raw.startsWith("/")) {
+    return "/chat";
+  }
+  if (raw.startsWith("//") || raw.startsWith("/auth/")) {
+    return "/chat";
+  }
+  return raw;
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  const code = searchParams.get("code");
+  const next = safeNext(searchParams.get("next"));
+
+  // Newer Supabase PKCE flow sends ?code=... instead of token_hash.
+  if (code) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      redirect(next);
+    }
+    const message = error.message ?? "verification_failed";
+    redirect(
+      buildErrorUrl({
+        error: message,
+        errorCode: "exchange_failed",
+        errorDescription: message,
+      })
+    );
+  }
 
   if (tokenHash && type) {
     const supabase = await createClient();
@@ -39,13 +67,13 @@ export async function GET(request: NextRequest) {
     }
 
     const message = error.message ?? "verification_failed";
-    const code = /expired/i.test(message)
+    const otpCode = /expired/i.test(message)
       ? "otp_expired"
       : "verification_failed";
     redirect(
       buildErrorUrl({
         error: message,
-        errorCode: code,
+        errorCode: otpCode,
         errorDescription: message,
       })
     );

@@ -1,7 +1,7 @@
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
+import { AuthShowcase } from "@/components/auth/auth-showcase";
 import { SparklesIcon } from "@/components/chat/icons";
-import { Preview } from "@/components/chat/preview";
 
 export default function AuthLayout({
   children,
@@ -30,7 +30,7 @@ export default function AuthLayout({
 
       <div className="hidden flex-1 flex-col overflow-hidden pl-12 xl:flex">
         <div className="flex-1 pt-8">
-          <Preview />
+          <AuthShowcase />
         </div>
       </div>
     </div>

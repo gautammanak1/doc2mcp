@@ -70,6 +70,42 @@ async function defaultBranch(owner: string, repo: string): Promise<string> {
   return data.default_branch ?? "main";
 }
 
+async function branchExists(
+  owner: string,
+  repo: string,
+  branch: string
+): Promise<boolean> {
+  const res = await fetchWithTimeout(
+    `${GITHUB_API}/repos/${owner}/${repo}/branches/${encodeURIComponent(branch)}`
+  );
+  return Boolean(res?.ok);
+}
+
+/**
+ * Resolve ambiguous branch/path splits for URLs like
+ * `github.com/owner/repo/tree/feat/add-docs/docs` where the branch contains a
+ * "/". Try the longest possible branch first.
+ */
+async function resolveBranchAndPath(
+  owner: string,
+  repo: string,
+  tail: string[]
+): Promise<{ branch: string; path?: string }> {
+  for (let i = tail.length; i >= 1; i--) {
+    const candidate = tail.slice(0, i).join("/");
+    if (await branchExists(owner, repo, candidate)) {
+      return {
+        branch: candidate,
+        path: tail.slice(i).join("/") || undefined,
+      };
+    }
+  }
+  return {
+    branch: tail[0] ?? "main",
+    path: tail.slice(1).join("/") || undefined,
+  };
+}
+
 async function listRepoTree(
   owner: string,
   repo: string,
@@ -145,15 +181,39 @@ export async function crawlGitHubRepo(params: {
   repo: string;
   branch?: string;
   path?: string;
+  ambiguousTail?: string[];
 }): Promise<CrawlResult[]> {
-  const branch =
-    params.branch ?? (await defaultBranch(params.owner, params.repo));
-  const tree = await listRepoTree(params.owner, params.repo, branch);
+  let branch = params.branch;
+  let subPath = params.path;
+
+  if (params.ambiguousTail && params.ambiguousTail.length > 0) {
+    const resolved = await resolveBranchAndPath(
+      params.owner,
+      params.repo,
+      params.ambiguousTail
+    );
+    branch = resolved.branch;
+    subPath = resolved.path;
+  }
+
+  if (!branch) {
+    branch = await defaultBranch(params.owner, params.repo);
+  }
+
+  let tree = await listRepoTree(params.owner, params.repo, branch);
+  // Fallback: branch in URL might not exist — retry against the default branch.
+  if (tree.length === 0) {
+    const fallback = await defaultBranch(params.owner, params.repo);
+    if (fallback !== branch) {
+      branch = fallback;
+      tree = await listRepoTree(params.owner, params.repo, branch);
+    }
+  }
   if (tree.length === 0) {
     return [];
   }
 
-  const files = pickDocFiles(tree, params.path);
+  const files = pickDocFiles(tree, subPath);
   const results: CrawlResult[] = [];
 
   for (const path of files) {

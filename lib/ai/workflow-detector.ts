@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { asi1GenerateText } from "@/lib/asi1/client";
 
 export interface WorkflowStep {
   name: string;
@@ -24,8 +24,6 @@ export interface WorkflowDetectionResult {
   commonPatterns: string[];
   recommendations: string[];
 }
-
-const client = new Anthropic();
 
 export async function detectWorkflows(
   documentationContent: string,
@@ -64,19 +62,24 @@ For each workflow, provide:
   "recommendations": ["optimization recommendations"]
 }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2048,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You are an expert AI workflow architect. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 2048,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -88,8 +91,12 @@ For each workflow, provide:
         recommendations: parsed.recommendations || [],
       };
     }
-  } catch (error) {
-    console.error("[v0] Failed to parse workflows:", error);
+  } catch {
+    return {
+      workflows: [],
+      commonPatterns: [],
+      recommendations: [],
+    };
   }
 
   return {
@@ -122,18 +129,24 @@ Include:
 
 Return production-ready code.`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2048,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You generate production-ready workflow implementation code. Return code only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 2048,
+    }
+  );
 
-  return response.content[0].type === "text" ? response.content[0].text : "";
+  return response.text;
 }
 
 export function workflowToMermaid(workflow: DetectedWorkflow): string {

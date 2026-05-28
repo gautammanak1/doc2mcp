@@ -266,6 +266,64 @@ const PurePreviewMessage = ({
       );
     }
 
+    if (type === "tool-webSearch") {
+      const { toolCallId, state } = part;
+      return (
+        <Tool
+          className="w-[min(100%,520px)]"
+          defaultOpen={false}
+          key={toolCallId}
+        >
+          <ToolHeader state={state} type="tool-webSearch" />
+          <ToolContent>
+            {state === "input-available" && <ToolInput input={part.input} />}
+            {state === "output-available" && (
+              <ToolOutput
+                errorText={undefined}
+                output={
+                  part.output && "results" in part.output ? (
+                    <div className="space-y-2 px-4 py-3 text-sm">
+                      {part.output.results.length === 0 ? (
+                        <p className="text-muted-foreground">
+                          {part.output.note ?? "No results."}
+                        </p>
+                      ) : (
+                        part.output.results.map((r) => (
+                          <a
+                            className="block rounded-md border border-border/40 p-2 transition-colors hover:bg-muted/40"
+                            href={r.url}
+                            key={r.url}
+                            rel="noopener noreferrer"
+                            target="_blank"
+                          >
+                            <p className="truncate font-medium text-foreground">
+                              {r.title}
+                            </p>
+                            <p className="truncate text-muted-foreground text-xs">
+                              {r.url}
+                            </p>
+                            {r.snippet ? (
+                              <p className="mt-1 line-clamp-2 text-muted-foreground/90 text-xs">
+                                {r.snippet}
+                              </p>
+                            ) : null}
+                          </a>
+                        ))
+                      )}
+                    </div>
+                  ) : (
+                    <div className="px-4 py-3 text-muted-foreground text-sm">
+                      No search results.
+                    </div>
+                  )
+                }
+              />
+            )}
+          </ToolContent>
+        </Tool>
+      );
+    }
+
     if (type === "tool-requestSuggestions") {
       const { toolCallId, state } = part;
 

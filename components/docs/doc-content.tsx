@@ -10,7 +10,7 @@ const docPlugins = { cjk, code, math, mermaid };
 
 export function DocContent({ content }: { content: string }) {
   return (
-    <article className="prose prose-invert prose-headings:font-display max-w-none prose-a:text-primary prose-code:rounded-md prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-pre:bg-black/50">
+    <article className="prose prose-zinc max-w-none dark:prose-invert prose-headings:font-display prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-code:rounded-md prose-code:border prose-code:border-border/60 prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:font-medium prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none prose-pre:border prose-pre:border-border/60 prose-pre:bg-muted prose-pre:text-foreground dark:prose-pre:bg-black/40 prose-blockquote:border-l-primary/60 prose-blockquote:text-foreground/80 prose-hr:border-border/60 prose-th:text-foreground prose-td:text-foreground/85">
       <Streamdown plugins={docPlugins}>{content}</Streamdown>
     </article>
   );

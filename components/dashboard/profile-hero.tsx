@@ -9,6 +9,7 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { isPlanId, PLANS } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 type Plan = {
@@ -63,6 +64,23 @@ function planLabel(planId: string): string {
   return planId.charAt(0).toUpperCase() + planId.slice(1);
 }
 
+function planPriceLabel(planId: string, cycle: string | null): string | null {
+  if (!isPlanId(planId)) {
+    return null;
+  }
+  const cfg = PLANS[planId];
+  const c =
+    cycle === "yearly"
+      ? "yearly"
+      : cycle === "biannual"
+        ? "biannual"
+        : "monthly";
+  const cents = cfg.prices[c];
+  const dollars = (cents / 100).toFixed(2);
+  const suffix = c === "yearly" ? "/year" : c === "biannual" ? "/6 mo" : "/mo";
+  return `$${dollars}${suffix}`;
+}
+
 function statusTone(status: string | null): {
   label: string;
   className: string;
@@ -73,17 +91,20 @@ function statusTone(status: string | null): {
   if (status === "active" || status === "trialing") {
     return {
       label: status === "trialing" ? "Trial" : "Active",
-      className: "bg-emerald-500/15 text-emerald-300",
+      className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
     };
   }
   if (status === "past_due") {
     return {
       label: "Past due",
-      className: "bg-amber-500/15 text-amber-300",
+      className: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
     };
   }
   if (status === "canceled") {
-    return { label: "Canceled", className: "bg-red-500/15 text-red-300" };
+    return {
+      label: "Canceled",
+      className: "bg-red-500/15 text-red-700 dark:text-red-300",
+    };
   }
   return {
     label: status,
@@ -114,13 +135,16 @@ export function ProfileHero({
   const status = statusTone(plan.status);
   const gradient = gradientFor(email);
   const isPaid = plan.planId !== "free";
+  const priceLabel = isPaid
+    ? planPriceLabel(plan.planId, plan.billingCycle)
+    : null;
 
   return (
     <section className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-6 sm:p-8">
       <div
         aria-hidden="true"
         className={cn(
-          "-top-32 -right-32 pointer-events-none absolute size-72 rounded-full bg-gradient-to-br opacity-20 blur-3xl",
+          "-top-32 -right-32 pointer-events-none absolute size-72 rounded-full bg-gradient-to-br opacity-[0.06] blur-3xl dark:opacity-10",
           gradient
         )}
       />
@@ -146,7 +170,7 @@ export function ProfileHero({
               <span className="truncate font-mono">{email}</span>
               <BadgeCheck
                 aria-label="Verified email"
-                className="size-3.5 shrink-0 text-violet-300"
+                className="size-3.5 shrink-0 text-violet-700 dark:text-violet-300"
               />
             </p>
           </div>
@@ -157,17 +181,24 @@ export function ProfileHero({
             icon={Crown}
             label="Plan"
             value={
-              <Badge
-                className={cn(
-                  "px-2 py-0.5 text-xs",
-                  isPaid
-                    ? "bg-violet-500/15 text-violet-300"
-                    : "bg-muted text-muted-foreground"
-                )}
-                variant="outline"
-              >
-                {planLabel(plan.planId)}
-              </Badge>
+              <div className="flex flex-col gap-1">
+                <Badge
+                  className={cn(
+                    "w-fit px-2 py-0.5 text-xs",
+                    isPaid
+                      ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                  variant="outline"
+                >
+                  {planLabel(plan.planId)}
+                </Badge>
+                {priceLabel ? (
+                  <span className="font-mono text-[11px] text-foreground/80">
+                    {priceLabel}
+                  </span>
+                ) : null}
+              </div>
             }
           />
           <Stat

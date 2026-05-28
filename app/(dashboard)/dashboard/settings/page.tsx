@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
 import {
   BillingPortalButton,
+  RefreshSubscriptionButton,
   SignOutButton,
   TeamInviteForm,
 } from "@/components/dashboard/settings-actions";
@@ -96,9 +97,15 @@ export default async function DashboardSettingsPage() {
                 }
               />
             </div>
-            <div className="pt-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2">
               <BillingPortalButton hasSubscription={hasSubscription} />
+              <RefreshSubscriptionButton size="default" variant="outline" />
             </div>
+            <p className="text-muted-foreground text-xs">
+              Just checked out and still seeing the old plan? Click{" "}
+              <span className="font-medium">Refresh subscription</span> — we'll
+              pull the latest state from Stripe.
+            </p>
           </CardContent>
         </Card>
       </section>

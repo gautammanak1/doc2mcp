@@ -8,7 +8,7 @@ No install, no API keys to share, no local clone. Powered by ASI1.
 
 ![doc2mcp social preview](./public/og-image.png)
 
-[Live](https://doc2mcp.dev) · [Docs](https://doc2mcp.dev/docs) · [Pricing](https://doc2mcp.dev/pricing)
+[Live](https://doc2mcp.site) · [Docs](https://doc2mcp.site/docs) · [Pricing](https://doc2mcp.site/pricing)
 
 </div>
 
@@ -27,7 +27,7 @@ doc2mcp turns any documentation site into a hosted **Model Context Protocol (MCP
 {
   "mcpServers": {
     "stripe": {
-      "url": "https://doc2mcp.dev/api/mcp/<projectId>/mcp",
+      "url": "https://doc2mcp.site/api/mcp/<projectId>/mcp",
       "headers": {
         "Authorization": "Bearer <project-token>"
       }
@@ -115,7 +115,7 @@ Set `NEXT_PUBLIC_APP_URL` to your deployed domain so generated MCP configs point
 | | |
 |---|---|
 | Framework | Next.js 16, React 19, Turbopack |
-| AI | ASI1 (`asi1-mini` by default) |
+| AI | ASI1 (`asi1` by default) |
 | Database | Supabase Postgres |
 | Auth | NextAuth 5 (credentials + guest) |
 | UI | Tailwind v4, shadcn/ui, Framer Motion, Streamdown |

@@ -6,7 +6,7 @@ import { PricingSection } from "@/components/landing/pricing-section";
 export const metadata: Metadata = {
   title: "Pricing — doc2mcp",
   description:
-    "Simple plans for turning docs into MCPs. Starter $5, Pro $20, Team $50. Monthly, 6-month, or yearly billing.",
+    "Free forever for tinkering. Starter $3.99, Pro $14.99, Team $39.99. Monthly, 6-month, or yearly billing.",
 };
 
 export default function PricingPage() {

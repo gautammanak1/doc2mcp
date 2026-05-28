@@ -24,7 +24,7 @@ Open **Cursor → Settings → MCP → Edit `mcp.json`** and merge into `mcpServ
 {
   "mcpServers": {
     "langchain": {
-      "url": "https://doc2mcp.dev/api/mcp/<projectId>/mcp",
+      "url": "https://doc2mcp.site/api/mcp/<projectId>/mcp",
       "headers": {
         "Authorization": "Bearer <project-token>"
       }

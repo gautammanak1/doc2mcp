@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { asi1GenerateText } from "@/lib/asi1/client";
 
 export interface AuthMethod {
   type: "api_key" | "oauth2" | "bearer" | "basic" | "jwt" | "custom" | "none";
@@ -15,8 +15,6 @@ export interface AuthInference {
   summary: string;
   securityConsiderations: string[];
 }
-
-const client = new Anthropic();
 
 export async function inferAuthMethods(
   documentationContent: string,
@@ -46,19 +44,24 @@ Return a JSON object with:
   "securityConsiderations": ["list of security notes"]
 }`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 1024,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You are a senior API security engineer. Return valid JSON only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 1024,
+    }
+  );
 
-  const text =
-    response.content[0].type === "text" ? response.content[0].text : "";
+  const text = response.text;
 
   try {
     const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -71,8 +74,13 @@ Return a JSON object with:
         securityConsiderations: parsed.securityConsiderations || [],
       };
     }
-  } catch (error) {
-    console.error("[v0] Failed to parse auth inference:", error);
+  } catch {
+    return {
+      methods: [],
+      confidence: 0,
+      summary: "Unable to determine authentication methods",
+      securityConsiderations: [],
+    };
   }
 
   return {
@@ -102,16 +110,22 @@ Include:
 
 Return production-ready code with comments.`;
 
-  const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
-    max_tokens: 2048,
-    messages: [
+  const response = await asi1GenerateText(
+    [
+      {
+        role: "system",
+        content:
+          "You generate secure API authentication implementation code. Return code only.",
+      },
       {
         role: "user",
         content: prompt,
       },
     ],
-  });
+    {
+      max_tokens: 2048,
+    }
+  );
 
-  return response.content[0].type === "text" ? response.content[0].text : "";
+  return response.text;
 }

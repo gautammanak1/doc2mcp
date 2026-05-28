@@ -15,7 +15,7 @@ Just the JSON block from the convert page:
 {
   "mcpServers": {
     "langchain": {
-      "url": "https://doc2mcp.dev/api/mcp/<projectId>/mcp",
+      "url": "https://doc2mcp.site/api/mcp/<projectId>/mcp",
       "headers": {
         "Authorization": "Bearer <project-token>"
       }

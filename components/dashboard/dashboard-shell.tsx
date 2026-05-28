@@ -83,8 +83,8 @@ export function DashboardShell({
 
         <nav className="flex-1 space-y-1 px-3 py-4">
           <Link
-            className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-violet-500/15 px-3 py-2 font-medium text-sm text-violet-300 transition-colors hover:bg-violet-500/25"
-            href="/"
+            className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-violet-500/15 px-3 py-2 font-medium text-sm text-violet-700 transition-colors hover:bg-violet-500/25 dark:text-violet-300"
+            href="/chat"
           >
             <Plus className="size-4" />
             New conversion
@@ -119,7 +119,7 @@ export function DashboardShell({
           >
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium text-sm">{userEmail}</p>
-              <p className="text-muted-foreground text-xs">{planLabel}</p>
+              <p className="text-muted-foreground text-xs">View profile</p>
             </div>
             <Badge variant="secondary">{planLabel}</Badge>
           </Link>
@@ -156,7 +156,7 @@ export function DashboardShell({
             <span className="font-display font-semibold text-sm">doc2mcp</span>
           </Link>
           <Button asChild size="sm" type="button" variant="outline">
-            <Link href="/">
+            <Link href="/chat">
               <Plus className="mr-1 size-3.5" />
               New
             </Link>
@@ -189,7 +189,7 @@ export function DashboardShell({
 
         <footer className="border-border/50 border-t bg-card/20 px-6 py-4 text-muted-foreground text-xs">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span>doc2mcp · MCP conversion platform</span>
+            <span>MCP conversion platform</span>
             <Link
               className="flex items-center gap-1 hover:text-foreground"
               href="/docs"

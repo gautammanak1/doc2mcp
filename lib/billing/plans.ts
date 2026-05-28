@@ -22,13 +22,13 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     id: "starter",
     name: "Starter",
     prices: {
-      monthly: 500,
-      biannual: 2400,
-      yearly: 3600,
+      monthly: 399,
+      biannual: 1914,
+      yearly: 2868,
     },
     entitlements: {
-      mcpConversionsPerMonth: 20,
-      maxPagesPerSite: 80,
+      mcpConversionsPerMonth: 50,
+      maxPagesPerSite: 150,
       privateProjects: false,
       recrawlHours: null,
       teammates: 1,
@@ -38,13 +38,13 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     id: "pro",
     name: "Pro",
     prices: {
-      monthly: 2000,
-      biannual: 9600,
-      yearly: 15_600,
+      monthly: 1499,
+      biannual: 7194,
+      yearly: 11_988,
     },
     entitlements: {
       mcpConversionsPerMonth: -1,
-      maxPagesPerSite: 500,
+      maxPagesPerSite: 750,
       privateProjects: true,
       recrawlHours: 24,
       teammates: 1,
@@ -54,13 +54,13 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     id: "team",
     name: "Team",
     prices: {
-      monthly: 5000,
-      biannual: 24_000,
-      yearly: 39_600,
+      monthly: 3999,
+      biannual: 19_194,
+      yearly: 31_188,
     },
     entitlements: {
       mcpConversionsPerMonth: -1,
-      maxPagesPerSite: 2000,
+      maxPagesPerSite: 2500,
       privateProjects: true,
       recrawlHours: 6,
       teammates: 5,
@@ -69,8 +69,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 };
 
 export const FREE_ENTITLEMENTS: PlanEntitlements = {
-  mcpConversionsPerMonth: 20,
-  maxPagesPerSite: 80,
+  mcpConversionsPerMonth: 5,
+  maxPagesPerSite: 50,
   privateProjects: false,
   recrawlHours: null,
   teammates: 1,

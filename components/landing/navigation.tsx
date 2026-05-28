@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 const navLinks = [
   { name: "Features", href: "/#features" },
   { name: "How it works", href: "/#how-it-works" },
+  { name: "Compare", href: "/comparison" },
   { name: "Pricing", href: "/pricing" },
   { name: "Docs", href: "/docs" },
 ];
@@ -100,10 +101,10 @@ export function LandingNavigation({
                   <Badge
                     className={`gap-1 px-1.5 py-0 text-[10px] ${
                       session.isAdmin
-                        ? "border-violet-500/30 bg-violet-500/15 text-violet-300"
+                        ? "border-violet-500/30 bg-violet-500/15 text-violet-700 dark:text-violet-300"
                         : session.plan === "free"
                           ? "border-foreground/15 bg-muted text-muted-foreground"
-                          : "border-emerald-500/30 bg-emerald-500/15 text-emerald-300"
+                          : "border-emerald-500/30 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                     }`}
                     variant="outline"
                   >
@@ -193,7 +194,7 @@ export function LandingNavigation({
                     <Badge
                       className={`shrink-0 text-[10px] ${
                         session.isAdmin
-                          ? "bg-violet-500/15 text-violet-300"
+                          ? "bg-violet-500/15 text-violet-700 dark:text-violet-300"
                           : "bg-muted text-muted-foreground"
                       }`}
                       variant="outline"

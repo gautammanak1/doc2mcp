@@ -1,5 +1,10 @@
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { ObservabilityDashboard } from "@/components/admin/observability-dashboard";
+import {
+  SkeletonStatCards,
+  SkeletonTable,
+} from "@/components/ui/page-skeleton";
 import {
   getErrorClassDistribution,
   getHourlyBuckets,
@@ -7,7 +12,30 @@ import {
   getRecentJobFailures,
 } from "@/lib/db/job-metrics";
 
-export default async function AdminObservabilityPage() {
+export default function AdminObservabilityPage() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-semibold text-xl">Observability</h2>
+        <p className="text-muted-foreground text-sm">
+          Job metrics, error distribution, and recent failures (last 24h)
+        </p>
+      </div>
+      <Suspense
+        fallback={
+          <div className="space-y-6">
+            <SkeletonStatCards />
+            <SkeletonTable columns={4} rows={6} />
+          </div>
+        }
+      >
+        <ObservabilityData />
+      </Suspense>
+    </div>
+  );
+}
+
+async function ObservabilityData() {
   await connection();
   const [summary, failures, errorClasses, buckets] = await Promise.all([
     getJobMetricSummary(24),
