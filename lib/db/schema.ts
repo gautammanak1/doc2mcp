@@ -2,6 +2,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
+  integer,
   json,
   pgTable,
   primaryKey,
@@ -20,7 +21,7 @@ export const user = pgTable("User", {
   image: text("image"),
   isAnonymous: boolean("isAnonymous").notNull().default(false),
   disabled: boolean("disabled").notNull().default(false),
-  stripeCustomerId: text("stripeCustomerId"),
+  razorpayCustomerId: text("razorpayCustomerId"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
@@ -207,8 +208,11 @@ export const subscription = pgTable("Subscription", {
   })
     .notNull()
     .default("incomplete"),
-  stripeCustomerId: text("stripeCustomerId").notNull(),
-  stripeSubscriptionId: text("stripeSubscriptionId").notNull(),
+  razorpayCustomerId: text("razorpayCustomerId"),
+  razorpayOrderId: text("razorpayOrderId").notNull(),
+  razorpayPaymentId: text("razorpayPaymentId").notNull(),
+  amount: integer("amount").notNull().default(0),
+  currency: varchar("currency", { length: 8 }).notNull().default("INR"),
   currentPeriodStart: timestamp("currentPeriodStart"),
   currentPeriodEnd: timestamp("currentPeriodEnd"),
   cancelAtPeriodEnd: boolean("cancelAtPeriodEnd").notNull().default(false),

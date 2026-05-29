@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { formatInrPaise, PLANS } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 type Feature = {
@@ -133,12 +134,12 @@ export function UpgradeBanner({
             </p>
             <p className="mt-1 flex items-baseline gap-1">
               <span className="font-display font-semibold text-2xl">
-                $14.99
+                {formatInrPaise(PLANS.pro.prices.monthly)}
               </span>
               <span className="text-muted-foreground text-xs">/ mo</span>
             </p>
             <p className="text-muted-foreground text-[11px]">
-              Cancel anytime · 1-click upgrade
+              One-time Razorpay payment · activates instantly
             </p>
           </div>
 

@@ -12,7 +12,7 @@ import { auth } from "@/app/(auth)/auth";
 import { ProfileHero } from "@/components/dashboard/profile-hero";
 import { ProfileNameEditor } from "@/components/dashboard/profile-name-editor";
 import {
-  BillingPortalButton,
+  ManageBillingButton,
   SignOutButton,
 } from "@/components/dashboard/settings-actions";
 import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
@@ -205,12 +205,12 @@ export default async function DashboardProfilePage() {
             <CardTitle>Billing</CardTitle>
             <CardDescription>
               {hasSubscription
-                ? "Open the Stripe customer portal to manage payment methods, invoices, and cancellation."
+                ? "Paid via Razorpay. Renew or change plan from the pricing page when your window ends."
                 : "You're on the Free plan. Pick a paid plan to unlock private projects, unlimited conversions, and auto re-crawl."}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
-            <BillingPortalButton hasSubscription={hasSubscription} />
+            <ManageBillingButton hasSubscription={hasSubscription} />
             {hasSubscription ? (
               <Button asChild type="button" variant="outline">
                 <Link href="/pricing">Compare plans</Link>

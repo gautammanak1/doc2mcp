@@ -9,7 +9,8 @@ export default function AdminUsersPage() {
       <div>
         <h2 className="font-semibold text-xl">Users</h2>
         <p className="text-muted-foreground text-sm">
-          Disable bans Supabase login and cancels Stripe subscription
+          Disable bans Supabase login and revokes the user's active
+          Razorpay-backed plan.
         </p>
       </div>
       <Suspense fallback={<SkeletonTable columns={6} rows={10} />}>

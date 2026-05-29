@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { isPlanId, PLANS } from "@/lib/billing/plans";
+import { formatInrPaise, isPlanId, PLANS } from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 type Plan = {
@@ -75,10 +75,9 @@ function planPriceLabel(planId: string, cycle: string | null): string | null {
       : cycle === "biannual"
         ? "biannual"
         : "monthly";
-  const cents = cfg.prices[c];
-  const dollars = (cents / 100).toFixed(2);
+  const paise = cfg.prices[c];
   const suffix = c === "yearly" ? "/year" : c === "biannual" ? "/6 mo" : "/mo";
-  return `$${dollars}${suffix}`;
+  return `${formatInrPaise(paise)}${suffix}`;
 }
 
 function statusTone(status: string | null): {

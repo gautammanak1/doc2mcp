@@ -6,7 +6,7 @@ import { PricingSection } from "@/components/landing/pricing-section";
 export const metadata: Metadata = {
   title: "Pricing — doc2mcp",
   description:
-    "Free forever for tinkering. Starter $3.99, Pro $14.99, Team $39.99. Monthly, 6-month, or yearly billing.",
+    "Free forever for tinkering. Starter ₹299, Pro ₹999, Team ₹2,999 per month. Razorpay checkout, INR pricing, monthly / 6-month / yearly cycles.",
 };
 
 export default function PricingPage() {

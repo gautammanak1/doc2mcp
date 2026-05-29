@@ -34,6 +34,8 @@ const REDACT_KEYS = new Set([
   "cookie",
   "stripeSecretKey",
   "stripe_secret_key",
+  "razorpayKeySecret",
+  "razorpay_key_secret",
   "anonKey",
   "service_role_key",
 ]);

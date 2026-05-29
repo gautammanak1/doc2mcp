@@ -1,7 +1,13 @@
+import { desc, eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/postgres-js";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { SkeletonTable } from "@/components/ui/page-skeleton";
-import { getStripe, isStripeConfigured } from "@/lib/billing/stripe";
+import { formatInrPaise } from "@/lib/billing/plans";
+import { getPostgresClient } from "@/lib/db/client";
+import { subscription, user } from "@/lib/db/schema";
+
+const db = drizzle(getPostgresClient());
 
 export default function AdminPaymentsPage() {
   return (
@@ -9,62 +15,84 @@ export default function AdminPaymentsPage() {
       <div>
         <h2 className="font-semibold text-xl">Payments</h2>
         <p className="text-muted-foreground text-sm">
-          Recent paid invoices from Stripe
+          Razorpay orders that activated paid plans
         </p>
       </div>
-      <Suspense fallback={<SkeletonTable columns={5} rows={8} />}>
-        <InvoicesTable />
+      <Suspense fallback={<SkeletonTable columns={6} rows={8} />}>
+        <PaymentsTable />
       </Suspense>
     </div>
   );
 }
 
-async function InvoicesTable() {
+async function PaymentsTable() {
   await connection();
 
-  if (!isStripeConfigured()) {
+  const rows = await db
+    .select({
+      id: subscription.id,
+      plan: subscription.plan,
+      billingCycle: subscription.billingCycle,
+      status: subscription.status,
+      amount: subscription.amount,
+      currency: subscription.currency,
+      orderId: subscription.razorpayOrderId,
+      paymentId: subscription.razorpayPaymentId,
+      createdAt: subscription.createdAt,
+      currentPeriodEnd: subscription.currentPeriodEnd,
+      email: user.email,
+    })
+    .from(subscription)
+    .leftJoin(user, eq(subscription.userId, user.id))
+    .orderBy(desc(subscription.createdAt))
+    .limit(50);
+
+  if (rows.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
-        Stripe is not configured. Add STRIPE_SECRET_KEY to view payments.
+        No Razorpay payments yet. Run a checkout from /pricing to populate this
+        table.
       </p>
     );
   }
 
-  const stripe = getStripe();
-  const invoices = await stripe.invoices.list({ limit: 50 });
-
   return (
     <div className="overflow-x-auto rounded-xl border border-border/50">
-      <table className="w-full min-w-[700px] text-left text-sm">
+      <table className="w-full min-w-[840px] text-left text-sm">
         <thead className="border-border/50 border-b bg-muted/30 text-muted-foreground text-xs">
           <tr>
-            <th className="px-4 py-3">Invoice</th>
+            <th className="px-4 py-3">Order</th>
             <th className="px-4 py-3">Customer</th>
+            <th className="px-4 py-3">Plan</th>
             <th className="px-4 py-3">Amount</th>
             <th className="px-4 py-3">Status</th>
+            <th className="px-4 py-3">Renews</th>
             <th className="px-4 py-3">Date</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/30">
-          {invoices.data.map((inv) => (
-            <tr key={inv.id}>
-              <td className="px-4 py-3 font-mono text-xs">
-                {inv.number ?? inv.id}
-              </td>
+          {rows.map((row) => (
+            <tr key={row.id}>
+              <td className="px-4 py-3 font-mono text-xs">{row.orderId}</td>
               <td className="px-4 py-3 text-muted-foreground">
-                {inv.customer_email ?? inv.customer?.toString() ?? "—"}
+                {row.email ?? "—"}
+              </td>
+              <td className="px-4 py-3 capitalize">
+                {row.plan} · {row.billingCycle}
               </td>
               <td className="px-4 py-3">
-                ${((inv.amount_paid ?? 0) / 100).toFixed(2)}{" "}
-                {inv.currency?.toUpperCase()}
+                {row.currency === "INR"
+                  ? formatInrPaise(row.amount)
+                  : `${(row.amount / 100).toFixed(2)} ${row.currency}`}
               </td>
-              <td className="px-4 py-3 capitalize">{inv.status}</td>
+              <td className="px-4 py-3 capitalize">{row.status}</td>
               <td className="px-4 py-3 text-muted-foreground">
-                {inv.status_transitions.paid_at
-                  ? new Date(
-                      inv.status_transitions.paid_at * 1000
-                    ).toLocaleString()
+                {row.currentPeriodEnd
+                  ? new Date(row.currentPeriodEnd).toLocaleDateString()
                   : "—"}
+              </td>
+              <td className="px-4 py-3 text-muted-foreground">
+                {new Date(row.createdAt).toLocaleString()}
               </td>
             </tr>
           ))}

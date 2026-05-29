@@ -2,17 +2,20 @@
 
 import { Check, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { PlanSubscribeButton } from "@/components/billing/plan-subscribe-button";
-import type { PlanId } from "@/lib/billing/plans";
+import { RazorpayCheckoutButton } from "@/components/billing/razorpay-checkout-button";
+import {
+  type BillingCycle,
+  billingCycleMonths,
+  formatInrPaise,
+  PLANS as PLAN_CONFIG,
+  type PlanId,
+} from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
-export type BillingCycle = "monthly" | "biannual" | "yearly";
-
 type Plan = {
-  id: string;
+  id: PlanId;
   name: string;
   tagline: string;
-  price: Record<BillingCycle, number>;
   badge?: string;
   highlight?: boolean;
   features: string[];
@@ -41,12 +44,11 @@ const FREE_PLAN: FreePlan = {
   ctaLabel: "Start free",
 };
 
-const PLANS: Plan[] = [
+const PLAN_COPY: Plan[] = [
   {
     id: "starter",
     name: "Starter",
     tagline: "For solo devs shipping side-projects.",
-    price: { monthly: 3.99, biannual: 3.19, yearly: 2.39 },
     features: [
       "50 MCP conversions / month",
       "Up to 150 pages per docs site",
@@ -61,7 +63,6 @@ const PLANS: Plan[] = [
     id: "pro",
     name: "Pro",
     tagline: "For builders shipping AI-native products.",
-    price: { monthly: 14.99, biannual: 11.99, yearly: 9.99 },
     badge: "Most popular",
     highlight: true,
     features: [
@@ -78,7 +79,6 @@ const PLANS: Plan[] = [
     id: "team",
     name: "Team",
     tagline: "For teams operating internal docs at scale.",
-    price: { monthly: 39.99, biannual: 31.99, yearly: 25.99 },
     features: [
       "Everything in Pro",
       "Up to 2,500 pages per docs site",
@@ -100,7 +100,7 @@ const CYCLE_LABEL: Record<BillingCycle, string> = {
 const CYCLE_DISCOUNT: Record<BillingCycle, string | null> = {
   monthly: null,
   biannual: "Save 20%",
-  yearly: "Save 33%",
+  yearly: "Save 40%",
 };
 
 const CYCLE_SUFFIX: Record<BillingCycle, string> = {
@@ -108,6 +108,17 @@ const CYCLE_SUFFIX: Record<BillingCycle, string> = {
   biannual: "/mo billed every 6 mo",
   yearly: "/mo billed annually",
 };
+
+/**
+ * Convert a Razorpay-style total in paise into the "per month" headline
+ * shown on the pricing card.
+ */
+function monthlyHeadline(planId: PlanId, cycle: BillingCycle): string {
+  const totalPaise = PLAN_CONFIG[planId].prices[cycle];
+  const months = billingCycleMonths(cycle);
+  const perMonthPaise = Math.round(totalPaise / months);
+  return formatInrPaise(perMonthPaise);
+}
 
 export function PricingSection() {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
@@ -225,7 +236,7 @@ export function PricingSection() {
             </a>
           </div>
 
-          {PLANS.map((plan, index) => (
+          {PLAN_COPY.map((plan, index) => (
             <div
               className={cn(
                 "relative flex flex-col gap-6 rounded-2xl border bg-card/40 p-6 backdrop-blur-xl transition-all duration-500",
@@ -257,12 +268,16 @@ export function PricingSection() {
 
               <div className="flex items-baseline gap-1">
                 <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
-                  ${plan.price[cycle].toFixed(2)}
+                  {monthlyHeadline(plan.id, cycle)}
                 </span>
                 <span className="text-muted-foreground text-xs">
                   {CYCLE_SUFFIX[cycle]}
                 </span>
               </div>
+              <p className="-mt-3 font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+                Charged once as{" "}
+                {formatInrPaise(PLAN_CONFIG[plan.id].prices[cycle])} · INR
+              </p>
 
               <ul className="flex flex-1 flex-col gap-2 text-sm">
                 {plan.features.map((feature) => (
@@ -273,11 +288,11 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <PlanSubscribeButton
+              <RazorpayCheckoutButton
                 cycle={cycle}
                 highlight={plan.highlight}
                 label={plan.ctaLabel}
-                planId={plan.id as PlanId}
+                planId={plan.id}
               />
             </div>
           ))}

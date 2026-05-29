@@ -964,13 +964,16 @@ export async function getActiveSubscriptionByUserId(userId: string) {
   }
 }
 
-export async function upsertSubscriptionFromStripe({
+export async function upsertSubscriptionFromRazorpay({
   userId,
   plan,
   billingCycle,
   status,
-  stripeCustomerId,
-  stripeSubscriptionId,
+  razorpayOrderId,
+  razorpayPaymentId,
+  razorpayCustomerId,
+  amount,
+  currency,
   currentPeriodStart,
   currentPeriodEnd,
   cancelAtPeriodEnd,
@@ -979,8 +982,11 @@ export async function upsertSubscriptionFromStripe({
   plan: PlanId;
   billingCycle: BillingCycle;
   status: Subscription["status"];
-  stripeCustomerId: string;
-  stripeSubscriptionId: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpayCustomerId: string | null;
+  amount: number;
+  currency: string;
   currentPeriodStart: Date | null;
   currentPeriodEnd: Date | null;
   cancelAtPeriodEnd: boolean;
@@ -989,7 +995,7 @@ export async function upsertSubscriptionFromStripe({
     const existing = await db
       .select()
       .from(subscription)
-      .where(eq(subscription.stripeSubscriptionId, stripeSubscriptionId))
+      .where(eq(subscription.razorpayOrderId, razorpayOrderId))
       .limit(1);
 
     if (existing.length > 0) {
@@ -999,6 +1005,10 @@ export async function upsertSubscriptionFromStripe({
           plan,
           billingCycle,
           status,
+          razorpayPaymentId,
+          razorpayCustomerId,
+          amount,
+          currency,
           currentPeriodStart,
           currentPeriodEnd,
           cancelAtPeriodEnd,
@@ -1016,8 +1026,11 @@ export async function upsertSubscriptionFromStripe({
         plan,
         billingCycle,
         status,
-        stripeCustomerId,
-        stripeSubscriptionId,
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpayCustomerId,
+        amount,
+        currency,
         currentPeriodStart,
         currentPeriodEnd,
         cancelAtPeriodEnd,
@@ -1025,7 +1038,7 @@ export async function upsertSubscriptionFromStripe({
       .returning();
     return created;
   } catch (error) {
-    console.error("upsertSubscriptionFromStripe:", error);
+    console.error("upsertSubscriptionFromRazorpay:", error);
     throw new ChatbotError(
       "bad_request:database",
       "Failed to upsert subscription"
@@ -1033,23 +1046,34 @@ export async function upsertSubscriptionFromStripe({
   }
 }
 
-export async function getUserByStripeCustomerId(stripeCustomerId: string) {
-  const rows = await db
-    .select()
-    .from(user)
-    .where(eq(user.stripeCustomerId, stripeCustomerId))
-    .limit(1);
-  return rows[0] ?? null;
-}
-
-export async function setUserStripeCustomerId(
+export async function setUserRazorpayCustomerId(
   userId: string,
-  stripeCustomerId: string
+  razorpayCustomerId: string
 ) {
   await db
     .update(user)
-    .set({ stripeCustomerId, updatedAt: new Date() })
+    .set({ razorpayCustomerId, updatedAt: new Date() })
     .where(eq(user.id, userId));
+}
+
+/**
+ * Mark every active/trialing subscription for a user as canceled.
+ * Used when an admin disables a user (or any other revocation flow).
+ */
+export async function cancelActiveSubscriptionForUser(userId: string) {
+  await db
+    .update(subscription)
+    .set({
+      status: "canceled",
+      cancelAtPeriodEnd: true,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(subscription.userId, userId),
+        inArray(subscription.status, ["active", "trialing", "past_due"])
+      )
+    );
 }
 
 export async function updateUserName(userId: string, name: string | null) {
@@ -1192,11 +1216,11 @@ export async function hardDeleteUser(userId: string) {
   await db.delete(user).where(eq(user.id, userId));
 }
 
-export async function getSubscriptionByStripeId(stripeSubscriptionId: string) {
+export async function getSubscriptionByRazorpayOrderId(orderId: string) {
   const rows = await db
     .select()
     .from(subscription)
-    .where(eq(subscription.stripeSubscriptionId, stripeSubscriptionId))
+    .where(eq(subscription.razorpayOrderId, orderId))
     .limit(1);
   return rows[0] ?? null;
 }

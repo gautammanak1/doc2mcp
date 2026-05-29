@@ -1,8 +1,7 @@
 import { requireAdmin } from "@/lib/admin/require-admin";
-import { getStripe } from "@/lib/billing/stripe";
 import {
+  cancelActiveSubscriptionForUser,
   disableUser,
-  getActiveSubscriptionByUserId,
   getUserById,
 } from "@/lib/db/queries";
 import { createSupabaseAdmin } from "@/lib/supabase/admin";
@@ -24,11 +23,10 @@ export async function POST(
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
-    const activeSub = await getActiveSubscriptionByUserId(id);
-    if (activeSub?.stripeSubscriptionId) {
-      const stripe = getStripe();
-      await stripe.subscriptions.cancel(activeSub.stripeSubscriptionId);
-    }
+    // Razorpay Standard Checkout creates one-off orders, not recurring
+    // subscriptions, so cancellation is purely a local state change — we mark
+    // the active subscription row as canceled to revoke entitlements.
+    await cancelActiveSubscriptionForUser(id);
 
     const supabase = createSupabaseAdmin();
     await supabase.auth.admin.updateUserById(id, {

@@ -12,7 +12,6 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { CheckoutSuccessHandler } from "@/components/billing/checkout-success-handler";
-import { RefreshSubscriptionButton } from "@/components/dashboard/settings-actions";
 import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -170,7 +169,7 @@ export default async function DashboardOverviewPage() {
                 server.
               </CardDescription>
               <Button asChild className="mt-2" type="button">
-                <Link href="/">Start your first conversion</Link>
+                <Link href="/chat">Start your first conversion</Link>
               </Button>
             </CardContent>
           </Card>
@@ -223,7 +222,6 @@ export default async function DashboardOverviewPage() {
               <Button asChild type="button" variant="ghost">
                 <Link href="/dashboard/usage">View usage</Link>
               </Button>
-              <RefreshSubscriptionButton size="sm" variant="ghost" />
             </div>
           </CardContent>
         </Card>
