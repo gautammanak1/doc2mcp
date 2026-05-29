@@ -19,7 +19,11 @@ export async function LandingNavigationServer() {
     const plan = await getUserPlan(session.user.id).catch(() => null);
     info = {
       email: session.user.email,
-      initial: (session.user.email[0] ?? "?").toUpperCase(),
+      name: session.user.name ?? null,
+      initial: (
+        (session.user.name?.trim()?.[0] || session.user.email[0]) ??
+        "?"
+      ).toUpperCase(),
       plan: plan?.planId ?? "free",
       isAdmin: isAdminEmail(session.user.email),
     };

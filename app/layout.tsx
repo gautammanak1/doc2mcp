@@ -13,11 +13,7 @@ export const metadata: Metadata = {
   ),
   title: "doc2mcp — Paste Docs URL, Get MCP Server",
   description:
-    "Turn any documentation URL into a Cursor-ready MCP server in seconds. No install, no API keys — powered by ASI1.",
-  icons: {
-    icon: "/doc2mcp-logo.png",
-    apple: "/doc2mcp-logo.png",
-  },
+    "Turn any documentation URL into a Cursor-ready MCP server in seconds. No install, no API keys.",
   openGraph: {
     title: "doc2mcp — Any docs URL → Cursor-ready MCP",
     description:
@@ -26,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "doc2mcp",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-image-v2.png",
         width: 1200,
         height: 630,
         alt: "doc2mcp — paste docs URL, get MCP server",
@@ -39,7 +35,7 @@ export const metadata: Metadata = {
     title: "doc2mcp — Any docs URL → Cursor-ready MCP",
     description:
       "Paste a docs URL. Get a remote MCP server. No install, no API keys.",
-    images: ["/og-image.png"],
+    images: ["/og-image-v2.png"],
   },
 };
 
@@ -74,7 +70,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           disableTransitionOnChange
           enableSystem
         >

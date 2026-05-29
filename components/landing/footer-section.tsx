@@ -1,10 +1,10 @@
 "use client";
 
-import { Github, Linkedin, Twitter, Youtube } from "lucide-react";
+import { Github, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
-import { CONTACT_EMAIL, GITHUB_REPO_URL } from "@/lib/config/site";
+import { CONTACT_EMAIL } from "@/lib/config/site";
 
 const FEATURES_LINKS = [
   { label: "Chat", href: "/chat" },
@@ -15,6 +15,7 @@ const FEATURES_LINKS = [
 
 const RESOURCES_LINKS = [
   { label: "Docs", href: "/docs" },
+  { label: "Blog", href: "/blog" },
   { label: "Getting started", href: "/docs/getting-started" },
   { label: "Workflow", href: "/docs/workflow" },
   { label: "Security", href: "/docs/security" },
@@ -28,12 +29,19 @@ const LEGAL_LINKS = [
 ];
 
 const SOCIAL_LINKS = [
-  { label: "X / Twitter", href: "https://x.com/doc2mcp", icon: Twitter },
-  { label: "YouTube", href: "https://youtube.com/@doc2mcp", icon: Youtube },
-  { label: "GitHub", href: GITHUB_REPO_URL, icon: Github },
+  {
+    label: "GitHub",
+    href: "https://github.com/Meerut-code-hub",
+    icon: Github,
+  },
+  {
+    label: "X / Twitter",
+    href: "https://twitter.com/MeerutCodehub",
+    icon: Twitter,
+  },
   {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/company/doc2mcp",
+    href: "https://www.linkedin.com/company/meerutcodehub/",
     icon: Linkedin,
   },
 ];
@@ -120,19 +128,52 @@ export function FooterSection() {
             >
               {CONTACT_EMAIL}
             </a>
-            {" · "}Powered by ASI1 · hosted on Vercel
+            {" · Built by "}
+            <a
+              className="font-medium text-foreground/90 underline decoration-foreground/20 decoration-dotted underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/60"
+              href="https://www.linkedin.com/company/meerutcodehub/"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              MeerutCodeHub
+            </a>
           </p>
         </div>
       </div>
 
-      <div
-        aria-hidden="true"
-        className="pointer-events-none mt-12 select-none overflow-hidden text-center"
-      >
-        <p className="-mb-4 bg-gradient-to-b from-foreground/10 to-foreground/0 bg-clip-text font-display font-bold leading-none tracking-tight text-transparent text-[clamp(3rem,14vw,18rem)] sm:-mb-10 lg:-mb-16">
-          doc2mcp
-        </p>
-      </div>
+      <AnimatedWordmark />
     </footer>
+  );
+}
+
+function AnimatedWordmark() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none mt-12 select-none overflow-hidden text-center"
+    >
+      <p className="-mb-4 footer-wordmark bg-gradient-to-b from-foreground/15 via-foreground/5 to-foreground/0 bg-clip-text font-display font-bold leading-none tracking-tight text-transparent text-[clamp(3rem,14vw,18rem)] sm:-mb-10 lg:-mb-16">
+        doc2mcp
+      </p>
+      <style>{`
+        .footer-wordmark {
+          background-size: 200% 200%;
+          animation: wordmark-shimmer 8s ease-in-out infinite;
+        }
+        @keyframes wordmark-shimmer {
+          0%, 100% {
+            background-position: 0% 50%;
+            filter: drop-shadow(0 0 0 rgba(168, 85, 247, 0));
+          }
+          50% {
+            background-position: 100% 50%;
+            filter: drop-shadow(0 8px 32px rgba(168, 85, 247, 0.18));
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .footer-wordmark { animation: none; }
+        }
+      `}</style>
+    </div>
   );
 }

@@ -115,6 +115,50 @@ export async function getOrCreateOAuthUser(
   }
 }
 
+const TRANSIENT_DB_CODES = new Set([
+  "CONNECT_TIMEOUT",
+  "ETIMEDOUT",
+  "ECONNRESET",
+  "ECONNREFUSED",
+  "EAI_AGAIN",
+  "ENOTFOUND",
+]);
+
+function isTransientDbError(err: unknown): boolean {
+  if (!err || typeof err !== "object") {
+    return false;
+  }
+  const code = (err as { code?: unknown }).code;
+  return typeof code === "string" && TRANSIENT_DB_CODES.has(code);
+}
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+async function runWithDbRetry<T>(
+  task: () => Promise<T>,
+  {
+    retries = 2,
+    baseDelayMs = 200,
+  }: { retries?: number; baseDelayMs?: number } = {}
+): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await task();
+    } catch (err) {
+      lastErr = err;
+      if (attempt === retries || !isTransientDbError(err)) {
+        break;
+      }
+      await sleep(baseDelayMs * 2 ** attempt);
+    }
+  }
+  throw lastErr;
+}
+
 export async function ensureAppUserFromSupabase({
   id,
   email,
@@ -127,30 +171,36 @@ export async function ensureAppUserFromSupabase({
   image?: string | null;
 }) {
   try {
-    const byId = await db.select().from(user).where(eq(user.id, id));
-    if (byId.length > 0) {
-      return byId[0];
-    }
+    return await runWithDbRetry(async () => {
+      const byId = await db.select().from(user).where(eq(user.id, id));
+      if (byId.length > 0) {
+        return byId[0];
+      }
 
-    const byEmail = await db.select().from(user).where(eq(user.email, email));
-    if (byEmail.length > 0) {
-      return byEmail[0];
-    }
+      const byEmail = await db.select().from(user).where(eq(user.email, email));
+      if (byEmail.length > 0) {
+        return byEmail[0];
+      }
 
-    const [created] = await db
-      .insert(user)
-      .values({
-        id,
-        email,
-        name: name ?? null,
-        image: image ?? null,
-        emailVerified: true,
-      })
-      .returning();
+      const [created] = await db
+        .insert(user)
+        .values({
+          id,
+          email,
+          name: name ?? null,
+          image: image ?? null,
+          emailVerified: true,
+        })
+        .returning();
 
-    return created;
+      return created;
+    });
   } catch (error) {
-    console.error("ensureAppUserFromSupabase failed:", error);
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String((error as { code: unknown }).code)
+        : "unknown";
+    console.error(`ensureAppUserFromSupabase failed (code=${code})`);
     throw new ChatbotError(
       "bad_request:database",
       "Failed to sync Supabase user"

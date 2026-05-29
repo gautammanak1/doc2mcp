@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/post-login",
   "/pricing",
   "/demo",
+  "/blog",
   "/contact",
   "/privacy-policy",
   "/refund-policy",
@@ -88,6 +89,41 @@ function setCurrencyHintIfMissing(
   });
 }
 
+/**
+ * Apply baseline security headers to every response. Cheap insurance that
+ * blocks clickjacking, mime sniffing, and unnecessary referrer leakage.
+ */
+function applySecurityHeaders(response: NextResponse) {
+  const headers = response.headers;
+  if (!headers.has("X-Content-Type-Options")) {
+    headers.set("X-Content-Type-Options", "nosniff");
+  }
+  if (!headers.has("X-Frame-Options")) {
+    headers.set("X-Frame-Options", "DENY");
+  }
+  if (!headers.has("Referrer-Policy")) {
+    headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  }
+  if (!headers.has("Permissions-Policy")) {
+    headers.set(
+      "Permissions-Policy",
+      'camera=(), microphone=(), geolocation=(), payment=(self "https://api.razorpay.com")'
+    );
+  }
+  if (
+    process.env.NODE_ENV === "production" &&
+    !headers.has("Strict-Transport-Security")
+  ) {
+    headers.set(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload"
+    );
+  }
+  // Strip framework fingerprints. They give attackers free recon.
+  headers.delete("X-Powered-By");
+  headers.delete("Server");
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -103,23 +139,32 @@ export async function proxy(request: NextRequest) {
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
   setCurrencyHintIfMissing(request, supabaseResponse);
+  applySecurityHeaders(supabaseResponse);
 
   if (isPublicPath(pathname)) {
     if (user && AUTH_PAGES.includes(pathname)) {
-      return NextResponse.redirect(new URL(`${base}/`, request.url));
+      const redirect = NextResponse.redirect(new URL(`${base}/`, request.url));
+      applySecurityHeaders(redirect);
+      return redirect;
     }
 
     return supabaseResponse;
   }
 
   if (pathname.startsWith("/admin") && (!user || !isAdminEmail(user.email))) {
-    return NextResponse.redirect(new URL(`${base}/login`, request.url));
+    const redirect = NextResponse.redirect(
+      new URL(`${base}/login`, request.url)
+    );
+    applySecurityHeaders(redirect);
+    return redirect;
   }
 
   if (pathname.startsWith("/dashboard") && !user) {
     const redirectUrl = new URL(`${base}/login`, request.url);
     redirectUrl.searchParams.set("redirectUrl", pathname);
-    return NextResponse.redirect(redirectUrl);
+    const redirect = NextResponse.redirect(redirectUrl);
+    applySecurityHeaders(redirect);
+    return redirect;
   }
 
   return supabaseResponse;
@@ -135,6 +180,8 @@ export const config = {
     "/auth/:path*",
     "/pricing",
     "/demo",
+    "/blog",
+    "/blog/:path*",
     "/contact",
     "/privacy-policy",
     "/refund-policy",

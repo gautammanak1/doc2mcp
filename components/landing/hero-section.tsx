@@ -52,9 +52,9 @@ export function HeroSection() {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
-          <span className="inline-flex items-center gap-3 rounded-full border border-border/50 bg-card/40 px-4 py-1.5 font-mono text-[11px] text-muted-foreground backdrop-blur-xl sm:text-xs">
-            <span className="size-1.5 rounded-full bg-violet-400" />
-            docs URL → MCP server · powered by ASI1
+          <span className="inline-flex items-center gap-2.5 rounded-full border border-border/50 bg-card/40 px-3.5 py-1.5 font-mono text-[11px] text-muted-foreground backdrop-blur-xl sm:text-xs">
+            <span className="size-1.5 rounded-full bg-emerald-500" />
+            docs URL → MCP server
           </span>
         </div>
 

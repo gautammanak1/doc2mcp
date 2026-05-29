@@ -27,13 +27,14 @@ function AnalysisPageContent() {
   const [workflows, _setWorkflows] = useState<DetectedWorkflow[]>([]);
   const [isComplete, setIsComplete] = useState(false);
 
-  const handleProcessingComplete = (result: unknown) => {
+  const handleProcessingComplete = (_result: unknown) => {
     setIsComplete(true);
-    console.log("[v0] Processing complete:", result);
   };
 
   const handleProcessingError = (error: Error) => {
-    console.error("[v0] Processing error:", error);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[analysis] processing error:", error.message);
+    }
   };
 
   return (

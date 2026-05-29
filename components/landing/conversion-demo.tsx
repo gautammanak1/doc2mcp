@@ -295,7 +295,7 @@ export function HeroVisual() {
           className="w-full h-auto"
           height={1024}
           priority
-          src="/hero-flow.png"
+          src="/hero-flow-v2.png"
           unoptimized
           width={1536}
         />
