@@ -9,7 +9,14 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatInrPaise, isPlanId, PLANS } from "@/lib/billing/plans";
+import {
+  type BillingCurrency,
+  DEFAULT_CURRENCY,
+  formatMoney,
+  isBillingCurrency,
+  isPlanId,
+  PLANS,
+} from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 type Plan = {
@@ -17,6 +24,7 @@ type Plan = {
   billingCycle: string | null;
   status: string | null;
   currentPeriodEnd: Date | null;
+  currency?: string | null;
   entitlements: {
     mcpConversionsPerMonth: number;
     maxPagesPerSite: number;
@@ -64,7 +72,11 @@ function planLabel(planId: string): string {
   return planId.charAt(0).toUpperCase() + planId.slice(1);
 }
 
-function planPriceLabel(planId: string, cycle: string | null): string | null {
+function planPriceLabel(
+  planId: string,
+  cycle: string | null,
+  currencyRaw: string | null
+): string | null {
   if (!isPlanId(planId)) {
     return null;
   }
@@ -75,9 +87,13 @@ function planPriceLabel(planId: string, cycle: string | null): string | null {
       : cycle === "biannual"
         ? "biannual"
         : "monthly";
-  const paise = cfg.prices[c];
+  const currency: BillingCurrency =
+    currencyRaw && isBillingCurrency(currencyRaw)
+      ? currencyRaw
+      : DEFAULT_CURRENCY;
+  const minorUnits = cfg.prices[currency][c];
   const suffix = c === "yearly" ? "/year" : c === "biannual" ? "/6 mo" : "/mo";
-  return `${formatInrPaise(paise)}${suffix}`;
+  return `${formatMoney(minorUnits, currency)}${suffix}`;
 }
 
 function statusTone(status: string | null): {
@@ -135,7 +151,7 @@ export function ProfileHero({
   const gradient = gradientFor(email);
   const isPaid = plan.planId !== "free";
   const priceLabel = isPaid
-    ? planPriceLabel(plan.planId, plan.billingCycle)
+    ? planPriceLabel(plan.planId, plan.billingCycle, plan.currency ?? null)
     : null;
 
   return (

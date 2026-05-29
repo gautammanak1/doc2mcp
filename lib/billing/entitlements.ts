@@ -2,11 +2,17 @@ import "server-only";
 
 import { cache } from "react";
 import type {
+  BillingCurrency,
   BillingCycle,
   PlanEntitlements,
   PlanId,
 } from "@/lib/billing/plans";
-import { FREE_ENTITLEMENTS, PLANS } from "@/lib/billing/plans";
+import {
+  DEFAULT_CURRENCY,
+  FREE_ENTITLEMENTS,
+  isBillingCurrency,
+  PLANS,
+} from "@/lib/billing/plans";
 import {
   countUserConversionsThisMonth,
   getActiveSubscriptionByUserId,
@@ -18,6 +24,7 @@ export type UserPlanInfo = {
   entitlements: PlanEntitlements;
   status: string | null;
   currentPeriodEnd: Date | null;
+  currency: BillingCurrency;
 };
 
 /**
@@ -35,11 +42,16 @@ export const getUserPlan = cache(
         entitlements: FREE_ENTITLEMENTS,
         status: sub?.status ?? null,
         currentPeriodEnd: sub?.currentPeriodEnd ?? null,
+        currency: DEFAULT_CURRENCY,
       };
     }
 
     const planId = sub.plan as PlanId;
     const config = PLANS[planId];
+    const subCurrency =
+      sub.currency && isBillingCurrency(sub.currency)
+        ? sub.currency
+        : DEFAULT_CURRENCY;
 
     return {
       planId,
@@ -47,6 +59,7 @@ export const getUserPlan = cache(
       entitlements: config.entitlements,
       status: sub.status,
       currentPeriodEnd: sub.currentPeriodEnd,
+      currency: subCurrency,
     };
   }
 );

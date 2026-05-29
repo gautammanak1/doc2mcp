@@ -22,7 +22,7 @@ function buildErrorUrl(params: {
 }
 
 function safeNext(raw: string | null): string {
-  if (!raw || !raw.startsWith("/")) {
+  if (!raw?.startsWith("/")) {
     return "/chat";
   }
   if (raw.startsWith("//") || raw.startsWith("/auth/")) {

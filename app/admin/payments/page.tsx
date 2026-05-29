@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { SkeletonTable } from "@/components/ui/page-skeleton";
-import { formatInrPaise } from "@/lib/billing/plans";
+import { type BillingCurrency, formatMoney } from "@/lib/billing/plans";
 import { getPostgresClient } from "@/lib/db/client";
 import { subscription, user } from "@/lib/db/schema";
 
@@ -81,8 +81,8 @@ async function PaymentsTable() {
                 {row.plan} · {row.billingCycle}
               </td>
               <td className="px-4 py-3">
-                {row.currency === "INR"
-                  ? formatInrPaise(row.amount)
+                {row.currency === "INR" || row.currency === "USD"
+                  ? formatMoney(row.amount, row.currency as BillingCurrency)
                   : `${(row.amount / 100).toFixed(2)} ${row.currency}`}
               </td>
               <td className="px-4 py-3 capitalize">{row.status}</td>

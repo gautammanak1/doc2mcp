@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import {
-  BILLING_CURRENCY,
+  DEFAULT_CURRENCY,
   getPeriodWindow,
+  getPlanPrice,
   isBillingCycle,
   isPlanId,
-  PLANS,
 } from "@/lib/billing/plans";
 import { upsertSubscriptionFromRazorpay } from "@/lib/db/queries";
 import { getRazorpay } from "@/lib/razorpay/client";
@@ -58,15 +58,19 @@ export async function POST(request: Request) {
   // Defense-in-depth: re-fetch the order from Razorpay and confirm it belongs
   // to this signed-in user (matches notes.userId set at create-order time).
   let orderNotesUserId: string | null = null;
-  let orderAmount: number = PLANS[body.plan].prices[body.cycle];
-  let orderCurrency: string = BILLING_CURRENCY;
+  let orderAmount: number = getPlanPrice(
+    body.plan,
+    DEFAULT_CURRENCY,
+    body.cycle
+  );
+  let orderCurrency: string = DEFAULT_CURRENCY;
   try {
     const razorpay = getRazorpay();
     const order = await razorpay.orders.fetch(body.razorpay_order_id);
     orderNotesUserId = (order.notes?.userId as string | undefined) ?? null;
     orderAmount =
       typeof order.amount === "number" ? order.amount : Number(order.amount);
-    orderCurrency = order.currency ?? BILLING_CURRENCY;
+    orderCurrency = order.currency ?? DEFAULT_CURRENCY;
   } catch (error) {
     console.error("Razorpay order fetch failed during verify:", error);
     return Response.json(

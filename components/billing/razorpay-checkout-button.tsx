@@ -5,7 +5,11 @@ import Script from "next/script";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import type { BillingCycle, PlanId } from "@/lib/billing/plans";
+import type {
+  BillingCurrency,
+  BillingCycle,
+  PlanId,
+} from "@/lib/billing/plans";
 import { useSupabaseAuth } from "@/lib/supabase/auth";
 import { cn } from "@/lib/utils";
 
@@ -61,12 +65,14 @@ declare global {
 export function RazorpayCheckoutButton({
   planId,
   cycle,
+  currency,
   label,
   highlight,
   successRedirect = "/dashboard?checkout=success",
 }: {
   planId: PlanId;
   cycle: BillingCycle;
+  currency: BillingCurrency;
   label: string;
   highlight?: boolean;
   successRedirect?: string;
@@ -96,7 +102,7 @@ export function RazorpayCheckoutButton({
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planId, cycle }),
+        body: JSON.stringify({ plan: planId, cycle, currency }),
       });
 
       const data = (await res.json()) as CreateOrderResponse;
@@ -126,7 +132,7 @@ export function RazorpayCheckoutButton({
           name: data.userName ?? undefined,
           email: data.userEmail ?? undefined,
         },
-        notes: { plan: planId, cycle },
+        notes: { plan: planId, cycle, currency },
         theme: { color: "#7c3aed" },
         modal: {
           ondismiss: () => {
@@ -187,7 +193,7 @@ export function RazorpayCheckoutButton({
     } finally {
       setPending(false);
     }
-  }, [authLoading, user, router, planId, cycle, successRedirect]);
+  }, [authLoading, user, router, planId, cycle, currency, successRedirect]);
 
   return (
     <>

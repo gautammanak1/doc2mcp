@@ -324,6 +324,74 @@ const PurePreviewMessage = ({
       );
     }
 
+    if (type === "tool-generateImage") {
+      const { toolCallId, state } = part;
+      return (
+        <Tool
+          className="w-[min(100%,560px)]"
+          defaultOpen={true}
+          key={toolCallId}
+        >
+          <ToolHeader state={state} type="tool-generateImage" />
+          <ToolContent>
+            {state === "input-available" && <ToolInput input={part.input} />}
+            {state === "output-available" && (
+              <ToolOutput
+                errorText={undefined}
+                output={(() => {
+                  const out = part.output as
+                    | {
+                        ok?: boolean;
+                        url?: string | null;
+                        b64Json?: string | null;
+                        prompt?: string;
+                        revisedPrompt?: string | null;
+                        error?: string;
+                      }
+                    | null
+                    | undefined;
+                  if (!out || out.ok === false) {
+                    return (
+                      <div className="rounded-md border border-border/50 bg-muted/30 px-4 py-3 text-muted-foreground text-sm">
+                        {out?.error ?? "Image generation failed."}
+                      </div>
+                    );
+                  }
+                  const src = out.url
+                    ? out.url
+                    : out.b64Json
+                      ? `data:image/png;base64,${out.b64Json}`
+                      : null;
+                  if (!src) {
+                    return (
+                      <div className="px-4 py-3 text-muted-foreground text-sm">
+                        ASI1 returned no image.
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="space-y-2 px-3 py-3">
+                      {/** biome-ignore lint/performance/noImgElement: external generated image, next/image needs domain whitelist */}
+                      <img
+                        alt={out.prompt ?? "Generated image"}
+                        className="w-full rounded-lg border border-border/40"
+                        src={src}
+                      />
+                      {out.revisedPrompt ? (
+                        <p className="px-1 text-muted-foreground text-xs">
+                          {out.revisedPrompt}
+                        </p>
+                      ) : null}
+                    </div>
+                  );
+                })()}
+              />
+            )}
+          </ToolContent>
+        </Tool>
+      );
+    }
+
     if (type === "tool-requestSuggestions") {
       const { toolCallId, state } = part;
 

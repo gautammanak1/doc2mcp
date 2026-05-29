@@ -2,6 +2,7 @@ import "server-only";
 
 const ASI1_BASE_URL = "https://api.asi1.ai/v1";
 export const ASI1_MODEL = process.env.ASI1_MODEL ?? "asi1";
+export const ASI1_IMAGE_MODEL = process.env.ASI1_IMAGE_MODEL ?? "asi1";
 
 export type Asi1Message = {
   role: "system" | "user" | "assistant";
@@ -83,6 +84,85 @@ export async function asi1ChatCompletionStream(
   }
 
   return response;
+}
+
+export type Asi1ImageSize =
+  | ""
+  | "256x256"
+  | "512x512"
+  | "1024x1024"
+  | "1024x1792"
+  | "1792x1024";
+
+export type Asi1ImageGenerationRequest = {
+  prompt: string;
+  size?: Asi1ImageSize;
+  model?: string;
+  n?: number;
+};
+
+export type Asi1ImageGenerationResponse = {
+  created?: number;
+  data?: Array<{
+    url?: string;
+    b64_json?: string;
+    revised_prompt?: string;
+  }>;
+  /** Some providers return a single shorthand `image_url`. */
+  image_url?: string;
+};
+
+export type GeneratedImage = {
+  url?: string;
+  b64Json?: string;
+  revisedPrompt?: string;
+};
+
+/**
+ * Generate an image with the ASI1 image API.
+ *
+ *   POST https://api.asi1.ai/v1/image/generate
+ *   { model, prompt, size }
+ *
+ * Returns the parsed list of images, normalising the different shapes the
+ * upstream API has been observed to return.
+ */
+export async function asi1GenerateImage(
+  request: Asi1ImageGenerationRequest
+): Promise<{ images: GeneratedImage[]; raw: Asi1ImageGenerationResponse }> {
+  const response = await fetch(`${ASI1_BASE_URL}/image/generate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getApiKey()}`,
+    },
+    body: JSON.stringify({
+      model: request.model ?? ASI1_IMAGE_MODEL,
+      prompt: request.prompt,
+      size: request.size ?? "",
+      ...(request.n ? { n: request.n } : {}),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`ASI1 image API error (${response.status}): ${errorText}`);
+  }
+
+  const raw = (await response.json()) as Asi1ImageGenerationResponse;
+
+  const fromData: GeneratedImage[] =
+    raw.data?.map((d) => ({
+      url: d.url,
+      b64Json: d.b64_json,
+      revisedPrompt: d.revised_prompt,
+    })) ?? [];
+
+  if (fromData.length === 0 && raw.image_url) {
+    fromData.push({ url: raw.image_url });
+  }
+
+  return { images: fromData, raw };
 }
 
 export async function asi1GenerateText(

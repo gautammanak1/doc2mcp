@@ -84,9 +84,22 @@ export const systemPrompt = ({
     "",
     realtimeAddendum(webSearchAvailable),
     "",
+    imageAddendum(),
+    "",
     getRequestPromptFromHints(requestHints),
   ].join("\n");
 };
+
+const imageAddendum = () =>
+  `Image generation:
+- You have a generateImage tool backed by the ASI1 image model.
+- Use it ONLY when the user explicitly asks to create, generate, draw, or
+  design an image, illustration, mockup, banner, or visual asset.
+- Do NOT use it for charts, plots, diagrams, or data visualizations — those
+  belong in a code artifact instead.
+- Provide a detailed prompt (subject, style, palette, composition, mood)
+  and a sensible size (default 1024x1024).
+- After the image renders, summarize what you generated in one short line.`;
 
 export const titlePrompt =
   "Generate a short title (max 6 words) summarizing the chat. Return only the title, no quotes.";

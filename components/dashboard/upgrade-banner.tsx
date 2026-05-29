@@ -9,7 +9,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { formatInrPaise, PLANS } from "@/lib/billing/plans";
+import {
+  type BillingCurrency,
+  DEFAULT_CURRENCY,
+  formatMoney,
+  PLANS,
+} from "@/lib/billing/plans";
 import { cn } from "@/lib/utils";
 
 type Feature = {
@@ -29,9 +34,11 @@ const PRO_FEATURES: Feature[] = [
 export function UpgradeBanner({
   conversionsUsed,
   conversionLimit,
+  currency = DEFAULT_CURRENCY,
 }: {
   conversionsUsed: number;
   conversionLimit: number;
+  currency?: BillingCurrency;
 }) {
   const percentUsed = Math.min(
     100,
@@ -134,7 +141,7 @@ export function UpgradeBanner({
             </p>
             <p className="mt-1 flex items-baseline gap-1">
               <span className="font-display font-semibold text-2xl">
-                {formatInrPaise(PLANS.pro.prices.monthly)}
+                {formatMoney(PLANS.pro.prices[currency].monthly, currency)}
               </span>
               <span className="text-muted-foreground text-xs">/ mo</span>
             </p>

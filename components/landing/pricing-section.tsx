@@ -4,12 +4,14 @@ import { Check, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { RazorpayCheckoutButton } from "@/components/billing/razorpay-checkout-button";
 import {
+  type BillingCurrency,
   type BillingCycle,
   billingCycleMonths,
-  formatInrPaise,
-  PLANS as PLAN_CONFIG,
+  formatMoney,
+  getPlanPrice,
   type PlanId,
 } from "@/lib/billing/plans";
+import { useBillingCurrency } from "@/lib/billing/use-currency";
 import { cn } from "@/lib/utils";
 
 type Plan = {
@@ -110,19 +112,24 @@ const CYCLE_SUFFIX: Record<BillingCycle, string> = {
 };
 
 /**
- * Convert a Razorpay-style total in paise into the "per month" headline
- * shown on the pricing card.
+ * Convert a Razorpay-style total in minor units into the "per month"
+ * headline shown on the pricing card.
  */
-function monthlyHeadline(planId: PlanId, cycle: BillingCycle): string {
-  const totalPaise = PLAN_CONFIG[planId].prices[cycle];
+function monthlyHeadline(
+  planId: PlanId,
+  currency: BillingCurrency,
+  cycle: BillingCycle
+): string {
+  const total = getPlanPrice(planId, currency, cycle);
   const months = billingCycleMonths(cycle);
-  const perMonthPaise = Math.round(totalPaise / months);
-  return formatInrPaise(perMonthPaise);
+  const perMonth = Math.round(total / months);
+  return formatMoney(perMonth, currency);
 }
 
 export function PricingSection() {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [isVisible, setIsVisible] = useState(false);
+  const { currency, setCurrency } = useBillingCurrency();
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -168,27 +175,51 @@ export function PricingSection() {
             and re-crawl more often.
           </p>
 
-          <div className="mt-8 flex w-full max-w-md flex-wrap items-center justify-center gap-2 rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl sm:max-w-none sm:flex-nowrap sm:justify-center">
-            {(Object.keys(CYCLE_LABEL) as BillingCycle[]).map((c) => (
-              <button
-                className={cn(
-                  "min-w-0 flex-1 rounded-full px-3 py-2 font-medium transition-all sm:flex-none sm:px-4",
-                  cycle === c
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-                key={c}
-                onClick={() => setCycle(c)}
-                type="button"
-              >
-                {CYCLE_LABEL[c]}
-                {CYCLE_DISCOUNT[c] ? (
-                  <span className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 font-mono text-[10px] text-violet-700 dark:text-violet-300">
-                    {CYCLE_DISCOUNT[c]}
-                  </span>
-                ) : null}
-              </button>
-            ))}
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="flex w-full max-w-md flex-wrap items-center justify-center gap-2 rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl sm:max-w-none sm:flex-nowrap sm:justify-center">
+              {(Object.keys(CYCLE_LABEL) as BillingCycle[]).map((c) => (
+                <button
+                  className={cn(
+                    "min-w-0 flex-1 rounded-full px-3 py-2 font-medium transition-all sm:flex-none sm:px-4",
+                    cycle === c
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  key={c}
+                  onClick={() => setCycle(c)}
+                  type="button"
+                >
+                  {CYCLE_LABEL[c]}
+                  {CYCLE_DISCOUNT[c] ? (
+                    <span className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 font-mono text-[10px] text-violet-700 dark:text-violet-300">
+                      {CYCLE_DISCOUNT[c]}
+                    </span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+
+            <fieldset className="m-0 inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/60 p-1 text-[11px] backdrop-blur-xl">
+              <legend className="sr-only">Currency</legend>
+              {(["USD", "INR"] as BillingCurrency[]).map((cur) => (
+                <button
+                  className={cn(
+                    "rounded-full px-3 py-1 font-mono transition-all",
+                    currency === cur
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                  key={cur}
+                  onClick={() => setCurrency(cur)}
+                  type="button"
+                >
+                  {cur === "USD" ? "$ USD" : "₹ INR"}
+                </button>
+              ))}
+            </fieldset>
+            <p className="font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+              Auto-detected from your location · switch any time
+            </p>
           </div>
         </div>
 
@@ -212,7 +243,7 @@ export function PricingSection() {
 
             <div className="flex items-baseline gap-1">
               <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
-                $0
+                {currency === "USD" ? "$0" : "₹0"}
               </span>
               <span className="text-muted-foreground text-xs">
                 forever · no card
@@ -268,7 +299,7 @@ export function PricingSection() {
 
               <div className="flex items-baseline gap-1">
                 <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
-                  {monthlyHeadline(plan.id, cycle)}
+                  {monthlyHeadline(plan.id, currency, cycle)}
                 </span>
                 <span className="text-muted-foreground text-xs">
                   {CYCLE_SUFFIX[cycle]}
@@ -276,7 +307,8 @@ export function PricingSection() {
               </div>
               <p className="-mt-3 font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
                 Charged once as{" "}
-                {formatInrPaise(PLAN_CONFIG[plan.id].prices[cycle])} · INR
+                {formatMoney(getPlanPrice(plan.id, currency, cycle), currency)}{" "}
+                · {currency}
               </p>
 
               <ul className="flex flex-1 flex-col gap-2 text-sm">
@@ -289,6 +321,7 @@ export function PricingSection() {
               </ul>
 
               <RazorpayCheckoutButton
+                currency={currency}
                 cycle={cycle}
                 highlight={plan.highlight}
                 label={plan.ctaLabel}

@@ -2,18 +2,20 @@ import { nanoid } from "nanoid";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import {
-  BILLING_CURRENCY,
+  DEFAULT_CURRENCY,
+  getMinAmount,
+  getPlanPrice,
+  isBillingCurrency,
   isBillingCycle,
   isPlanId,
   PLANS,
 } from "@/lib/billing/plans";
 import { getRazorpay, getRazorpayKeyId } from "@/lib/razorpay/client";
 
-const MIN_AMOUNT_PAISE = 100;
-
 const bodySchema = z.object({
   plan: z.string(),
   cycle: z.string(),
+  currency: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -42,12 +44,20 @@ export async function POST(request: Request) {
     );
   }
 
-  const planConfig = PLANS[parsed.plan];
-  const amount = planConfig.prices[parsed.cycle];
+  const currency =
+    parsed.currency && isBillingCurrency(parsed.currency)
+      ? parsed.currency
+      : DEFAULT_CURRENCY;
 
-  if (amount < MIN_AMOUNT_PAISE) {
+  const planConfig = PLANS[parsed.plan];
+  const amount = getPlanPrice(parsed.plan, currency, parsed.cycle);
+  const minAmount = getMinAmount(currency);
+
+  if (amount < minAmount) {
     return Response.json(
-      { error: "Plan amount is below Razorpay's minimum of 100 paise." },
+      {
+        error: `Plan amount is below Razorpay's minimum of ${minAmount} ${currency === "USD" ? "cents" : "paise"}.`,
+      },
       { status: 400 }
     );
   }
@@ -56,7 +66,7 @@ export async function POST(request: Request) {
     const razorpay = getRazorpay();
     const order = await razorpay.orders.create({
       amount,
-      currency: BILLING_CURRENCY,
+      currency,
       // Razorpay's `receipt` field is capped at 40 chars.
       receipt: `d2m_${parsed.plan.slice(0, 4)}_${nanoid(10)}`.slice(0, 40),
       notes: {
@@ -64,6 +74,7 @@ export async function POST(request: Request) {
         email: session.user.email ?? "",
         plan: parsed.plan,
         cycle: parsed.cycle,
+        currency,
       },
     });
 
@@ -80,8 +91,16 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Razorpay create order error:", error);
+    const message = (error as { error?: { description?: string } } | null)
+      ?.error?.description;
     return Response.json(
-      { error: "Could not create payment order. Please try again." },
+      {
+        error:
+          message ??
+          (currency === "USD"
+            ? "USD payments require International Payments to be enabled on your Razorpay account."
+            : "Could not create payment order. Please try again."),
+      },
       { status: 500 }
     );
   }
