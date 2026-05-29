@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
@@ -79,6 +80,7 @@ export default function RootLayout({
         >
           <TooltipProvider>
             {children}
+            <Analytics />
             <Toaster position="bottom-center" theme="system" />
           </TooltipProvider>
         </ThemeProvider>

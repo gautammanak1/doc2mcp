@@ -1,6 +1,5 @@
 import { ArrowLeftIcon } from "lucide-react";
 import Link from "next/link";
-import { AuthShowcase } from "@/components/auth/auth-showcase";
 import { SparklesIcon } from "@/components/chat/icons";
 
 export default function AuthLayout({
@@ -9,8 +8,8 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-dvh w-screen bg-sidebar">
-      <div className="flex w-full flex-col bg-background p-8 xl:w-[600px] xl:shrink-0 xl:rounded-r-2xl xl:border-r xl:border-border/40 md:p-16">
+    <div className="flex min-h-dvh w-screen bg-background">
+      <div className="mx-auto flex w-full max-w-xl flex-col bg-background p-8 md:p-16">
         <Link
           className="flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
           href="/"
@@ -25,12 +24,6 @@ export default function AuthLayout({
             </div>
             {children}
           </div>
-        </div>
-      </div>
-
-      <div className="hidden flex-1 flex-col overflow-hidden pl-12 xl:flex">
-        <div className="flex-1 pt-8">
-          <AuthShowcase />
         </div>
       </div>
     </div>

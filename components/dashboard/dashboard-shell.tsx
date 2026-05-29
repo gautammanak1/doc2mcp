@@ -75,9 +75,6 @@ export function DashboardShell({
         <div className="flex h-16 items-center gap-2 border-border/50 border-b px-5">
           <Link className="flex items-center gap-2" href="/">
             <Doc2McpLogo size={28} />
-            <span className="font-display font-semibold text-base tracking-tight">
-              doc2mcp
-            </span>
           </Link>
         </div>
 
@@ -153,7 +150,6 @@ export function DashboardShell({
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-4 border-border/50 border-b bg-background/80 px-6 backdrop-blur-xl md:hidden">
           <Link className="flex items-center gap-2" href="/dashboard">
             <Doc2McpLogo size={26} />
-            <span className="font-display font-semibold text-sm">doc2mcp</span>
           </Link>
           <Button asChild size="sm" type="button" variant="outline">
             <Link href="/chat">
