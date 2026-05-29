@@ -22,6 +22,7 @@ import { getLanguageModel } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { editDocument } from "@/lib/ai/tools/edit-document";
 import { generateImageTool } from "@/lib/ai/tools/generate-image";
+import { generatePdfTool } from "@/lib/ai/tools/generate-pdf";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 import { updateDocument } from "@/lib/ai/tools/update-document";
@@ -196,6 +197,7 @@ export async function POST(request: Request) {
       | "getWeather"
       | "webSearch"
       | "generateImage"
+      | "generatePdf"
       | "createDocument"
       | "editDocument"
       | "updateDocument"
@@ -203,6 +205,7 @@ export async function POST(request: Request) {
     const baseActiveTools: ChatToolName[] = [
       "getWeather",
       "generateImage",
+      "generatePdf",
       "createDocument",
       "editDocument",
       "updateDocument",
@@ -231,6 +234,7 @@ export async function POST(request: Request) {
             getWeather,
             webSearch: webSearchTool,
             generateImage: generateImageTool,
+            generatePdf: generatePdfTool({ userId: session.user.id }),
             createDocument: createDocument({
               session,
               dataStream,

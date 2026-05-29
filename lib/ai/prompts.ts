@@ -99,7 +99,17 @@ const imageAddendum = () =>
   belong in a code artifact instead.
 - Provide a detailed prompt (subject, style, palette, composition, mood)
   and a sensible size (default 1024x1024).
-- After the image renders, summarize what you generated in one short line.`;
+- After the image renders, summarize what you generated in one short line.
+
+PDF generation:
+- You have a generatePdf tool that renders a downloadable PDF from markdown.
+- Use it when the user asks for a PDF — report, invoice, summary, cheat
+  sheet, study notes, certificate, or anything they want as a file.
+- Pass a clear title and well-structured markdown (use # / ## / ###
+  headings, bullet/ordered lists, paragraphs, fenced \`\`\` code blocks,
+  and --- horizontal rules).
+- After the PDF is ready, link to it in your reply and mention the file
+  name in one short sentence.`;
 
 export const titlePrompt =
   "Generate a short title (max 6 words) summarizing the chat. Return only the title, no quotes.";

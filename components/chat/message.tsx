@@ -392,6 +392,72 @@ const PurePreviewMessage = ({
       );
     }
 
+    if (type === "tool-generatePdf") {
+      const { toolCallId, state } = part;
+      return (
+        <Tool
+          className="w-[min(100%,520px)]"
+          defaultOpen={true}
+          key={toolCallId}
+        >
+          <ToolHeader state={state} type="tool-generatePdf" />
+          <ToolContent>
+            {state === "input-available" && <ToolInput input={part.input} />}
+            {state === "output-available" && (
+              <ToolOutput
+                errorText={undefined}
+                output={(() => {
+                  const out = part.output as
+                    | {
+                        ok?: boolean;
+                        url?: string;
+                        name?: string;
+                        title?: string;
+                        size?: number;
+                        error?: string;
+                      }
+                    | null
+                    | undefined;
+                  if (!out || out.ok === false || !out.url) {
+                    return (
+                      <div className="rounded-md border border-border/50 bg-muted/30 px-4 py-3 text-muted-foreground text-sm">
+                        {out?.error ?? "PDF generation failed."}
+                      </div>
+                    );
+                  }
+                  const sizeKb = out.size
+                    ? `${Math.max(1, Math.round(out.size / 1024))} KB`
+                    : "";
+                  return (
+                    <a
+                      className="flex items-center gap-3 px-3 py-3 transition-colors hover:bg-muted/40"
+                      download={out.name}
+                      href={out.url}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 font-mono text-[10px] text-rose-600 dark:text-rose-300">
+                        PDF
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium text-foreground text-sm">
+                          {out.title ?? out.name}
+                        </span>
+                        <span className="block truncate text-muted-foreground text-xs">
+                          {out.name}
+                          {sizeKb ? ` · ${sizeKb}` : ""} · click to download
+                        </span>
+                      </span>
+                    </a>
+                  );
+                })()}
+              />
+            )}
+          </ToolContent>
+        </Tool>
+      );
+    }
+
     if (type === "tool-requestSuggestions") {
       const { toolCallId, state } = part;
 

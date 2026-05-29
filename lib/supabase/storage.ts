@@ -12,7 +12,7 @@ async function ensureUploadsBucket() {
   if (!exists) {
     await supabase.storage.createBucket(UPLOADS_BUCKET, {
       public: true,
-      fileSizeLimit: 5 * 1024 * 1024,
+      fileSizeLimit: 25 * 1024 * 1024,
     });
   }
 }
