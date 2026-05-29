@@ -29,11 +29,17 @@ export default function AuthLayout({
 
         <p className="mt-6 text-center text-muted-foreground text-xs">
           By continuing you agree to our{" "}
-          <Link className="underline hover:text-foreground" href="/terms">
+          <Link
+            className="underline hover:text-foreground"
+            href="/terms-and-conditions"
+          >
             Terms
           </Link>{" "}
           and{" "}
-          <Link className="underline hover:text-foreground" href="/privacy">
+          <Link
+            className="underline hover:text-foreground"
+            href="/privacy-policy"
+          >
             Privacy Policy
           </Link>
           .

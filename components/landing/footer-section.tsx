@@ -21,10 +21,10 @@ const RESOURCES_LINKS = [
 ];
 
 const LEGAL_LINKS = [
-  { label: "Terms", href: "/docs/terms" },
-  { label: "Privacy", href: "/docs/privacy" },
-  { label: "Acceptable use", href: "/docs/acceptable-use" },
-  { label: "Trust center", href: "/docs/security" },
+  { label: "Terms & Conditions", href: "/terms-and-conditions" },
+  { label: "Privacy Policy", href: "/privacy-policy" },
+  { label: "Refund & Cancellation", href: "/refund-policy" },
+  { label: "Contact us", href: "/contact" },
 ];
 
 const SOCIAL_LINKS = [
