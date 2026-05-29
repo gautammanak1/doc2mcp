@@ -189,9 +189,39 @@ export async function POST(request: Request) {
     const capabilities = modelCapabilities[chatModel];
     const isReasoningModel = capabilities?.reasoning === true;
     const supportsTools = capabilities?.tools === true;
+    const supportsVision = capabilities?.vision === true;
     const webSearchAvailable = isWebSearchEnabled();
 
-    const modelMessages = await convertToModelMessages(uiMessages);
+    // The current model can't natively see images/PDFs — if we leave the
+    // file parts in, the AI SDK inlines them as base64 into the prompt and
+    // we blow past the model's context window (3M+ tokens for a single PDF).
+    // Replace file parts with a short text marker so the model still knows
+    // an attachment was sent, but the bytes never go upstream.
+    const sanitizedUiMessages: ChatMessage[] = supportsVision
+      ? uiMessages
+      : uiMessages.map((m) => {
+          if (!m.parts?.some((p) => p.type === "file")) {
+            return m;
+          }
+          const rewritten = m.parts.map((part) => {
+            if (part.type !== "file") {
+              return part;
+            }
+            const filename =
+              (part as { filename?: string; name?: string }).filename ??
+              (part as { name?: string }).name ??
+              "file";
+            const mediaType =
+              (part as { mediaType?: string }).mediaType ?? "unknown";
+            return {
+              type: "text" as const,
+              text: `[Attachment: ${filename} (${mediaType}) — use the generatePdf / generateImage tool if you need to act on it]`,
+            };
+          });
+          return { ...m, parts: rewritten } as ChatMessage;
+        });
+
+    const modelMessages = await convertToModelMessages(sanitizedUiMessages);
 
     type ChatToolName =
       | "getWeather"
@@ -311,15 +341,33 @@ export async function POST(request: Request) {
         }
       },
       onError: (error) => {
+        const msg =
+          error instanceof Error ? error.message : String(error ?? "");
         if (
-          error instanceof Error &&
-          error.message?.includes(
+          msg.includes(
             "AI Gateway requires a valid credit card on file to service requests"
           )
         ) {
           return "AI Gateway requires a valid credit card on file to service requests. Please visit https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card to add a card and unlock your free credits.";
         }
-        return "Oops, an error occurred!";
+        // ASI1 / OpenAI-style context overflow surfaces as a 400 with a
+        // "context_length_exceeded" code (sometimes wrapped in Zod parse
+        // failures because the upstream uses `type: 400` instead of a string).
+        if (
+          msg.includes("context_length_exceeded") ||
+          msg.includes("longer than the model") ||
+          msg.includes("maximum context length")
+        ) {
+          return "This conversation is too long for the current model. Start a new chat or remove large attachments and try again.";
+        }
+        if (
+          msg.includes("OpenAIBackendError") ||
+          msg.includes("BadRequestError")
+        ) {
+          return "The AI provider rejected the request. Please try again with a shorter message or without the attachment.";
+        }
+        console.error("streamText onError:", msg);
+        return "Something went wrong while generating a response. Please try again.";
       },
     });
 

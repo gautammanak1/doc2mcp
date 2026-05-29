@@ -363,20 +363,26 @@ function PureMultimodalInput({
       `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/chat/${chatId}`
     );
 
+    const userParts = [
+      ...attachments.map((attachment) => ({
+        type: "file" as const,
+        url: attachment.url,
+        name: attachment.name,
+        mediaType: attachment.contentType,
+      })),
+      ...(input.trim()
+        ? [
+            {
+              type: "text" as const,
+              text: input,
+            },
+          ]
+        : []),
+    ];
+
     sendMessage({
       role: "user",
-      parts: [
-        ...attachments.map((attachment) => ({
-          type: "file" as const,
-          url: attachment.url,
-          name: attachment.name,
-          mediaType: attachment.contentType,
-        })),
-        {
-          type: "text",
-          text: input,
-        },
-      ],
+      parts: userParts,
     });
 
     setAttachments([]);
@@ -704,7 +710,9 @@ function PureMultimodalInput({
               )}
               data-testid="send-button"
               disabled={
-                !input.trim() || uploadQueue.length > 0 || doc2mcpLoading
+                (!input.trim() && attachments.length === 0) ||
+                uploadQueue.length > 0 ||
+                doc2mcpLoading
               }
               status={status}
               variant="secondary"
