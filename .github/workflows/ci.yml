@@ -94,8 +94,12 @@ jobs:
           fetch-depth: 0
       # Trivy: known-CVE scan over the lockfile. Fails the job on HIGH/CRITICAL
       # so a Dependabot bump or a malicious transitive can't slip through.
+      #
+      # The official trivy-action README recommends pinning to `@master`; per-
+      # minor tags such as `0.28.0` are not always published, which was
+      # breaking CI ("Unable to resolve action").
       - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
           scan-ref: .

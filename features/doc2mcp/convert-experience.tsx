@@ -17,6 +17,7 @@ import { AnimatedBackground } from "@/components/doc2mcp/animated-background";
 import { ApiGraph } from "@/components/doc2mcp/api-graph";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
+import { McpRegistryBanner } from "@/components/doc2mcp/mcp-registry-banner";
 import { PipelineProgress } from "@/components/doc2mcp/pipeline-progress";
 import { TerminalLog } from "@/components/doc2mcp/terminal-log";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
@@ -371,6 +372,8 @@ export function ConvertExperience({
                     </div>
                   </div>
                 ) : null}
+
+                {artifacts.mcpAccessToken ? <McpRegistryBanner /> : null}
               </section>
 
               {exportBundle ? (

@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { toast } from "sonner";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
+import { McpRegistryBanner } from "@/components/doc2mcp/mcp-registry-banner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -150,6 +151,8 @@ export function ProjectDetail({
         report={report}
         tools={tools}
       />
+
+      {artifacts?.mcpAccessToken ? <McpRegistryBanner /> : null}
 
       <Tabs defaultValue="tools">
         <TabsList className="w-full justify-start overflow-x-auto">
