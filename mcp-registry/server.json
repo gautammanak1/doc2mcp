@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.doc2mcp/doc2mcp",
   "title": "doc2mcp",
-  "description": "Turn any documentation site, GitHub repo, or OpenAPI spec into a remote Model Context Protocol (MCP) server. Each project is exposed as a tokenized HTTP MCP endpoint that AI clients like Cursor, Claude Desktop, and ChatGPT can connect to.",
+  "description": "Remote MCP server that turns docs, GitHub repos, and OpenAPI specs into AI-ready tools.",
   "version": "1.0.0",
   "repository": {
     "url": "https://github.com/doc2mcp/doc2mcp",
