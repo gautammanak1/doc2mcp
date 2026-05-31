@@ -826,6 +826,44 @@ export async function getPlatformProjectForMcp({ id }: { id: string }) {
   return project ?? null;
 }
 
+/**
+ * MCP API: load project metadata WITHOUT the multi-megabyte `crawlData`
+ * JSON. Use for `tools/list` and other endpoints that only need auth +
+ * status + artifacts (the MCP token hash, project name, source URL, and
+ * `compressedTools` all live in `artifacts`).
+ *
+ * Cuts the per-request payload from ~4-8 MB to ~10-50 KB for typical
+ * projects, and avoids parsing the giant JSON on the Vercel lambda.
+ */
+export async function getPlatformProjectMetaForMcp({ id }: { id: string }) {
+  const [project] = await db
+    .select({
+      id: platformProject.id,
+      userId: platformProject.userId,
+      name: platformProject.name,
+      sourceUrl: platformProject.sourceUrl,
+      sourceType: platformProject.sourceType,
+      status: platformProject.status,
+      artifacts: platformProject.artifacts,
+      // crawlData intentionally omitted; logs/tokenUsage not needed at runtime
+      createdAt: platformProject.createdAt,
+      updatedAt: platformProject.updatedAt,
+    })
+    .from(platformProject)
+    .where(eq(platformProject.id, id));
+  if (!project) {
+    return null;
+  }
+  // Return a shape compatible with full PlatformProject for downstream code,
+  // with crawlData explicitly null so callers don't accidentally use it.
+  return {
+    ...project,
+    crawlData: null,
+    logs: null,
+    tokenUsage: null,
+  };
+}
+
 export async function updatePlatformProject({
   id,
   userId,

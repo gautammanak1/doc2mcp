@@ -1,4 +1,7 @@
-import { getPlatformProjectForMcp } from "@/lib/db/queries";
+import {
+  getPlatformProjectForMcp,
+  getPlatformProjectMetaForMcp,
+} from "@/lib/db/queries";
 import {
   buildDocsIndex,
   buildFullDocsMarkdown,
@@ -8,9 +11,27 @@ import {
 import { readMcpAuthToken, verifyMcpToken } from "@/lib/doc2mcp/mcp-access";
 import type { CrawlResult, ProjectArtifacts } from "@/types/platform";
 
-export async function resolveMcpProject(request: Request, projectId: string) {
+export type ResolveMcpProjectOptions = {
+  /**
+   * Skip loading the multi-megabyte `crawlData` JSON column. Only the
+   * project metadata + artifacts are returned, so `pages` will be `[]`.
+   *
+   * Use for `tools/list` and any other endpoint that doesn't need the
+   * crawled pages — saves a 4-8 MB JSON parse per request.
+   */
+  withPages?: boolean;
+};
+
+export async function resolveMcpProject(
+  request: Request,
+  projectId: string,
+  options: ResolveMcpProjectOptions = {}
+) {
+  const { withPages = true } = options;
   const token = readMcpAuthToken(request);
-  const project = await getPlatformProjectForMcp({ id: projectId });
+  const project = withPages
+    ? await getPlatformProjectForMcp({ id: projectId })
+    : await getPlatformProjectMetaForMcp({ id: projectId });
 
   if (!project) {
     return { error: "not_found" as const };
@@ -27,7 +48,9 @@ export async function resolveMcpProject(request: Request, projectId: string) {
     return { error: "not_ready" as const };
   }
 
-  const pages = (project.crawlData as CrawlResult[] | null) ?? [];
+  const pages = withPages
+    ? ((project.crawlData as CrawlResult[] | null) ?? [])
+    : [];
 
   return { project, pages, artifacts };
 }

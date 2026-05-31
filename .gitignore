@@ -27,3 +27,4 @@ next-env.d.ts
 tsconfig.tsbuildinfo
 
 .fetch-coder/checkpoints/
+.env*

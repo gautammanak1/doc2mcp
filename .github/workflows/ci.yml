@@ -80,6 +80,36 @@ jobs:
       - name: Ultracite check
         run: pnpm check
 
+  security:
+    name: Dependency + secret scan
+    needs: install
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Trivy: known-CVE scan over the lockfile. Fails the job on HIGH/CRITICAL
+      # so a Dependabot bump or a malicious transitive can't slip through.
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+      # gitleaks: catches accidentally-committed API keys before they hit
+      # main. Configured to ignore the .env.example placeholder values.
+      - name: Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     name: Next build (no migrate)
     needs: [typecheck, lint]

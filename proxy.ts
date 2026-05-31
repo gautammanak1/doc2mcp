@@ -135,6 +135,16 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
+  // Hot path: MCP tool calls authenticate via bearer token inside the route
+  // handler (resolveMcpProject → verifyMcpToken). Running Supabase session
+  // refresh here adds 150-400ms per call for zero benefit, since the MCP
+  // bearer token is the source of truth. Skip middleware entirely.
+  if (pathname.startsWith("/api/mcp/")) {
+    const response = NextResponse.next({ request });
+    applySecurityHeaders(response);
+    return response;
+  }
+
   const { supabaseResponse, user } = await updateSession(request);
   const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 

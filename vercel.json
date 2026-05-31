@@ -1,3 +1,35 @@
 {
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "regions": ["bom1"],
+  "functions": {
+    "app/api/convert/route.ts": { "maxDuration": 60 },
+    "app/api/projects/[id]/sync/route.ts": { "maxDuration": 60 },
+    "app/api/mcp/[projectId]/mcp/route.ts": { "maxDuration": 30 },
+    "app/api/mcp/[projectId]/ask/route.ts": { "maxDuration": 30 },
+    "app/api/mcp/[projectId]/search/route.ts": { "maxDuration": 15 },
+    "app/api/mcp/[projectId]/pages/route.ts": { "maxDuration": 15 },
+    "app/api/mcp/[projectId]/full/route.ts": { "maxDuration": 15 },
+    "app/api/mcp/[projectId]/overview/route.ts": { "maxDuration": 15 },
+    "app/api/pdf/generate/route.ts": { "maxDuration": 60 },
+    "app/api/image/generate/route.ts": { "maxDuration": 60 },
+    "app/(chat)/api/chat/route.ts": { "maxDuration": 60 },
+    "app/(chat)/api/files/upload/route.ts": { "maxDuration": 30 }
+  },
+  "headers": [
+    {
+      "source": "/api/mcp/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "authorization, x-doc2mcp-token, content-type"
+        },
+        { "key": "Access-Control-Max-Age", "value": "86400" }
+      ]
+    }
+  ]
 }

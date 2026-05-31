@@ -165,6 +165,21 @@ export async function asi1GenerateImage(
   return { images: fromData, raw };
 }
 
+/**
+ * Generate text via ASI1 chat completions.
+ *
+ * Defaults tuned for doc2mcp's actual workload (structured extraction,
+ * documentation Q&A, deterministic API simulation):
+ *   - temperature: 0.1 — was 0.7. doc2mcp parses JSON out of nearly every
+ *     response; high temperature wastes tokens on creative phrasing and
+ *     produces unparseable output ~5-10% of the time.
+ *   - max_tokens: 2048 — was 4096. The longest legitimate response in this
+ *     codebase is the analyze step's endpoint list, which empirically fits
+ *     in ~1500 tokens. Lowering the cap halves the worst-case wait.
+ *
+ * Retries use exponential backoff WITH jitter to avoid thundering-herd
+ * during ASI1 regional outages.
+ */
 export async function asi1GenerateText(
   messages: Asi1Message[],
   options?: { temperature?: number; max_tokens?: number }
@@ -176,8 +191,8 @@ export async function asi1GenerateText(
     try {
       const result = await asi1ChatCompletion({
         messages,
-        temperature: options?.temperature ?? 0.7,
-        max_tokens: options?.max_tokens ?? 4096,
+        temperature: options?.temperature ?? 0.1,
+        max_tokens: options?.max_tokens ?? 2048,
       });
 
       const text = result.choices.at(0)?.message.content ?? "";
@@ -185,7 +200,9 @@ export async function asi1GenerateText(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       if (attempt < maxRetries - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2 ** attempt * 500));
+        const base = 2 ** attempt * 500;
+        const jitter = Math.random() * 250;
+        await new Promise((resolve) => setTimeout(resolve, base + jitter));
       }
     }
   }

@@ -1,0 +1,61 @@
+name: Publish to MCP Registry
+
+# Lives in the doc2mcp/doc2mcp GitHub-organization repo (NOT in the
+# Vercel-deployed code base at gautammanak1/doc2mcp).
+#
+# This split exists because the MCP Registry uses GitHub OIDC: the OIDC
+# token issued to this workflow claims membership of the repo's owner. We
+# want the MCP server to be published under the `io.github.doc2mcp/*`
+# namespace, so the workflow MUST run from a repo inside the `doc2mcp`
+# GitHub org. The code base lives in `gautammanak1/doc2mcp` and produces
+# the live deployment at https://doc2mcp.site.
+#
+# Triggers:
+#   - push to a version tag like `v1.0.1` (recommended release flow)
+#   - manual dispatch (for ad-hoc re-publishing)
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish doc2mcp to MCP Registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      id-token: write # OIDC for github-oidc login
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install mcp-publisher
+        run: |
+          set -euo pipefail
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+          curl -sSL \
+            "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_${OS}_${ARCH}.tar.gz" \
+            | tar xz mcp-publisher
+          ./mcp-publisher --help
+
+      - name: Sync server.json version with git tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "Setting server.json version to $VERSION"
+          jq --arg v "$VERSION" '.version = $v' server.json > server.tmp.json
+          mv server.tmp.json server.json
+          cat server.json
+
+      - name: Authenticate to MCP Registry (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server to MCP Registry
+        run: ./mcp-publisher publish

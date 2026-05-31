@@ -55,8 +55,19 @@ export async function POST(request: Request) {
     );
   }
 
-  // Defense-in-depth: re-fetch the order from Razorpay and confirm it belongs
-  // to this signed-in user (matches notes.userId set at create-order time).
+  // Defense-in-depth: re-fetch BOTH the order and the payment from Razorpay.
+  //
+  // The HMAC signature alone is insufficient because Razorpay produces a
+  // valid signature for `authorized` payments that have NOT been captured —
+  // and for payments that were later refunded. An attacker can authorize a
+  // payment, abort capture, and POST the legitimate signature triplet here
+  // to flip their plan to "active" for free.
+  //
+  // We therefore re-fetch the payment, confirm:
+  //   - payment.status === "captured" (actual money moved)
+  //   - payment.order_id matches the order id we received
+  //   - payment.amount matches the order.amount (no price tampering)
+  //   - payment.currency matches the order.currency
   let orderNotesUserId: string | null = null;
   let orderAmount: number = getPlanPrice(
     body.plan,
@@ -66,13 +77,51 @@ export async function POST(request: Request) {
   let orderCurrency: string = DEFAULT_CURRENCY;
   try {
     const razorpay = getRazorpay();
-    const order = await razorpay.orders.fetch(body.razorpay_order_id);
+    const [order, payment] = await Promise.all([
+      razorpay.orders.fetch(body.razorpay_order_id),
+      razorpay.payments.fetch(body.razorpay_payment_id),
+    ]);
     orderNotesUserId = (order.notes?.userId as string | undefined) ?? null;
     orderAmount =
       typeof order.amount === "number" ? order.amount : Number(order.amount);
     orderCurrency = order.currency ?? DEFAULT_CURRENCY;
+
+    if (payment.status !== "captured") {
+      return Response.json(
+        {
+          error:
+            "Payment is not captured. If the charge succeeded, please contact support.",
+        },
+        { status: 402 }
+      );
+    }
+
+    if (payment.order_id !== body.razorpay_order_id) {
+      return Response.json(
+        { error: "Payment does not belong to this order" },
+        { status: 400 }
+      );
+    }
+
+    const paymentAmount =
+      typeof payment.amount === "number"
+        ? payment.amount
+        : Number(payment.amount);
+    if (paymentAmount !== orderAmount) {
+      return Response.json(
+        { error: "Payment amount does not match order amount" },
+        { status: 400 }
+      );
+    }
+
+    if (payment.currency !== orderCurrency) {
+      return Response.json(
+        { error: "Payment currency does not match order currency" },
+        { status: 400 }
+      );
+    }
   } catch (error) {
-    console.error("Razorpay order fetch failed during verify:", error);
+    console.error("Razorpay order/payment fetch failed during verify:", error);
     return Response.json(
       { error: "Could not verify order with Razorpay" },
       { status: 500 }
