@@ -315,17 +315,30 @@ export function ComparisonSection() {
                 : "translate-y-4 opacity-0"
             )}
           >
-            doc2mcp vs the market.
+            Manual MCP development{" "}
+            <span className="text-muted-foreground">vs</span>{" "}
+            <span className="bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+              Doc2MCP
+            </span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Everyone else exposes endpoints, edits docs, or sells you one
-            vendor. We turn{" "}
-            <span className="text-foreground">any docs URL</span> into{" "}
-            <span className="text-foreground">semantic toolkits</span>,{" "}
-            <span className="text-foreground">inferred workflows</span>, and a{" "}
-            <span className="text-foreground">live playground</span> — built on
-            ASI1.
+            Build it by hand and you ship a one-off, brittle integration. Use
+            Doc2MCP and you ship{" "}
+            <span className="text-foreground">infrastructure</span> —
+            structured, current, and ready for every agent in your stack.
           </p>
+        </div>
+
+        <ManualVsDoc2McpTable />
+        <div className="mt-16 mb-10 text-center">
+          <span className="inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+            <span className="h-px w-8 bg-foreground/30" />
+            Market matrix
+            <span className="h-px w-8 bg-foreground/30" />
+          </span>
+          <h3 className="mt-4 font-display text-2xl tracking-tight sm:text-3xl">
+            And how we compare to other MCP tooling
+          </h3>
         </div>
 
         <div
@@ -611,6 +624,108 @@ function StatTile({
         {value}
       </p>
       <p className="text-muted-foreground text-xs">{sublabel}</p>
+    </div>
+  );
+}
+
+const MANUAL_VS_ROWS: { label: string; manual: string; doc2mcp: string }[] = [
+  {
+    label: "Setup time",
+    manual: "Days to weeks of engineering",
+    doc2mcp: "Minutes from a docs URL",
+  },
+  {
+    label: "Maintenance",
+    manual: "Manual diffs on every API change",
+    doc2mcp: "Continuous, automated sync",
+  },
+  {
+    label: "Documentation understanding",
+    manual: "You read it, model guesses",
+    doc2mcp: "Structured, schema-aware context",
+  },
+  {
+    label: "Updates",
+    manual: "Redeploy, regenerate tools",
+    doc2mcp: "Live — same endpoint, fresh content",
+  },
+  {
+    label: "Retrieval layer",
+    manual: "DIY embeddings + glue code",
+    doc2mcp: "Semantic + workflow-aware out of the box",
+  },
+  {
+    label: "AI readiness",
+    manual: "Endpoint-shaped tools",
+    doc2mcp: "LLM-shaped tools and workflows",
+  },
+  {
+    label: "Deployment",
+    manual: "Self-host a server per integration",
+    doc2mcp: "One hosted remote MCP, multi-tenant",
+  },
+  {
+    label: "Support",
+    manual: "Internal, ad hoc",
+    doc2mcp: "Dedicated team, audit logs, SLAs",
+  },
+];
+
+function ManualVsDoc2McpTable() {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/40 backdrop-blur-xl">
+      <div className="grid grid-cols-1 border-border/40 border-b sm:grid-cols-[1.1fr_1fr_1fr]">
+        <div className="hidden bg-muted/20 px-5 py-4 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.16em] sm:block">
+          Capability
+        </div>
+        <div className="bg-muted/10 px-5 py-4">
+          <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.16em]">
+            Manual MCP development
+          </p>
+          <p className="mt-1 font-display font-semibold text-foreground/85 text-base">
+            DIY · slow · brittle
+          </p>
+        </div>
+        <div className="bg-gradient-to-br from-violet-500/15 via-fuchsia-500/10 to-sky-500/15 px-5 py-4">
+          <p className="flex items-center gap-1.5 font-mono text-[11px] text-violet-700 uppercase tracking-[0.16em] dark:text-violet-200">
+            <Sparkles className="size-3" />
+            Doc2MCP
+          </p>
+          <p className="mt-1 font-display font-semibold text-base">
+            Infrastructure · automated · current
+          </p>
+        </div>
+      </div>
+
+      {MANUAL_VS_ROWS.map((row, i) => (
+        <div
+          className={cn(
+            "grid grid-cols-1 items-stretch border-border/40 sm:grid-cols-[1.1fr_1fr_1fr]",
+            i !== MANUAL_VS_ROWS.length - 1 && "border-b"
+          )}
+          key={row.label}
+        >
+          <div className="bg-muted/10 px-5 py-4 sm:bg-transparent">
+            <p className="font-display font-medium text-foreground text-sm">
+              {row.label}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-5 py-4 text-muted-foreground text-sm">
+            <X
+              aria-hidden="true"
+              className="size-3.5 shrink-0 text-rose-500/70"
+            />
+            <span>{row.manual}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-violet-500/5 px-5 py-4 text-foreground/90 text-sm">
+            <Check
+              aria-hidden="true"
+              className="size-3.5 shrink-0 text-emerald-500"
+            />
+            <span>{row.doc2mcp}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

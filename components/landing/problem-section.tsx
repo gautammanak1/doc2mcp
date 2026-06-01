@@ -14,28 +14,28 @@ import { useEffect, useRef, useState } from "react";
 
 const PAIN_POINTS = [
   {
-    icon: Clock,
-    title: "Hours lost in docs",
-    body: "Developers waste 5–10 hours every week hunting through outdated, fragmented documentation that lives across 4–6 different sites.",
-    accent: "from-rose-500/30 to-orange-500/30",
-  },
-  {
     icon: Ghost,
-    title: "AI agents hallucinate",
-    body: "When Cursor / Claude / ChatGPT don't have current API context, they invent endpoints, mis-spell params, and ship code that compiles but breaks in production.",
+    title: "Hallucinated APIs",
+    body: "Without real context, AI assistants invent endpoints, mis-spell params, and ship code that compiles but breaks in production.",
     accent: "from-violet-500/30 to-fuchsia-500/30",
   },
   {
     icon: ClipboardX,
-    title: "Copy-paste, every time",
-    body: "Engineers paste the same docs section into prompts over and over. Knowledge stays trapped in chat history, not in your IDE.",
+    title: "Missing context",
+    body: "Docs were written for humans. Agents miss the schemas, examples, and policies they actually need to act correctly.",
     accent: "from-sky-500/30 to-cyan-500/30",
   },
   {
     icon: AlertTriangle,
-    title: "Version drift",
-    body: "v1 says one thing, v2 the opposite, the changelog disagrees with both. Your AI assistant picks the wrong one — silently.",
+    title: "Outdated examples",
+    body: "v1 says one thing, v2 the opposite. Your assistant picks the wrong one — silently — and integrations drift.",
     accent: "from-amber-500/30 to-yellow-500/30",
+  },
+  {
+    icon: Clock,
+    title: "Manual MCP work",
+    body: "Hand-coding MCP tools per product is slow, brittle, and falls behind every changelog. Engineering hours, not infra.",
+    accent: "from-rose-500/30 to-orange-500/30",
   },
 ];
 
@@ -90,10 +90,10 @@ export function ProblemSection() {
             <span className="h-px w-8 bg-foreground/30" />
           </span>
           <h2 className="mt-6 font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
-            Docs are{" "}
+            AI agents are only as good as{" "}
             <span className="relative inline-block">
               <span className="relative z-10 text-rose-600 dark:text-rose-400">
-                broken
+                their context
               </span>
               <motion.span
                 animate={{ scaleX: 1 }}
@@ -104,13 +104,13 @@ export function ProblemSection() {
                 viewport={{ once: true }}
                 whileInView={{ scaleX: 1 }}
               />
-            </span>{" "}
-            for AI agents.
+            </span>
+            .
           </h2>
           <p className="mt-5 text-base text-muted-foreground leading-relaxed sm:text-lg">
-            Documentation was written for humans, not models. So your AI
-            assistant guesses, hallucinates, or stalls — and you pay the bill in
-            lost hours and prod incidents.
+            Most documentation was written for humans. So agents guess,
+            hallucinate, or stall — and developers spend hours fixing AI-
+            generated mistakes. Doc2MCP solves this automatically.
           </p>
         </motion.div>
 

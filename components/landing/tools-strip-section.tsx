@@ -41,9 +41,7 @@ function ToolPill({ tool }: { tool: Tool }) {
       <Image
         alt=""
         className={
-          tool.invertOnDark
-            ? "size-4 shrink-0 dark:invert"
-            : "size-4 shrink-0"
+          tool.invertOnDark ? "size-4 shrink-0 dark:invert" : "size-4 shrink-0"
         }
         height={16}
         src={tool.icon}
@@ -59,11 +57,17 @@ export function ToolsStripSection() {
     <section className="relative border-border/40 border-y bg-background py-14 sm:py-20">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
         <div className="text-center">
-          <p className="font-display font-semibold text-foreground text-xl sm:text-2xl">
-            Works with your favorite AI tools
+          <span className="inline-flex items-center gap-2 font-mono text-muted-foreground text-[11px] uppercase tracking-[0.18em] sm:text-xs">
+            <span className="h-px w-8 bg-foreground/30" />
+            Ecosystem
+            <span className="h-px w-8 bg-foreground/30" />
+          </span>
+          <p className="mt-3 font-display font-semibold text-foreground text-xl tracking-tight sm:text-2xl">
+            Built for the modern AI ecosystem
           </p>
           <p className="mt-2 text-muted-foreground text-sm">
-            One MCP server, ready to paste into every major AI editor.
+            One MCP server, ready to plug into every major AI editor and agent
+            runtime.
           </p>
         </div>
 

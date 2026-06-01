@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { AutoSyncSection } from "@/components/landing/auto-sync-section";
 import { ComparisonSection } from "@/components/landing/comparison-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { EnterpriseSection } from "@/components/landing/enterprise-section";
@@ -12,9 +11,12 @@ import { LandingNavigation } from "@/components/landing/navigation";
 import { LandingNavigationServer } from "@/components/landing/navigation-server";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { ProblemSectionClient } from "@/components/landing/problem-section-client";
+import { RealExampleSection } from "@/components/landing/real-example-section";
+import { SocialProofSection } from "@/components/landing/social-proof-section";
 import { ToolsStripSection } from "@/components/landing/tools-strip-section";
 import { UseCasesSection } from "@/components/landing/use-cases-section";
 import { WhyNowSection } from "@/components/landing/why-now-section";
+import { WhyTeamsSection } from "@/components/landing/why-teams-section";
 
 export default function Page() {
   return (
@@ -25,13 +27,15 @@ export default function Page() {
       <HeroSection />
       <ToolsStripSection />
       <ProblemSectionClient />
+      <RealExampleSection />
       <HowItWorksSection />
       <FeaturesSection />
-      <AutoSyncSection />
+      <WhyTeamsSection />
       <UseCasesSection />
       <ComparisonSection />
       <EnterpriseSection />
       <WhyNowSection />
+      <SocialProofSection />
       <PricingSection />
       <FaqSection />
       <CtaSection />

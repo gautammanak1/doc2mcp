@@ -93,19 +93,40 @@ export function WhyNowSection() {
                 : "translate-y-4 opacity-0"
             )}
           >
-            The agentic web needs
-            <br />
+            Why this matters{" "}
             <span className="bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
-              an infrastructure layer.
+              right now.
             </span>
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-            AI agents are becoming the next software interface. MCP is emerging
-            as the standard protocol for AI tool access. Millions of APIs and
-            documentation platforms aren't MCP-ready —{" "}
-            <span className="text-foreground">doc2mcp bridges that gap</span>.
+            AI agents are becoming the next application layer. MCP is emerging
+            as the standard protocol for tool access. Millions of APIs and
+            documentation sites are not MCP-ready —{" "}
+            <span className="text-foreground">
+              Doc2MCP bridges that gap automatically
+            </span>
+            .
           </p>
         </div>
+
+        {/* Highlighted quote */}
+        <figure
+          className={cn(
+            "mx-auto mt-10 max-w-3xl rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/8 via-card/40 to-fuchsia-500/8 p-7 backdrop-blur-xl transition-all duration-700 sm:mt-12 sm:p-9",
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          )}
+        >
+          <Sparkles
+            aria-hidden="true"
+            className="size-5 text-violet-500 dark:text-violet-300"
+          />
+          <blockquote className="mt-3 font-display text-foreground text-xl leading-snug tracking-tight sm:text-2xl lg:text-3xl">
+            “Documentation is becoming the knowledge layer for AI agents.”
+          </blockquote>
+          <figcaption className="mt-4 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.16em]">
+            — The thesis behind Doc2MCP
+          </figcaption>
+        </figure>
 
         <div className="mt-12 grid grid-cols-1 gap-5 sm:mt-16 md:grid-cols-2">
           {PILLARS.map((p, i) => {
