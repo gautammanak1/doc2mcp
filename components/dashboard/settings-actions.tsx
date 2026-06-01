@@ -81,9 +81,9 @@ export function TeamInviteForm() {
           Want early access? Email{" "}
           <a
             className="underline underline-offset-2"
-            href="mailto:hello@doc2mcp.site?subject=Team%20workspace%20early%20access"
+            href="mailto:doc2mcp@gmail.com?subject=Team%20workspace%20early%20access"
           >
-            hello@doc2mcp.site
+            doc2mcp@gmail.com
           </a>
           .
         </p>

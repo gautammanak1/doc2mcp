@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Github, Heart, Linkedin, Twitter } from "lucide-react";
+import { Calendar, Github, Heart, Linkedin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
@@ -31,17 +31,12 @@ const LEGAL_LINKS = [
 const SOCIAL_LINKS = [
   {
     label: "GitHub",
-    href: "https://github.com/Meerut-code-hub",
+    href: "https://github.com/doc2mcp",
     icon: Github,
   },
   {
-    label: "X / Twitter",
-    href: "https://twitter.com/MeerutCodehub",
-    icon: Twitter,
-  },
-  {
     label: "LinkedIn",
-    href: "https://www.linkedin.com/company/meerutcodehub/",
+    href: "https://www.linkedin.com/company/doc2mcp",
     icon: Linkedin,
   },
 ];
@@ -155,14 +150,14 @@ export function FooterSection() {
             >
               {CONTACT_EMAIL}
             </a>
-            {" · Built by "}
+            {" · Built by the "}
             <a
               className="font-medium text-foreground/90 underline decoration-foreground/20 decoration-dotted underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/60"
-              href="https://www.linkedin.com/company/meerutcodehub/"
+              href="https://www.linkedin.com/company/doc2mcp"
               rel="noopener noreferrer"
               target="_blank"
             >
-              MeerutCodeHub
+              doc2mcp team
             </a>
           </p>
         </div>
