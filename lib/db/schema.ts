@@ -252,3 +252,24 @@ export const jobMetric = pgTable("JobMetric", {
 });
 
 export type JobMetric = InferSelectModel<typeof jobMetric>;
+
+export const contactMessage = pgTable("ContactMessage", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  name: varchar("name", { length: 120 }).notNull(),
+  email: varchar("email", { length: 200 }).notNull(),
+  subject: varchar("subject", { length: 120 }),
+  orderId: varchar("orderId", { length: 120 }),
+  message: text("message").notNull(),
+  ip: varchar("ip", { length: 64 }).notNull().default("unknown"),
+  userAgent: text("userAgent"),
+  deliveryStatus: varchar("deliveryStatus", {
+    enum: ["pending", "sent", "failed", "not_configured"],
+  })
+    .notNull()
+    .default("pending"),
+  deliveryReason: text("deliveryReason"),
+  deliveredAt: timestamp("deliveredAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type ContactMessage = InferSelectModel<typeof contactMessage>;

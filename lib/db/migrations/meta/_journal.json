@@ -29,6 +29,13 @@
       "when": 1748000000000,
       "tag": "0003_observability",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780353600000,
+      "tag": "0006_contact_messages",
+      "breakpoints": true
     }
   ]
 }

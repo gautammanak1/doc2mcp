@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { CONTACT_EMAIL } from "@/lib/config/site";
+import {
+  type ContactDeliveryStatus,
+  createContactMessage,
+  updateContactMessageDelivery,
+} from "@/lib/db/contact";
 
 const bodySchema = z.object({
   name: z.string().min(1).max(120),
@@ -13,6 +18,12 @@ const bodySchema = z.object({
 
 type ContactPayload = z.infer<typeof bodySchema>;
 
+type DeliveryResult = {
+  delivered: boolean;
+  status: ContactDeliveryStatus;
+  reason?: string;
+};
+
 function getClientIp(request: Request): string {
   const fwd = request.headers.get("x-forwarded-for");
   if (fwd) {
@@ -21,10 +32,17 @@ function getClientIp(request: Request): string {
   return request.headers.get("x-real-ip") ?? "unknown";
 }
 
-async function deliverViaResend(payload: ContactPayload, ip: string) {
+async function deliverViaResend(
+  payload: ContactPayload,
+  ip: string
+): Promise<DeliveryResult> {
   const key = process.env.RESEND_API_KEY;
   if (!key) {
-    return { delivered: false, reason: "RESEND_API_KEY not set" };
+    return {
+      delivered: false,
+      status: "not_configured",
+      reason: "RESEND_API_KEY not set",
+    };
   }
   const from =
     process.env.RESEND_FROM ?? "doc2mcp contact <onboarding@resend.dev>";
@@ -59,9 +77,13 @@ async function deliverViaResend(payload: ContactPayload, ip: string) {
 
   if (!res.ok) {
     const detail = await res.text();
-    return { delivered: false, reason: `resend ${res.status}: ${detail}` };
+    return {
+      delivered: false,
+      status: "failed",
+      reason: `resend ${res.status}: ${detail}`,
+    };
   }
-  return { delivered: true };
+  return { delivered: true, status: "sent" };
 }
 
 export async function POST(request: Request) {
@@ -81,10 +103,32 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request);
+  const userAgent = request.headers.get("user-agent");
 
-  // Always log so the message is recoverable from Vercel/Supabase logs even
-  // when Resend isn't configured.
+  let contactId: string;
+  try {
+    const saved = await createContactMessage({
+      name: parsed.name,
+      email: parsed.email,
+      subject: parsed.subject ?? null,
+      orderId: parsed.orderId ?? null,
+      message: parsed.message,
+      ip,
+      userAgent,
+    });
+    contactId = saved.id;
+  } catch (error) {
+    console.error("[contact] failed to persist message:", error);
+    return Response.json(
+      { error: "Could not save your message. Please try again." },
+      { status: 500 }
+    );
+  }
+
+  // Keep a short log line for ops visibility. The full message is stored in
+  // ContactMessage, so logs are no longer the source of truth.
   console.log("[contact] new message", {
+    id: contactId,
     name: parsed.name,
     email: parsed.email,
     subject: parsed.subject ?? null,
@@ -95,13 +139,31 @@ export async function POST(request: Request) {
 
   try {
     const delivery = await deliverViaResend(parsed, ip);
+    try {
+      await updateContactMessageDelivery({
+        id: contactId,
+        status: delivery.status,
+        reason: delivery.reason ?? null,
+      });
+    } catch (error) {
+      console.error("[contact] failed to update delivery status:", error);
+    }
     if (!delivery.delivered) {
       console.warn("[contact] email not delivered:", delivery.reason);
     }
     return Response.json({ ok: true });
   } catch (error) {
     console.error("[contact] delivery error:", error);
-    // Still return ok — the message is in our logs.
+    try {
+      await updateContactMessageDelivery({
+        id: contactId,
+        status: "failed",
+        reason: error instanceof Error ? error.message : "Unknown error",
+      });
+    } catch (updateError) {
+      console.error("[contact] failed to update delivery status:", updateError);
+    }
+    // Still return ok because the full message is already stored in Postgres.
     return Response.json({ ok: true });
   }
 }
