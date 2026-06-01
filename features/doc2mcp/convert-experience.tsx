@@ -18,6 +18,7 @@ import { ApiGraph } from "@/components/doc2mcp/api-graph";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
 import { McpRegistryBanner } from "@/components/doc2mcp/mcp-registry-banner";
+import { PublishToRegistryPanel } from "@/components/doc2mcp/publish-to-registry-panel";
 import { PipelineProgress } from "@/components/doc2mcp/pipeline-progress";
 import { TerminalLog } from "@/components/doc2mcp/terminal-log";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
@@ -374,6 +375,14 @@ export function ConvertExperience({
                 ) : null}
 
                 {artifacts.mcpAccessToken ? <McpRegistryBanner /> : null}
+
+                {artifacts.mcpAccessToken ? (
+                  <PublishToRegistryPanel
+                    docsUrl={project.sourceUrl}
+                    projectId={project.id}
+                    projectName={project.name}
+                  />
+                ) : null}
               </section>
 
               {exportBundle ? (

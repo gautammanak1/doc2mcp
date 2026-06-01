@@ -176,22 +176,34 @@ export function PricingSection() {
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3">
-            <div className="flex w-full max-w-md flex-wrap items-center justify-center gap-2 rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl sm:max-w-none sm:flex-nowrap sm:justify-center">
+            <div
+              className="inline-flex w-full max-w-[420px] items-stretch gap-1 rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl sm:w-auto sm:max-w-none"
+              role="tablist"
+            >
               {(Object.keys(CYCLE_LABEL) as BillingCycle[]).map((c) => (
                 <button
+                  aria-selected={cycle === c}
                   className={cn(
-                    "min-w-0 flex-1 rounded-full px-3 py-2 font-medium transition-all sm:flex-none sm:px-4",
+                    "flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 font-medium transition-all sm:flex-none sm:px-4",
                     cycle === c
                       ? "bg-foreground text-background"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                   key={c}
                   onClick={() => setCycle(c)}
+                  role="tab"
                   type="button"
                 >
-                  {CYCLE_LABEL[c]}
+                  <span>{CYCLE_LABEL[c]}</span>
                   {CYCLE_DISCOUNT[c] ? (
-                    <span className="ml-2 rounded-full bg-violet-500/20 px-2 py-0.5 font-mono text-[10px] text-violet-700 dark:text-violet-300">
+                    <span
+                      className={cn(
+                        "shrink-0 whitespace-nowrap rounded-full px-1.5 py-0.5 font-mono text-[9px] tracking-wide sm:text-[10px]",
+                        cycle === c
+                          ? "bg-background/20 text-background"
+                          : "bg-violet-500/20 text-violet-700 dark:text-violet-300"
+                      )}
+                    >
                       {CYCLE_DISCOUNT[c]}
                     </span>
                   ) : null}
@@ -204,7 +216,7 @@ export function PricingSection() {
               {(["USD", "INR"] as BillingCurrency[]).map((cur) => (
                 <button
                   className={cn(
-                    "rounded-full px-3 py-1 font-mono transition-all",
+                    "whitespace-nowrap rounded-full px-3 py-1 font-mono transition-all",
                     currency === cur
                       ? "bg-foreground text-background"
                       : "text-muted-foreground hover:text-foreground"
@@ -217,7 +229,7 @@ export function PricingSection() {
                 </button>
               ))}
             </fieldset>
-            <p className="font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+            <p className="text-center font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
               Auto-detected from your location · switch any time
             </p>
           </div>

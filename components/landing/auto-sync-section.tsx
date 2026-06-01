@@ -45,9 +45,9 @@ export function AutoSyncSection() {
       <div className="relative mx-auto max-w-[1280px] px-6 lg:px-12">
         <div className="grid grid-cols-1 items-center gap-12 sm:gap-16 lg:grid-cols-2">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] text-emerald-700 uppercase tracking-[0.16em] dark:text-emerald-300">
-              <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-              New
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 font-mono text-[10px] text-amber-700 uppercase tracking-[0.16em] dark:text-amber-300">
+              <span className="size-1.5 animate-pulse rounded-full bg-amber-500" />
+              Coming soon
             </span>
             <h2 className="mt-5 font-display font-semibold text-3xl text-foreground tracking-tight sm:text-5xl">
               Docs change.
@@ -55,10 +55,10 @@ export function AutoSyncSection() {
               <span className="text-muted-foreground">Your MCP follows.</span>
             </h2>
             <p className="mt-5 max-w-md text-base text-muted-foreground leading-relaxed">
-              Turn on auto-sync once per project. doc2mcp watches the source
-              URL, detects content changes, and silently regenerates the MCP
-              server so every editor stays current — no redeploy, no token
-              rotation, no copy-paste.
+              Coming soon: turn on auto-sync once per project and doc2mcp will
+              watch the source URL, detect content changes, and silently
+              regenerate the MCP server — no redeploy, no token rotation, no
+              copy-paste. Join the waitlist below to be early.
             </p>
             <ul className="mt-7 space-y-3 text-sm">
               {[
@@ -75,13 +75,27 @@ export function AutoSyncSection() {
                 </li>
               ))}
             </ul>
-            <p className="mt-7 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-              Included on Pro · Manual refresh on Free
-            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <a
+                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 px-3.5 font-medium text-amber-700 text-xs transition-colors hover:bg-amber-500/15 dark:text-amber-200"
+                href="https://calendly.com/doc2mcp/30min"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Join the waitlist →
+              </a>
+              <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+                Ships with Pro · Manual refresh on Free
+              </p>
+            </div>
           </div>
 
           <div className="relative">
-            <div className="-inset-6 pointer-events-none absolute -z-10 rounded-3xl bg-gradient-to-br from-emerald-500/8 via-transparent to-violet-500/8 blur-3xl" />
+            <div className="-inset-6 pointer-events-none absolute -z-10 rounded-3xl bg-gradient-to-br from-amber-500/8 via-transparent to-violet-500/8 blur-3xl" />
+            <span className="-top-3 -translate-x-1/2 absolute left-1/2 z-10 inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 font-mono text-[10px] text-amber-700 uppercase tracking-[0.16em] backdrop-blur dark:text-amber-200">
+              <span className="size-1.5 animate-pulse rounded-full bg-amber-500" />
+              Preview · coming soon
+            </span>
             <div className="overflow-hidden rounded-2xl border border-border/60 bg-card/60 shadow-sm backdrop-blur-sm">
               <div className="flex items-center justify-between border-border/40 border-b px-4 py-2.5">
                 <div className="flex items-center gap-2">

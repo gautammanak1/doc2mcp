@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
+import { CustomDomainCard } from "@/components/dashboard/custom-domain-card";
 import {
   ManageBillingButton,
   SignOutButton,
@@ -127,6 +128,10 @@ export default async function DashboardSettingsPage() {
             </p>
           </CardContent>
         </Card>
+      </section>
+
+      <section>
+        <CustomDomainCard plan={plan.planId} />
       </section>
     </div>
   );

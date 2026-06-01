@@ -16,6 +16,7 @@ import { useMemo } from "react";
 import { toast } from "sonner";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
 import { McpRegistryBanner } from "@/components/doc2mcp/mcp-registry-banner";
+import { PublishToRegistryPanel } from "@/components/doc2mcp/publish-to-registry-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -153,6 +154,14 @@ export function ProjectDetail({
       />
 
       {artifacts?.mcpAccessToken ? <McpRegistryBanner /> : null}
+
+      {artifacts?.mcpAccessToken ? (
+        <PublishToRegistryPanel
+          docsUrl={project.sourceUrl}
+          projectId={project.id}
+          projectName={project.name}
+        />
+      ) : null}
 
       <Tabs defaultValue="tools">
         <TabsList className="w-full justify-start overflow-x-auto">
