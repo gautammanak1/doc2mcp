@@ -123,7 +123,20 @@ export function LandingNavigation({
         <div className="hidden items-center gap-1.5 md:flex">
           <ThemeToggle />
           {session ? (
-            <UserMenu session={session} />
+            <>
+              <Button
+                asChild
+                className="group h-8 gap-1.5 rounded-full px-3.5 text-[13px]"
+                size="sm"
+              >
+                <Link href={session.isAdmin ? "/admin" : "/dashboard"}>
+                  <LayoutDashboard aria-hidden="true" className="size-3.5" />
+                  {session.isAdmin ? "Admin" : "Dashboard"}
+                  <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+              </Button>
+              <UserMenu session={session} />
+            </>
           ) : (
             <>
               <Button

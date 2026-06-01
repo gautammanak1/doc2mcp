@@ -175,67 +175,82 @@ export function RealExampleSection() {
 }
 
 function StageRow({ stage, align }: { stage: Stage; align: "left" | "right" }) {
-  const Icon = stage.icon;
+  const isLeft = align === "left";
   return (
-    <li
-      className={cn(
-        "relative grid grid-cols-1 items-center gap-2 sm:grid-cols-2 sm:gap-6",
-        align === "right" && "sm:[&>*:first-child]:order-2"
-      )}
-    >
-      <div
-        className={cn(
-          "group relative overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl transition-transform hover:scale-[1.01] sm:p-5",
-          align === "left"
-            ? "sm:mr-auto sm:max-w-[340px] sm:text-right"
-            : "sm:ml-auto sm:max-w-[340px] sm:text-left"
-        )}
-      >
-        <div
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute inset-0 -z-10 opacity-30 blur-2xl",
-            stage.accent
-          )}
-        />
-        <div
-          className={cn(
-            "flex items-start gap-3",
-            align === "left" && "sm:flex-row-reverse sm:text-right"
-          )}
-        >
-          <span
-            className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-xl border",
-              stage.accent
-            )}
-          >
-            <Icon className="size-4 text-foreground/85" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="font-display font-semibold text-foreground text-sm sm:text-base">
-              {stage.title}
-            </p>
-            <p className="mt-0.5 font-mono text-[11px] text-muted-foreground sm:text-xs">
-              {stage.detail}
-            </p>
-          </div>
+    <li className="relative">
+      {/* Mobile — single full-width card with arrow below */}
+      <div className="sm:hidden">
+        <StageCard align="left" stage={stage} />
+        <div className="-mt-1 -mb-1 mt-3 flex justify-center">
+          <ArrowRight
+            aria-hidden="true"
+            className="size-4 rotate-90 text-muted-foreground/50"
+          />
         </div>
       </div>
 
-      {/* Connector dot on the centerline (desktop) */}
-      <span
-        aria-hidden="true"
-        className="-translate-x-1/2 absolute left-1/2 hidden size-2.5 rounded-full border border-violet-500/40 bg-background ring-4 ring-violet-500/10 sm:block"
-      />
-
-      {/* Arrow on mobile only */}
-      <div className="-mt-1 -mb-1 flex justify-center sm:hidden">
-        <ArrowRight
+      {/* Desktop — 3-column grid: left card slot, centerline dot, right card slot */}
+      <div className="hidden grid-cols-[1fr_auto_1fr] items-center gap-5 sm:grid">
+        <div className="justify-self-end">
+          {isLeft ? <StageCard align="left" stage={stage} /> : null}
+        </div>
+        <span
           aria-hidden="true"
-          className="size-4 rotate-90 text-muted-foreground/50"
+          className="size-2.5 shrink-0 rounded-full border border-violet-500/40 bg-background ring-4 ring-violet-500/10"
         />
+        <div className="justify-self-start">
+          {isLeft ? null : <StageCard align="right" stage={stage} />}
+        </div>
       </div>
     </li>
+  );
+}
+
+function StageCard({
+  stage,
+  align,
+}: {
+  stage: Stage;
+  align: "left" | "right";
+}) {
+  const Icon = stage.icon;
+  const isLeft = align === "left";
+  return (
+    <div
+      className={cn(
+        "group relative w-full overflow-hidden rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl transition-all hover:scale-[1.01] hover:border-border sm:w-[320px] sm:p-5"
+      )}
+    >
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-0 -z-10 opacity-30 blur-2xl",
+          stage.accent
+        )}
+      />
+      <div
+        className={cn(
+          "flex items-start gap-3",
+          isLeft && "sm:flex-row-reverse sm:text-right"
+        )}
+      >
+        <span
+          className={cn(
+            "flex size-10 shrink-0 items-center justify-center rounded-xl border",
+            stage.accent
+          )}
+        >
+          <Icon className="size-4 text-foreground/85" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-display font-semibold text-foreground text-sm sm:text-base">
+            {stage.title}
+          </p>
+          <p className="mt-0.5 font-mono text-[11px] text-muted-foreground sm:text-xs">
+            {stage.detail}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }

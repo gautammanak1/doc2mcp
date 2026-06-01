@@ -2,7 +2,10 @@
 
 import {
   Bot,
+  Check,
   Download,
+  FileText,
+  Folder,
   type LucideIcon,
   Network,
   RefreshCw,
@@ -13,6 +16,138 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
+
+const CRAWLER_TREE = [
+  { kind: "folder", label: "/docs", indent: 0, delay: 0 },
+  { kind: "file", label: "introduction.mdx", indent: 1, delay: 0.3 },
+  { kind: "file", label: "quickstart.mdx", indent: 1, delay: 0.6 },
+  { kind: "folder", label: "/api", indent: 1, delay: 0.9 },
+  { kind: "file", label: "customers.mdx", indent: 2, delay: 1.2 },
+  { kind: "file", label: "payment_intents.mdx", indent: 2, delay: 1.5 },
+  { kind: "file", label: "webhooks.mdx", indent: 2, delay: 1.8 },
+  { kind: "folder", label: "/sdks", indent: 1, delay: 2.1 },
+  { kind: "file", label: "node.mdx", indent: 2, delay: 2.4 },
+  { kind: "file", label: "python.mdx", indent: 2, delay: 2.7 },
+] as const;
+
+function CrawlerVisual() {
+  return (
+    <div className="relative h-full min-h-[280px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 backdrop-blur-xl sm:min-h-[320px]">
+      {/* Top bar */}
+      <div className="flex items-center justify-between border-border/30 border-b pb-2">
+        <div className="flex items-center gap-1.5">
+          <span className="size-2 rounded-full bg-rose-400/60" />
+          <span className="size-2 rounded-full bg-amber-400/60" />
+          <span className="size-2 rounded-full bg-emerald-400/60" />
+        </div>
+        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+          docs.stripe.com · sitemap
+        </span>
+        <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
+          <span className="crawler-pulse-dot size-1.5 rounded-full bg-emerald-500" />
+          crawling
+        </span>
+      </div>
+
+      {/* File tree */}
+      <ul className="mt-2.5 space-y-1 font-mono text-[11px]">
+        {CRAWLER_TREE.map((row, i) => (
+          <li
+            className="crawler-row flex items-center gap-1.5"
+            key={`${row.label}-${String(i)}`}
+            style={{
+              paddingLeft: `${row.indent * 14}px`,
+              animationDelay: `${row.delay}s`,
+            }}
+          >
+            {row.kind === "folder" ? (
+              <Folder
+                aria-hidden="true"
+                className="size-3 shrink-0 text-violet-500"
+              />
+            ) : (
+              <FileText
+                aria-hidden="true"
+                className="size-3 shrink-0 text-foreground/55"
+              />
+            )}
+            <span
+              className={cn(
+                "truncate",
+                row.kind === "folder"
+                  ? "text-foreground/85"
+                  : "text-muted-foreground"
+              )}
+            >
+              {row.label}
+            </span>
+            <Check
+              aria-hidden="true"
+              className="crawler-check ml-auto size-3 shrink-0 text-emerald-500"
+              style={{ animationDelay: `${row.delay + 0.4}s` }}
+            />
+          </li>
+        ))}
+      </ul>
+
+      {/* Scanner line */}
+      <span className="crawler-scanner pointer-events-none absolute inset-x-3 top-10 h-px bg-gradient-to-r from-transparent via-violet-400/70 to-transparent" />
+
+      {/* Stats footer */}
+      <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between border-border/30 border-t pt-2 font-mono text-[10px]">
+        <span className="text-muted-foreground">pages indexed</span>
+        <span className="font-display font-semibold text-foreground/85 text-sm">
+          1,284
+        </span>
+      </div>
+
+      <style>{`
+        .crawler-row {
+          opacity: 0;
+          animation: crawler-row-in 0.4s ease-out both, crawler-row-loop 12s ease-in-out infinite;
+        }
+        @keyframes crawler-row-in {
+          from { opacity: 0; transform: translateX(-6px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes crawler-row-loop {
+          0%, 25%   { opacity: 1; }
+          70%, 100% { opacity: 1; }
+        }
+        .crawler-check {
+          opacity: 0;
+          animation: crawler-check-in 0.3s ease-out both;
+        }
+        @keyframes crawler-check-in {
+          from { opacity: 0; transform: scale(0.6); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+        .crawler-scanner {
+          animation: crawler-scan 3.6s ease-in-out infinite;
+        }
+        @keyframes crawler-scan {
+          0%   { transform: translateY(0);   opacity: 0; }
+          10%  { opacity: 0.9; }
+          90%  { opacity: 0.9; }
+          100% { transform: translateY(220px); opacity: 0; }
+        }
+        .crawler-pulse-dot {
+          animation: crawler-dot-pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes crawler-dot-pulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+          50%      { opacity: 0.6; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .crawler-row, .crawler-check, .crawler-scanner, .crawler-pulse-dot {
+            animation: none;
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 type Feature = {
   id: string;
@@ -89,54 +224,7 @@ const features: Feature[] = [
 
 function CardVisual({ visual }: { visual: Feature["visual"] }) {
   if (visual === "crawler") {
-    return (
-      <div className="relative h-full min-h-[180px] w-full">
-        <svg className="size-full" viewBox="0 0 320 180">
-          <title>Smart documentation crawler graph</title>
-          <defs>
-            <radialGradient cx="50%" cy="50%" id="crawler-glow" r="50%">
-              <stop offset="0%" stopColor="currentColor" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          {/* Central node */}
-          <circle cx="160" cy="90" fill="url(#crawler-glow)" r="50" />
-          <circle cx="160" cy="90" fill="currentColor" opacity="0.9" r="6" />
-          {/* Outer nodes */}
-          {[
-            { x: 60, y: 40 },
-            { x: 260, y: 40 },
-            { x: 40, y: 140 },
-            { x: 280, y: 140 },
-            { x: 160, y: 20 },
-            { x: 160, y: 160 },
-            { x: 100, y: 90 },
-            { x: 220, y: 90 },
-          ].map((p, i) => (
-            <g key={`n-${String(i)}`}>
-              <line
-                opacity="0.25"
-                stroke="currentColor"
-                strokeWidth="1"
-                x1="160"
-                x2={p.x}
-                y1="90"
-                y2={p.y}
-              />
-              <circle cx={p.x} cy={p.y} fill="currentColor" opacity="0.7" r="3">
-                <animate
-                  attributeName="opacity"
-                  begin={`${(i * 0.2).toString()}s`}
-                  dur="2.4s"
-                  repeatCount="indefinite"
-                  values="0.3;1;0.3"
-                />
-              </circle>
-            </g>
-          ))}
-        </svg>
-      </div>
-    );
+    return <CrawlerVisual />;
   }
   if (visual === "mcp") {
     return (
