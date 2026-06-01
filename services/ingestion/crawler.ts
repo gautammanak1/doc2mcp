@@ -9,9 +9,13 @@ import { contentHash, DuplicateFilter } from "./page-dedupe";
 import { fetchRobotsRules, isPathAllowed } from "./robots";
 import { discoverSitemapUrls } from "./sitemap";
 
-const MAX_PAGES = 80;
+// Tuned for Vercel Hobby's 60s lambda cap. The full pipeline (crawl +
+// ASI1 analyze + tool compression + DB writes) needs to fit in one
+// invocation when QStash isn't configured, so we cap pages aggressively.
+// On Pro/Enterprise (300s+), bump this back to 80 for breadth.
+const MAX_PAGES = 40;
 const PER_PAGE_CHARS = 50_000;
-const FETCH_TIMEOUT_MS = 15_000;
+const FETCH_TIMEOUT_MS = 12_000;
 const USER_AGENT = "doc2mcp/1.0 (+https://doc2mcp.site)";
 
 /**

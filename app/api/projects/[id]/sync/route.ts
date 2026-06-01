@@ -8,6 +8,7 @@ import {
 import { getPlatformProjectById } from "@/lib/db/queries";
 import { detectSourceTypeFromUrl } from "@/lib/doc2mcp/detect-source-type";
 import { ChatbotError } from "@/lib/errors";
+import { enqueuePipelineJob, isQstashConfigured } from "@/lib/queue/qstash";
 import { processProjectPipeline } from "@/services/pipeline/process-project";
 
 function shouldBypassLimits(email: string | null | undefined): boolean {
@@ -78,15 +79,24 @@ export async function POST(
     const sourceType =
       project.sourceType ?? detectSourceTypeFromUrl(project.sourceUrl);
 
-    after(async () => {
-      await processProjectPipeline({
-        projectId: project.id,
-        userId: session.user.id,
-        sourceUrl: project.sourceUrl as string,
-        sourceType,
-        projectName: project.name,
-      });
-    });
+    const jobPayload = {
+      projectId: project.id,
+      userId: session.user.id,
+      sourceUrl: project.sourceUrl,
+      sourceType,
+      projectName: project.name,
+    };
+
+    if (isQstashConfigured()) {
+      try {
+        await enqueuePipelineJob(jobPayload);
+      } catch (error) {
+        console.error("QStash enqueue failed, falling back to after():", error);
+        after(() => processProjectPipeline(jobPayload));
+      }
+    } else {
+      after(() => processProjectPipeline(jobPayload));
+    }
 
     return Response.json({
       id: project.id,

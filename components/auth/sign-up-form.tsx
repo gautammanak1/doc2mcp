@@ -11,6 +11,27 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
+function getSignUpErrorMessage(error: unknown) {
+  const fallback = "We could not create your account. Please try again.";
+  if (!(error instanceof Error)) {
+    return fallback;
+  }
+
+  const message = error.message.toLowerCase();
+  if (message.includes("email rate limit")) {
+    return "Signup email limit is temporarily reached. Please try again in a few minutes, or contact support to activate your account.";
+  }
+
+  if (
+    message.includes("already registered") ||
+    message.includes("already exists")
+  ) {
+    return "An account already exists for this email. Please sign in instead.";
+  }
+
+  return error.message || fallback;
+}
+
 export function SignUpForm({ className }: { className?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -58,9 +79,7 @@ export function SignUpForm({ className }: { className?: string }) {
 
       router.push("/auth/sign-up-success");
     } catch (signUpError: unknown) {
-      setError(
-        signUpError instanceof Error ? signUpError.message : "An error occurred"
-      );
+      setError(getSignUpErrorMessage(signUpError));
     } finally {
       setIsLoading(false);
     }

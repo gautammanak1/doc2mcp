@@ -14,11 +14,16 @@ import { parseOpenApiText } from "../ingestion/openapi-source";
 import { compressApiToTools } from "./tool-compression";
 import { inferWorkflowDetection } from "./workflow-engine";
 
+// Per-page truncation in the LLM context. Lower values keep the ASI1
+// round-trip well under the 60s Hobby lambda cap and reduce token spend.
+// Increase if you observe systematic endpoint omissions for verbose docs.
+const PROMPT_CHARS_PER_PAGE = 1500;
+
 function buildAnalysisPrompt(crawlResults: CrawlResult[]): string {
   const docsSummary = crawlResults
     .map(
       (r) =>
-        `## ${r.title} (${r.type})\nURL: ${r.url}\n${r.content.slice(0, 2000)}`
+        `## ${r.title} (${r.type})\nURL: ${r.url}\n${r.content.slice(0, PROMPT_CHARS_PER_PAGE)}`
     )
     .join("\n\n");
 

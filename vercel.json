@@ -3,6 +3,7 @@
   "regions": ["bom1"],
   "functions": {
     "app/api/convert/route.ts": { "maxDuration": 60 },
+    "app/api/internal/pipeline-worker/route.ts": { "maxDuration": 60 },
     "app/api/projects/[id]/sync/route.ts": { "maxDuration": 60 },
     "app/api/mcp/[projectId]/mcp/route.ts": { "maxDuration": 30 },
     "app/api/mcp/[projectId]/ask/route.ts": { "maxDuration": 30 },
