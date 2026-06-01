@@ -432,7 +432,7 @@ function FeatureCard({
           </span>
         </div>
 
-        <div className="grid flex-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
+        <div className="grid flex-1 grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 lg:items-center">
           <div>
             <h3 className="mb-3 font-display text-2xl group-hover:translate-x-2 transition-transform duration-500 sm:mb-4 sm:text-3xl lg:text-4xl">
               {feature.title}

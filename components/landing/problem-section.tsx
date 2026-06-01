@@ -114,7 +114,7 @@ export function ProblemSection() {
           </p>
         </motion.div>
 
-        <div className="mt-16 grid items-start gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
+        <div className="mt-12 grid grid-cols-1 items-start gap-10 sm:mt-16 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
           {/* Visual: the chaos image with floating glitch chips */}
           <motion.div
             className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-border/60 bg-black"

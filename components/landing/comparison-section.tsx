@@ -414,7 +414,7 @@ export function ComparisonSection() {
           </div>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
           <FeatureCallout
             badge="Semantic"
             body="Endpoints group into User Management, Billing, Webhooks. Tools are LLM-shaped, not REST-shaped."
@@ -450,14 +450,14 @@ export function ComparisonSection() {
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {COMPETITOR_PROFILES.map((profile) => (
               <CompetitorCard key={profile.id} profile={profile} />
             ))}
           </div>
         </div>
 
-        <div className="mt-12 grid gap-4 rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-card/40 to-fuchsia-500/10 p-6 backdrop-blur-xl sm:grid-cols-3 sm:p-8">
+        <div className="mt-12 grid grid-cols-1 gap-4 rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/10 via-card/40 to-fuchsia-500/10 p-6 backdrop-blur-xl sm:grid-cols-3 sm:p-8">
           <StatTile
             label="Tools per project"
             sublabel="vs raw endpoint count"

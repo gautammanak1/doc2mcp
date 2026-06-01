@@ -43,7 +43,7 @@ export function AutoSyncSection() {
   return (
     <section className="relative overflow-hidden border-border/40 border-y bg-gradient-to-b from-background via-background to-muted/20 py-24 sm:py-32">
       <div className="relative mx-auto max-w-[1280px] px-6 lg:px-12">
-        <div className="grid items-center gap-16 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-center gap-12 sm:gap-16 lg:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 font-mono text-[10px] text-emerald-700 uppercase tracking-[0.16em] dark:text-emerald-300">
               <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />

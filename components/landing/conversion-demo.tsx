@@ -128,7 +128,7 @@ export function ConversionDemo() {
         <div className="absolute inset-0 rounded-[40px] bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-500/10 blur-3xl" />
       </div>
 
-      <div className="mx-auto grid max-w-[1100px] gap-6 rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl sm:p-6 lg:grid-cols-2 lg:gap-8 lg:p-8">
+      <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-6 rounded-2xl border border-border/60 bg-card/60 p-4 backdrop-blur-xl sm:p-6 lg:grid-cols-2 lg:gap-8 lg:p-8">
         {/* Browser-style URL input */}
         <div className="space-y-4">
           <div className="rounded-xl border border-border/50 bg-background/80 shadow-[var(--shadow-card)]">

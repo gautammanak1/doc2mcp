@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { startTransition, useEffect, useState } from "react";
 
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import { AnimatedSphere } from "./animated-sphere";
 
-const words = ["crawl", "compress", "generate", "ship"];
+const words = ["AI-ready", "agent-native", "MCP-shaped", "production"];
 
 const marqueeStats = [
   { value: "<60s", label: "docs to MCP", company: "PIPELINE" },
@@ -46,31 +46,30 @@ export function HeroSection() {
         ))}
       </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-6 pb-20 lg:px-12 lg:pb-28">
+      <div className="relative z-10 mx-auto w-full max-w-[1280px] px-4 pb-16 sm:px-6 sm:pb-20 lg:px-12 lg:pb-28">
         <div
-          className={`mb-8 transition-all duration-700 ${
+          className={`mb-6 transition-all duration-700 sm:mb-8 ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
-          <span className="inline-flex items-center gap-2.5 rounded-full border border-border/50 bg-card/40 px-3.5 py-1.5 font-mono text-[11px] text-muted-foreground backdrop-blur-xl sm:text-xs">
-            <span className="size-1.5 rounded-full bg-emerald-500" />
-            docs URL → MCP server
+          <span className="inline-flex items-center gap-2.5 rounded-full border border-border/50 bg-card/40 px-3.5 py-1.5 font-mono text-[10px] text-muted-foreground backdrop-blur-xl sm:text-xs">
+            <Sparkles aria-hidden="true" className="size-3 text-violet-500" />
+            The infrastructure layer for AI-ready docs
           </span>
         </div>
 
         <h1
-          className={`max-w-none font-display text-[clamp(2.25rem,8vw,8.5rem)] leading-[0.95] tracking-tight transition-all duration-1000 sm:max-w-[14ch] ${
+          className={`max-w-none font-display text-[clamp(2rem,8vw,7rem)] leading-[1.02] tracking-tight transition-all duration-1000 sm:max-w-[18ch] sm:leading-[0.98] ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
-          <span className="block">Paste docs.</span>
+          <span className="block">Turn any docs into</span>
           <span className="block">
-            Get{" "}
             <span className="relative inline-block">
               <span className="inline-flex" key={wordIndex}>
                 {words[wordIndex].split("").map((char, i) => (
                   <span
-                    className="animate-char-in inline-block"
+                    className="animate-char-in inline-block bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent"
                     key={`${wordIndex}-${char}-${String(i)}`}
                     style={{ animationDelay: `${i * 50}ms` }}
                   >
@@ -78,47 +77,63 @@ export function HeroSection() {
                   </span>
                 ))}
               </span>
-              <span className="absolute -bottom-1 right-0 left-0 h-2 bg-violet-500/30 sm:-bottom-2 sm:h-3" />
-            </span>
+            </span>{" "}
+            <span className="text-foreground/90">MCP servers.</span>
           </span>
         </h1>
 
         <p
-          className={`mt-8 max-w-2xl text-base leading-relaxed text-muted-foreground transition-all delay-200 duration-700 sm:text-lg lg:text-xl ${
+          className={`mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground transition-all delay-200 duration-700 sm:mt-8 sm:text-lg lg:text-xl ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
-          Paste any docs URL — LangChain, Stripe, your own — and get a hosted
-          MCP server Cursor can read in seconds. No install, no API keys to
-          share.
+          Give Cursor, Claude, Windsurf, VS Code, and OpenAI agents instant
+          access to your documentation. Paste a docs URL and get a hosted,
+          production-ready MCP server — in minutes.
         </p>
 
         <div
-          className={`mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 transition-all delay-300 duration-700 ${
+          className={`mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4 transition-all delay-300 duration-700 ${
             isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
           <Button
             asChild
-            className="group h-12 rounded-full bg-foreground px-7 text-background hover:bg-foreground/90"
+            className="group h-12 w-full rounded-full bg-foreground px-7 text-background hover:bg-foreground/90 sm:w-auto"
             size="lg"
           >
             <Link href="/chat">
-              Open chat
+              Generate MCP
               <ArrowRight className="ml-2 size-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </Button>
           <Button
             asChild
-            className="h-12 rounded-full border-foreground/20 px-7 hover:bg-foreground/5"
+            className="h-12 w-full rounded-full border-foreground/20 px-7 hover:bg-foreground/5 sm:w-auto"
             size="lg"
             variant="outline"
           >
-            <Link href="/pricing">See pricing</Link>
+            <a
+              href="https://calendly.com/doc2mcp/30min"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Calendar aria-hidden="true" className="mr-2 size-4" />
+              Book demo
+            </a>
           </Button>
         </div>
 
-        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+        <p
+          className={`mt-5 text-muted-foreground text-xs transition-all delay-500 duration-700 sm:text-sm ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+          }`}
+        >
+          Works with Cursor, Claude Desktop, VS Code, Windsurf, OpenAI Agents
+          and every MCP-compatible tool.
+        </p>
+
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 lg:grid-cols-4">
           {marqueeStats.map((stat) => (
             <div
               className="rounded-xl border border-border/40 bg-card/30 px-4 py-4 backdrop-blur-xl"

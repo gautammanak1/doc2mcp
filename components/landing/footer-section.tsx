@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Twitter } from "lucide-react";
+import { Calendar, Github, Heart, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
@@ -84,7 +84,7 @@ export function FooterSection() {
   return (
     <footer className="relative overflow-hidden border-border/40 border-t bg-background pt-16 sm:pt-20">
       <div className="mx-auto max-w-[1280px] px-6 lg:px-12">
-        <div className="grid gap-12 lg:grid-cols-[1.2fr_1fr_1fr_1fr] lg:gap-16">
+        <div className="grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1fr] lg:gap-16">
           <div className="space-y-6">
             <Link className="inline-flex items-center gap-2" href="/">
               <Doc2McpLogo size={32} />
@@ -109,6 +109,33 @@ export function FooterSection() {
                   </a>
                 );
               })}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-2">
+              <a
+                aria-label="Book a 30-minute demo on Calendly"
+                className="inline-flex h-9 items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3.5 text-foreground/80 text-xs transition-colors hover:border-border hover:text-foreground"
+                href="https://calendly.com/doc2mcp/30min"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Calendar aria-hidden="true" className="size-3.5" />
+                <span className="font-medium">Book a demo</span>
+              </a>
+              <a
+                aria-label="Sponsor gautammanak1 on GitHub"
+                className="group inline-flex h-9 items-center gap-2 rounded-full border border-pink-500/30 bg-pink-500/10 px-3.5 text-pink-700 text-xs transition-colors hover:border-pink-500/60 hover:bg-pink-500/15 dark:text-pink-300"
+                href="https://github.com/sponsors/gautammanak1"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <Heart
+                  aria-hidden="true"
+                  className="size-3.5 transition-transform group-hover:scale-110"
+                  fill="currentColor"
+                />
+                <span className="font-medium">Sponsor on GitHub</span>
+              </a>
             </div>
           </div>
 

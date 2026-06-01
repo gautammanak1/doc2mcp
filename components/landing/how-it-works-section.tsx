@@ -102,7 +102,7 @@ export function HowItWorksSection() {
           </h2>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="space-y-4">
             {steps.map((step, index) => (
               <button

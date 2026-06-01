@@ -223,7 +223,7 @@ export function PricingSection() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           <div
             className={cn(
               "relative flex flex-col gap-6 rounded-2xl border border-border/40 bg-card/30 p-6 backdrop-blur-xl transition-all duration-500 hover:border-border/60",
