@@ -20,8 +20,6 @@ import { SOURCE_TYPE_LABELS } from "@/lib/marketplace/types";
 
 type Params = { id: string };
 
-export const revalidate = 60;
-
 export async function generateMetadata({
   params,
 }: {

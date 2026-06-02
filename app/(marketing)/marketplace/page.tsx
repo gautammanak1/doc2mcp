@@ -14,9 +14,6 @@ export const metadata: Metadata = {
     "Browse every MCP server generated on doc2mcp. Discover documentation turned into AI-ready infrastructure for Cursor, Claude, VS Code, Windsurf and OpenAI Agents.",
 };
 
-// Listing reflects newly generated MCPs quickly without going fully dynamic.
-export const revalidate = 60;
-
 export default async function MarketplacePage() {
   const rows = await getMarketplaceProjects({ limit: 200 });
   const mcps = rows.map(toMarketplaceMcp);
