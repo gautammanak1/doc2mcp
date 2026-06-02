@@ -1,6 +1,8 @@
 import { Boxes, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { FooterSection } from "@/components/landing/footer-section";
 import { LandingNavigation } from "@/components/landing/navigation";
 import { MarketplaceExplorer } from "@/components/marketplace/marketplace-explorer";
@@ -14,16 +16,51 @@ export const metadata: Metadata = {
     "Browse every MCP server generated on doc2mcp. Discover documentation turned into AI-ready infrastructure for Cursor, Claude, VS Code, Windsurf and OpenAI Agents.",
 };
 
-export default async function MarketplacePage() {
+export default function MarketplacePage() {
+  return (
+    <main className="landing-page relative min-h-screen overflow-x-hidden">
+      <Suspense fallback={<MarketplaceFallback />}>
+        <LandingNavigation />
+        <MarketplaceContent />
+        <FooterSection />
+      </Suspense>
+    </main>
+  );
+}
+
+function MarketplaceFallback() {
+  return (
+    <>
+      <section className="relative mx-auto max-w-[1280px] px-6 pt-32 pb-12 lg:px-12">
+        <div className="max-w-2xl space-y-4">
+          <div className="h-3 w-32 rounded-full bg-muted" />
+          <div className="h-14 w-full max-w-xl rounded-full bg-muted" />
+          <div className="h-20 w-full max-w-2xl rounded-2xl bg-muted" />
+        </div>
+      </section>
+      <section className="relative mx-auto max-w-[1280px] px-6 pb-32 lg:px-12">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {["one", "two", "three"].map((item) => (
+            <div
+              className="h-56 rounded-2xl border border-border/50 bg-card/40"
+              key={item}
+            />
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+async function MarketplaceContent() {
+  await connection();
   const rows = await getMarketplaceProjects({ limit: 200 });
   const mcps = rows.map(toMarketplaceMcp);
 
   const totalTools = mcps.reduce((acc, mcp) => acc + mcp.toolCount, 0);
 
   return (
-    <main className="landing-page relative min-h-screen overflow-x-hidden">
-      <LandingNavigation />
-
+    <>
       <section className="relative mx-auto max-w-[1280px] px-6 pt-32 pb-12 lg:px-12">
         <div className="max-w-2xl">
           <p className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
@@ -83,7 +120,6 @@ export default async function MarketplacePage() {
         )}
       </section>
 
-      <FooterSection />
-    </main>
+    </>
   );
 }

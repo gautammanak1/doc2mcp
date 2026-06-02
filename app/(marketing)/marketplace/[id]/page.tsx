@@ -9,6 +9,8 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { FooterSection } from "@/components/landing/footer-section";
 import { LandingNavigation } from "@/components/landing/navigation";
 import { InstallPanel } from "@/components/marketplace/install-panel";
@@ -20,24 +22,11 @@ import { SOURCE_TYPE_LABELS } from "@/lib/marketplace/types";
 
 type Params = { id: string };
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
-  const { id } = await params;
-  const row = await getMarketplaceProjectById(id);
-  if (!row) {
-    return { title: "MCP not found — doc2mcp" };
-  }
-  const mcp = toMarketplaceMcpDetail(row);
-  return {
-    title: `${mcp.name} — MCP Marketplace — doc2mcp`,
-    description:
-      mcp.summary ||
-      `${mcp.name}: a doc2mcp-generated MCP server with ${mcp.toolCount} tools, ready for Cursor, Claude, VS Code and OpenAI Agents.`,
-  };
-}
+export const metadata: Metadata = {
+  title: "MCP server — doc2mcp marketplace",
+  description:
+    "Install a doc2mcp-generated MCP server in Cursor or VS Code with one click.",
+};
 
 function StatTile({
   icon,
@@ -61,11 +50,52 @@ function StatTile({
   );
 }
 
-export default async function MarketplaceDetailPage({
+function MarketplaceDetailFallback() {
+  return (
+    <article className="relative mx-auto max-w-4xl px-6 pt-32 pb-16 lg:px-8">
+      <div className="h-3 w-28 rounded-full bg-muted" />
+      <div className="mt-8 flex items-start gap-4">
+        <div className="size-14 rounded-2xl bg-muted" />
+        <div className="flex-1 space-y-3">
+          <div className="h-4 w-40 rounded-full bg-muted" />
+          <div className="h-10 w-full max-w-md rounded-full bg-muted" />
+          <div className="h-4 w-full max-w-lg rounded-full bg-muted" />
+        </div>
+      </div>
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {["tools", "pages", "endpoints", "score"].map((item) => (
+          <div
+            className="h-24 rounded-xl border border-border/50 bg-card/40"
+            key={item}
+          />
+        ))}
+      </div>
+    </article>
+  );
+}
+
+export default function MarketplaceDetailPage({
   params,
 }: {
   params: Promise<Params>;
 }) {
+  return (
+    <main className="landing-page relative min-h-screen overflow-x-hidden">
+      <Suspense fallback={<MarketplaceDetailFallback />}>
+        <LandingNavigation />
+        <MarketplaceDetailContent params={params} />
+        <FooterSection />
+      </Suspense>
+    </main>
+  );
+}
+
+async function MarketplaceDetailContent({
+  params,
+}: {
+  params: Promise<Params>;
+}) {
+  await connection();
   const { id } = await params;
   const row = await getMarketplaceProjectById(id);
   if (!row) {
@@ -75,10 +105,7 @@ export default async function MarketplaceDetailPage({
   const installTargets = buildInstallTargets(row.artifacts);
 
   return (
-    <main className="landing-page relative min-h-screen overflow-x-hidden">
-      <LandingNavigation />
-
-      <article className="relative mx-auto max-w-4xl px-6 pt-32 pb-16 lg:px-8">
+    <article className="relative mx-auto max-w-4xl px-6 pt-32 pb-16 lg:px-8">
         <Link
           className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em] hover:text-foreground"
           href="/marketplace"
@@ -201,9 +228,6 @@ export default async function MarketplaceDetailPage({
             </Link>
           </Button>
         </div>
-      </article>
-
-      <FooterSection />
-    </main>
+    </article>
   );
 }
