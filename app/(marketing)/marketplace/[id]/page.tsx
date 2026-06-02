@@ -28,6 +28,17 @@ export const metadata: Metadata = {
     "Install a doc2mcp-generated MCP server in Cursor or VS Code with one click.",
 };
 
+function hostOf(url: string | null): string | null {
+  if (!url) {
+    return null;
+  }
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
 function StatTile({
   icon,
   label,
@@ -103,6 +114,7 @@ async function MarketplaceDetailContent({
   }
   const mcp = toMarketplaceMcpDetail(row);
   const installTargets = buildInstallTargets(row.artifacts);
+  const mcpHost = hostOf(mcp.sourceUrl);
 
   return (
     <article className="relative mx-auto max-w-4xl px-6 pt-32 pb-16 lg:px-8">
@@ -151,11 +163,11 @@ async function MarketplaceDetailContent({
           </Button>
         </header>
 
-        {mcp.summary ? (
-          <p className="mt-8 text-foreground/85 text-lg leading-relaxed">
-            {mcp.summary}
-          </p>
-        ) : null}
+        <p className="mt-6 text-muted-foreground text-sm leading-relaxed">
+          MCP server{mcpHost ? ` for ${mcpHost}` : ""} · {mcp.toolCount} tool
+          {mcp.toolCount === 1 ? "" : "s"} · published by {mcp.ownerName} on
+          doc2mcp.
+        </p>
 
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatTile

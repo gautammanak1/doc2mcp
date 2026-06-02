@@ -42,6 +42,31 @@ function toolCountOf(artifacts: ProjectArtifacts | null): number {
   return artifacts?.compressedTools?.length ?? 0;
 }
 
+/**
+ * Turn raw llms.txt markdown into a clean, human-readable snippet.
+ * Strips headings, list/quote markers, links, source URLs and stray
+ * markdown so the marketplace never shows raw `# ... > ...` text.
+ */
+function cleanSummaryText(raw: string): string {
+  const cleaned = raw
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/^#{1,6}\s*/gm, " ")
+    .replace(/^\s*[>\-*+]\s*/gm, " ")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/source:\s*\S+/gi, " ")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[#>*`_~]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (cleaned.length <= 200) {
+    return cleaned;
+  }
+  const slice = cleaned.slice(0, 200);
+  const lastSpace = slice.lastIndexOf(" ");
+  return `${slice.slice(0, lastSpace > 120 ? lastSpace : 200).trim()}…`;
+}
+
 export function toMarketplaceMcp(project: ProjectRow): MarketplaceMcp {
   const artifacts = readArtifacts(project.artifacts);
   return {
@@ -69,10 +94,7 @@ export function toMarketplaceMcpDetail(
     description: tool.description,
   }));
 
-  const summary = (artifacts?.llmsTxt ?? "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 280);
+  const summary = cleanSummaryText(artifacts?.llmsTxt ?? "");
 
   return {
     ...base,
