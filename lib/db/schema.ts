@@ -146,7 +146,15 @@ export const platformProject = pgTable("PlatformProject", {
   name: text("name").notNull(),
   sourceUrl: text("sourceUrl"),
   sourceType: varchar("sourceType", {
-    enum: ["url", "github", "markdown", "openapi", "postman", "html"],
+    enum: [
+      "url",
+      "github",
+      "markdown",
+      "openapi",
+      "postman",
+      "html",
+      "gitbook",
+    ],
   }).notNull(),
   status: varchar("status", {
     enum: ["pending", "crawling", "analyzing", "generating", "ready", "error"],

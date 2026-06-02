@@ -764,7 +764,7 @@ export async function crawlDocsSource(
 
   const normalizedSourceUrl = await normalizeDocsUrl(sourceUrl);
 
-  if (sourceType === "url") {
+  if (sourceType === "url" || sourceType === "gitbook") {
     const specCrawl = await discoverOpenApiSpec(normalizedSourceUrl);
     if (specCrawl.length > 0) {
       return specCrawl;

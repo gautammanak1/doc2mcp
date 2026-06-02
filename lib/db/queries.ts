@@ -8,8 +8,10 @@ import {
   eq,
   gt,
   gte,
+  ilike,
   inArray,
   lt,
+  or,
   type SQL,
   sql,
 } from "drizzle-orm";
@@ -1218,6 +1220,89 @@ export async function getAllProjectsWithUser(limit = 100) {
     .innerJoin(user, eq(platformProject.userId, user.id))
     .orderBy(desc(platformProject.createdAt))
     .limit(limit);
+}
+
+/**
+ * Marketplace: every successfully generated MCP is auto-listed here.
+ *
+ * Returns only `ready` projects from users who are not disabled, joined
+ * with the owner's display name (NOT email — email is PII and never
+ * leaves the server for the public marketplace). Token hashes and the
+ * heavy `crawlData` blob are intentionally excluded.
+ */
+export async function getMarketplaceProjects({
+  limit = 200,
+  offset = 0,
+  search,
+  sourceType,
+}: {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  sourceType?: PlatformProject["sourceType"];
+} = {}) {
+  const filters: SQL[] = [
+    eq(platformProject.status, "ready"),
+    eq(user.disabled, false),
+  ];
+
+  if (sourceType) {
+    filters.push(eq(platformProject.sourceType, sourceType));
+  }
+
+  if (search && search.trim().length > 0) {
+    const term = `%${search.trim()}%`;
+    const searchFilter = or(
+      ilike(platformProject.name, term),
+      ilike(platformProject.sourceUrl, term)
+    );
+    if (searchFilter) {
+      filters.push(searchFilter);
+    }
+  }
+
+  return db
+    .select({
+      id: platformProject.id,
+      name: platformProject.name,
+      sourceUrl: platformProject.sourceUrl,
+      sourceType: platformProject.sourceType,
+      artifacts: platformProject.artifacts,
+      createdAt: platformProject.createdAt,
+      updatedAt: platformProject.updatedAt,
+      ownerName: user.name,
+    })
+    .from(platformProject)
+    .innerJoin(user, eq(platformProject.userId, user.id))
+    .where(and(...filters))
+    .orderBy(desc(platformProject.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+/** Marketplace: single MCP detail (public-safe fields only). */
+export async function getMarketplaceProjectById(id: string) {
+  const [row] = await db
+    .select({
+      id: platformProject.id,
+      name: platformProject.name,
+      sourceUrl: platformProject.sourceUrl,
+      sourceType: platformProject.sourceType,
+      status: platformProject.status,
+      artifacts: platformProject.artifacts,
+      createdAt: platformProject.createdAt,
+      updatedAt: platformProject.updatedAt,
+      ownerName: user.name,
+      ownerDisabled: user.disabled,
+    })
+    .from(platformProject)
+    .innerJoin(user, eq(platformProject.userId, user.id))
+    .where(eq(platformProject.id, id));
+
+  if (!row || row.status !== "ready" || row.ownerDisabled) {
+    return null;
+  }
+  return row;
 }
 
 export async function getAllUsersWithStats(limit = 100) {

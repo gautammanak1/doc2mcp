@@ -10,6 +10,7 @@ import { checkBotId } from "botid/server";
 import { after } from "next/server";
 import { createResumableStreamContext } from "resumable-stream";
 import { auth, type UserType } from "@/app/(auth)/auth";
+import { isAdminEmail } from "@/lib/admin/admin-access";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import {
   allowedModelIds,
@@ -92,13 +93,20 @@ export async function POST(request: Request) {
       await checkIpRateLimit(ipAddress(request));
     }
 
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 1,
-    });
+    // Admins (and explicit bypass) have no query limit.
+    const bypassQueryLimit =
+      process.env.DOC2MCP_BYPASS_LIMITS === "1" ||
+      isAdminEmail(session.user.email);
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerHour) {
-      return new ChatbotError("rate_limit:chat").toResponse();
+    if (!bypassQueryLimit) {
+      const messageCount = await getMessageCountByUserId({
+        id: session.user.id,
+        differenceInHours: 1,
+      });
+
+      if (messageCount > entitlementsByUserType[userType].maxMessagesPerHour) {
+        return new ChatbotError("rate_limit:chat").toResponse();
+      }
     }
 
     const isToolApprovalFlow = Boolean(messages);

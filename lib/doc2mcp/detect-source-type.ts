@@ -50,6 +50,15 @@ export function detectSourceTypeFromUrl(url: string): SourceType {
     return "github";
   }
 
+  // GitBook published spaces and hosted docs.
+  if (
+    lower.includes(".gitbook.io") ||
+    lower.includes("gitbook.com") ||
+    lower.includes("/gitbook")
+  ) {
+    return "gitbook";
+  }
+
   if (lower.endsWith(".html") || lower.endsWith(".htm")) {
     return "html";
   }

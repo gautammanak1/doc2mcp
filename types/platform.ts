@@ -12,7 +12,8 @@ export type SourceType =
   | "markdown"
   | "openapi"
   | "postman"
-  | "html";
+  | "html"
+  | "gitbook";
 
 export type AuthType = "api_key" | "oauth" | "bearer" | "none" | "env";
 
