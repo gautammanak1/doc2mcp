@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { SourceIcon } from "@/components/marketplace/source-icon";
 import { Input } from "@/components/ui/input";
 import {
   type MarketplaceMcp,
@@ -66,14 +67,16 @@ function McpCard({ mcp }: { mcp: MarketplaceMcp }) {
   const host = hostOf(mcp.sourceUrl);
   return (
     <Link
-      className="group flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/40 p-5 transition-all duration-300 hover:border-border hover:bg-card/70"
+      className="group relative flex flex-col gap-4 overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:bg-card/70 hover:shadow-lg hover:shadow-violet-500/5"
       href={`/marketplace/${mcp.id}`}
     >
+      <div
+        aria-hidden="true"
+        className="-translate-y-1/2 pointer-events-none absolute top-0 right-0 size-32 translate-x-1/2 rounded-full bg-violet-500/10 opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100"
+      />
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border/50 bg-background">
-            <Boxes className="size-5 text-violet-500" />
-          </span>
+          <SourceIcon className="shadow-sm" host={host} size={44} />
           <div className="min-w-0">
             <h3 className="truncate font-semibold text-foreground text-sm">
               {mcp.name}

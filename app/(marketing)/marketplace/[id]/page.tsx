@@ -14,6 +14,7 @@ import { Suspense } from "react";
 import { FooterSection } from "@/components/landing/footer-section";
 import { LandingNavigation } from "@/components/landing/navigation";
 import { InstallPanel } from "@/components/marketplace/install-panel";
+import { SourceIcon } from "@/components/marketplace/source-icon";
 import { Button } from "@/components/ui/button";
 import { getMarketplaceProjectById } from "@/lib/db/queries";
 import { buildInstallTargets } from "@/lib/marketplace/install";
@@ -128,9 +129,7 @@ async function MarketplaceDetailContent({
 
       <header className="mt-8 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-4">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border/50 bg-card/60">
-            <Boxes className="size-7 text-violet-500" />
-          </span>
+          <SourceIcon className="shadow-sm" host={mcpHost} size={56} />
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-xs">
               <span className="rounded-full bg-muted/60 px-2.5 py-0.5 font-medium">
