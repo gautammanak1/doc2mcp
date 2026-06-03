@@ -236,24 +236,27 @@ type Accent = {
 
 const ACCENTS: Record<string, Accent> = {
   violet: {
-    chip: "border-violet-500/30 bg-violet-500/10 text-violet-300",
+    chip: "border-violet-500/30 bg-violet-500/10 text-violet-600 dark:text-violet-300",
     glow: "bg-violet-500/30",
-    value: "from-violet-300 to-fuchsia-300",
+    value:
+      "from-violet-600 to-fuchsia-600 dark:from-violet-300 dark:to-fuchsia-300",
   },
   sky: {
-    chip: "border-sky-500/30 bg-sky-500/10 text-sky-300",
+    chip: "border-sky-500/30 bg-sky-500/10 text-sky-600 dark:text-sky-300",
     glow: "bg-sky-500/30",
-    value: "from-sky-300 to-cyan-300",
+    value: "from-sky-600 to-cyan-600 dark:from-sky-300 dark:to-cyan-300",
   },
   emerald: {
-    chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
+    chip: "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
     glow: "bg-emerald-500/30",
-    value: "from-emerald-300 to-teal-300",
+    value:
+      "from-emerald-600 to-teal-600 dark:from-emerald-300 dark:to-teal-300",
   },
   amber: {
-    chip: "border-amber-500/30 bg-amber-500/10 text-amber-300",
+    chip: "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-300",
     glow: "bg-amber-500/30",
-    value: "from-amber-300 to-orange-300",
+    value:
+      "from-amber-600 to-orange-600 dark:from-amber-300 dark:to-orange-300",
   },
 };
 
@@ -273,7 +276,7 @@ function MetricCard({
   const display = useCountUp(value);
   const tone = ACCENTS[accent];
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/15">
+    <div className="group relative overflow-hidden rounded-2xl border border-border/60 bg-foreground/[0.02] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-foreground/20">
       <div
         className={cn(
           "pointer-events-none absolute -right-10 -top-10 size-28 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100",
@@ -304,7 +307,7 @@ function MetricCard({
 
 function VisualPipeline() {
   return (
-    <section className="glass-card rounded-2xl border border-white/5 bg-black/20 p-6">
+    <section className="glass-card rounded-2xl border border-border/60 bg-foreground/[0.02] p-6">
       <div className="flex items-center gap-2">
         <Network className="size-4 text-violet-300" />
         <h2 className="font-display font-semibold text-lg">
@@ -316,7 +319,7 @@ function VisualPipeline() {
       </p>
       <div className="relative mt-6">
         {/* Desktop flowing data track */}
-        <div className="pointer-events-none absolute inset-x-16 top-8 hidden h-px overflow-hidden bg-white/10 lg:block">
+        <div className="pointer-events-none absolute inset-x-16 top-8 hidden h-px overflow-hidden bg-foreground/10 lg:block">
           <div className="h-full w-1/3 bg-gradient-to-r from-transparent via-emerald-400 to-transparent [animation:flow-pulse_2.6s_linear_infinite]" />
         </div>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
@@ -370,7 +373,7 @@ function McpServerCard({
 
   return (
     <section className="glass-card overflow-hidden rounded-2xl border border-violet-500/15 bg-gradient-to-b from-violet-500/[0.05] to-transparent">
-      <div className="flex flex-col gap-3 border-white/5 border-b p-6 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-3 border-border/60 border-b p-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <Server className="size-4 text-violet-300" />
@@ -384,7 +387,7 @@ function McpServerCard({
         <div className="flex flex-wrap gap-1.5">
           {AGENT_BADGES.map((badge) => (
             <span
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[10px] text-foreground/70"
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-foreground/5 px-2.5 py-1 font-mono text-[10px] text-foreground/70"
               key={badge}
             >
               <span className="size-1.5 rounded-full bg-violet-400" />
@@ -400,7 +403,7 @@ function McpServerCard({
             <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
               Endpoint
             </p>
-            <div className="mt-2 flex items-center gap-2 rounded-xl border border-white/5 bg-black/40 p-2 pl-3">
+            <div className="mt-2 flex items-center gap-2 rounded-xl border border-border/60 bg-foreground/5 p-2 pl-3">
               <code className="min-w-0 flex-1 truncate font-mono text-[12px] text-foreground/90">
                 {endpoint}
               </code>
@@ -428,8 +431,8 @@ function McpServerCard({
           <MiniStat label="Pages" value={String(pageCount)} />
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-white/5 bg-black/60 font-mono text-[11px]">
-          <div className="flex items-center gap-1.5 border-white/5 border-b px-3 py-2">
+        <div className="overflow-hidden rounded-xl border border-border/60 bg-muted/50 font-mono text-[11px]">
+          <div className="flex items-center gap-1.5 border-border/60 border-b px-3 py-2">
             <span className="size-2.5 rounded-full bg-red-400/70" />
             <span className="size-2.5 rounded-full bg-amber-400/70" />
             <span className="size-2.5 rounded-full bg-emerald-400/70" />
@@ -452,7 +455,7 @@ function McpServerCard({
           </div>
         </div>
 
-        <details className="group rounded-xl border border-white/5 bg-black/30">
+        <details className="group rounded-xl border border-border/60 bg-foreground/[0.03]">
           <summary className="flex cursor-pointer items-center justify-between p-3 font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
             <span>Production MCP configuration (JSON)</span>
             <span className="flex gap-1">
@@ -480,7 +483,7 @@ function McpServerCard({
               </Button>
             </span>
           </summary>
-          <pre className="max-h-72 overflow-auto border-white/5 border-t p-4 font-mono text-[11px] leading-relaxed">
+          <pre className="max-h-72 overflow-auto border-border/60 border-t p-4 font-mono text-[11px] leading-relaxed">
             {json}
           </pre>
         </details>
@@ -499,7 +502,7 @@ function MiniStat({
   valueClass?: string;
 }) {
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
+    <div className="rounded-xl border border-border/60 bg-foreground/[0.03] p-3">
       <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-wider">
         {label}
       </p>
@@ -527,7 +530,7 @@ function ActivityTimeline({ logs }: { logs: ProcessingLog[] }) {
         <Activity className="size-4 text-violet-300" />
         <h2 className="font-display font-semibold text-xl">Activity</h2>
       </div>
-      <ol className="relative ml-1 space-y-4 border-white/10 border-l pl-6">
+      <ol className="relative ml-1 space-y-4 border-border border-l pl-6">
         {logs.map((log) => (
           <li className="relative" key={log.id}>
             <span
@@ -577,7 +580,7 @@ function ConfigPanel({
       {hint ? (
         <p className="mt-2 text-muted-foreground text-xs">{hint}</p>
       ) : null}
-      <pre className="mt-3 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 font-mono text-[10px]">
+      <pre className="mt-3 max-h-48 overflow-auto rounded-lg bg-foreground/5 p-3 font-mono text-[10px]">
         {config}
       </pre>
     </div>
@@ -589,11 +592,11 @@ function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
   const visibleSteps = workflow.steps.slice(0, 4);
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-black/25 p-5">
+    <div className="rounded-2xl border border-border/60 bg-foreground/[0.02] p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display font-semibold text-white">
+            <h3 className="font-display font-semibold text-foreground">
               {workflow.name}
             </h3>
             <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300 uppercase">
@@ -604,7 +607,7 @@ function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
             {workflow.description}
           </p>
         </div>
-        <div className="shrink-0 rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-right">
+        <div className="shrink-0 rounded-lg border border-border/60 bg-foreground/5 px-2 py-1 text-right">
           <p className="font-mono text-[9px] text-muted-foreground uppercase">
             score
           </p>
@@ -703,7 +706,7 @@ export function ResultDashboard({
           MCP infrastructure · live
         </span>
         <h1 className="mt-4 font-display font-semibold text-4xl tracking-tight sm:text-5xl">
-          <span className="bg-gradient-to-br from-white via-white to-violet-200 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-br from-foreground via-foreground to-violet-500 bg-clip-text text-transparent dark:to-violet-200">
             {project.name}
           </span>
         </h1>
@@ -801,7 +804,7 @@ export function ResultDashboard({
               below.
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-2">
-              <code className="max-w-full truncate rounded-lg bg-black/50 px-3 py-2 font-mono text-[11px]">
+              <code className="max-w-full truncate rounded-lg bg-muted/60 px-3 py-2 font-mono text-[11px]">
                 {artifacts.mcpAccessToken}
               </code>
               <Button
@@ -828,8 +831,8 @@ export function ResultDashboard({
 
       {/* Quality scorecard */}
       {artifacts.qualityScore ? (
-        <Reveal className="glass-card block rounded-2xl border border-white/5 bg-black/30 p-6">
-          <h2 className="font-display font-semibold text-xl text-white">
+        <Reveal className="glass-card block rounded-2xl border border-border/60 bg-foreground/[0.03] p-6">
+          <h2 className="font-display font-semibold text-xl text-foreground">
             AI quality scorecard
           </h2>
           <p className="mt-1 text-muted-foreground text-sm">
@@ -867,7 +870,7 @@ export function ResultDashboard({
             <Workflow className="size-3.5" />
             Workflow AI engine
           </p>
-          <h2 className="mt-2 font-display font-semibold text-xl text-white">
+          <h2 className="mt-2 font-display font-semibold text-xl text-foreground">
             Suggested AI workflows
           </h2>
           <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -932,7 +935,7 @@ export function ResultDashboard({
       {artifacts.graphNodes?.length > 0 ? (
         <section>
           <h2 className="mb-4 font-display font-semibold text-xl">API graph</h2>
-          <div className="h-[420px] overflow-hidden rounded-2xl border border-white/5">
+          <div className="h-[420px] overflow-hidden rounded-2xl border border-border/60">
             <ApiGraph
               edges={artifacts.graphEdges}
               nodes={artifacts.graphNodes}
@@ -987,7 +990,7 @@ function ScoreTile({
   const display = useCountUp(value);
   const tone = ACCENTS[accent];
   return (
-    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
+    <div className="rounded-xl border border-border/60 bg-foreground/5 p-4 text-center">
       <p className="font-mono text-[10px] text-muted-foreground uppercase">
         {label}
       </p>

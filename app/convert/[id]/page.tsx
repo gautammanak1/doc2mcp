@@ -30,7 +30,7 @@ async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="dark relative min-h-dvh bg-[#040409] text-foreground">
+    <div className="relative min-h-dvh bg-background text-foreground">
       <LandingNavigationServer />
       <ConvertExperience initialProject={project} />
       <FooterSection />
@@ -40,7 +40,7 @@ async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
 
 function ConvertFallback() {
   return (
-    <div className="dark flex min-h-dvh items-center justify-center bg-[#040409] text-foreground">
+    <div className="flex min-h-dvh items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center gap-3 text-muted-foreground">
         <Loader2 className="size-5 animate-spin text-violet-400" />
         <p className="font-mono text-xs">loading conversion…</p>

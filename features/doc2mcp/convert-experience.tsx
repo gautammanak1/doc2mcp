@@ -133,7 +133,7 @@ export function ConvertExperience({
       {/* Project context bar — sits beneath the global site navigation. */}
       <motion.div
         animate={{ y: 0, opacity: 1 }}
-        className="relative z-10 mt-20 border-white/5 border-b bg-black/40 backdrop-blur-xl sm:mt-24"
+        className="relative z-10 mt-20 border-border/60 border-b bg-background/60 backdrop-blur-xl sm:mt-24"
         initial={{ y: -20, opacity: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >

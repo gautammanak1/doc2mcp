@@ -21,7 +21,7 @@ function CopyConfigButton({ value, label }: { value: string; label: string }) {
 
   return (
     <button
-      className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:border-white/20 hover:text-foreground"
+      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-foreground/5 px-2.5 py-1 text-[12px] text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
       onClick={handleCopy}
       type="button"
     >
@@ -42,10 +42,10 @@ function CopyConfigButton({ value, label }: { value: string; label: string }) {
 
 function BrandIcon({ src, alt }: { src: string; alt: string }) {
   return (
-    <span className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/5">
+    <span className="flex size-10 items-center justify-center rounded-xl border border-border bg-foreground/5">
       <Image
         alt={alt}
-        className="size-5 invert"
+        className="size-5 dark:invert"
         height={20}
         src={src}
         width={20}
@@ -61,10 +61,10 @@ function BrandIcon({ src, alt }: { src: string; alt: string }) {
  */
 export function InstallButtons({ targets }: { targets: InstallTargets }) {
   return (
-    <section className="glass-card rounded-2xl border border-white/5 bg-black/30 p-6">
+    <section className="glass-card rounded-2xl border border-border/60 bg-foreground/[0.03] p-6">
       <div className="flex items-center gap-2">
-        <Download className="size-4 text-violet-300" />
-        <h2 className="font-display font-semibold text-xl text-white">
+        <Download className="size-4 text-violet-500 dark:text-violet-300" />
+        <h2 className="font-display font-semibold text-xl text-foreground">
           Install in your editor
         </h2>
       </div>
@@ -74,7 +74,7 @@ export function InstallButtons({ targets }: { targets: InstallTargets }) {
 
       <div className="mt-5 grid gap-4 lg:grid-cols-2">
         {/* Cursor */}
-        <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-foreground/[0.02] p-5">
           <div className="flex items-center gap-3">
             <BrandIcon alt="Cursor" src="/icons/tools/cursor.svg" />
             <div>
@@ -87,7 +87,7 @@ export function InstallButtons({ targets }: { targets: InstallTargets }) {
 
           <Button
             asChild
-            className="h-10 w-full gap-1.5 rounded-full bg-white text-black hover:bg-white/90"
+            className="h-10 w-full gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90"
           >
             <a href={targets.cursorDeeplink}>
               <Download className="size-4" />
@@ -105,7 +105,7 @@ export function InstallButtons({ targets }: { targets: InstallTargets }) {
         </div>
 
         {/* VS Code */}
-        <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+        <div className="flex flex-col gap-4 rounded-2xl border border-border/60 bg-foreground/[0.02] p-5">
           <div className="flex items-center gap-3">
             <BrandIcon alt="VS Code" src="/icons/tools/visualstudiocode.svg" />
             <div>
@@ -128,7 +128,7 @@ export function InstallButtons({ targets }: { targets: InstallTargets }) {
             </Button>
             <Button
               asChild
-              className="h-10 flex-1 gap-1.5 rounded-full border-white/15"
+              className="h-10 flex-1 gap-1.5 rounded-full border-border"
               variant="outline"
             >
               <a href={targets.vscodeInsidersDeeplink}>Insiders</a>
