@@ -2,6 +2,8 @@ import { Loader2 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
+import { FooterSection } from "@/components/landing/footer-section";
+import { LandingNavigationServer } from "@/components/landing/navigation-server";
 import { ConvertExperience } from "@/features/doc2mcp/convert-experience";
 import { getPlatformProjectById } from "@/lib/db/queries";
 
@@ -27,7 +29,13 @@ async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
-  return <ConvertExperience initialProject={project} />;
+  return (
+    <div className="dark relative min-h-dvh bg-[#040409] text-foreground">
+      <LandingNavigationServer />
+      <ConvertExperience initialProject={project} />
+      <FooterSection />
+    </div>
+  );
 }
 
 function ConvertFallback() {

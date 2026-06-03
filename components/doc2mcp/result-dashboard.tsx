@@ -23,12 +23,14 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ApiGraph } from "@/components/doc2mcp/api-graph";
+import { InstallButtons } from "@/components/doc2mcp/install-buttons";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
 import { McpRegistryBanner } from "@/components/doc2mcp/mcp-registry-banner";
 import { PublishToRegistryPanel } from "@/components/doc2mcp/publish-to-registry-panel";
 import { ToolCard } from "@/components/doc2mcp/tool-card";
 import { Button } from "@/components/ui/button";
 import type { PlatformProject } from "@/lib/db/schema";
+import { buildInstallTargets } from "@/lib/marketplace/install";
 import { cn } from "@/lib/utils";
 import { generateMcpExportBundle } from "@/services/mcp/exports";
 import type {
@@ -676,6 +678,11 @@ export function ResultDashboard({
     });
   }, [fixedConfig, artifacts.generationReport]);
 
+  const installTargets = useMemo(
+    () => buildInstallTargets({ mcpConfig: fixedConfig }),
+    [fixedConfig]
+  );
+
   return (
     <motion.div
       animate={{ opacity: 1 }}
@@ -774,6 +781,12 @@ export function ResultDashboard({
           toolCount={fixedConfig?.tools?.length ?? tools.length}
         />
       </Reveal>
+
+      {installTargets ? (
+        <Reveal>
+          <InstallButtons targets={installTargets} />
+        </Reveal>
+      ) : null}
 
       {/* Token + registry */}
       {artifacts.mcpAccessToken ? (
@@ -890,11 +903,11 @@ export function ResultDashboard({
         <section className="space-y-4">
           <div>
             <h2 className="font-display font-semibold text-xl">
-              One-click IDE exports
+              Advanced configs
             </h2>
             <p className="mt-1 text-muted-foreground text-sm">
-              Installable configs for Cursor, Claude Desktop, VS Code, Windsurf,
-              OpenAI Agents SDK, and hosted MCP endpoints.
+              Copy or download configs for Claude Desktop, Windsurf, OpenAI
+              Agents SDK, and custom MCP clients.
             </p>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">

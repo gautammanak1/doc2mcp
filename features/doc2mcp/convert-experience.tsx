@@ -6,7 +6,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AnimatedBackground } from "@/components/doc2mcp/animated-background";
-import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { PipelineProgress } from "@/components/doc2mcp/pipeline-progress";
 import {
   ResultDashboard,
@@ -128,21 +127,18 @@ export function ConvertExperience({
   };
 
   return (
-    <div className="dark relative min-h-dvh bg-[#040409] text-foreground">
+    <div className="relative text-foreground">
       <AnimatedBackground />
 
-      {/* Sticky top bar */}
-      <motion.header
+      {/* Project context bar — sits beneath the global site navigation. */}
+      <motion.div
         animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-30 border-white/5 border-b bg-black/50 backdrop-blur-xl"
+        className="relative z-10 mt-20 border-white/5 border-b bg-black/40 backdrop-blur-xl sm:mt-24"
         initial={{ y: -20, opacity: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <Link className="shrink-0" href="/">
-              <Doc2McpLogo showWordmark={false} size={30} />
-            </Link>
             <div className="min-w-0">
               <p className="truncate font-medium text-sm">{project.name}</p>
               <p className="truncate font-mono text-[11px] text-muted-foreground">
@@ -169,7 +165,7 @@ export function ConvertExperience({
             </Button>
           </div>
         </div>
-      </motion.header>
+      </motion.div>
 
       <main className="relative z-10 mx-auto max-w-6xl space-y-10 px-6 py-10">
         {isProcessing ? (
