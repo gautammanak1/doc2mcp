@@ -1,7 +1,7 @@
 import { DocsMobileNav } from "@/components/docs/docs-mobile-nav";
-import { getDocNav } from "@/lib/docs/loader";
+import { getDocNavGroups } from "@/lib/docs/loader";
 
 export async function DocsMobileNavLoader() {
-  const nav = await getDocNav();
-  return <DocsMobileNav items={nav} />;
+  const groups = await getDocNavGroups();
+  return <DocsMobileNav groups={groups} />;
 }

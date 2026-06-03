@@ -227,7 +227,7 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
     return <CrawlerVisual />;
   }
   if (visual === "mcp") {
-  return (
+    return (
       <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 font-mono text-[10px] backdrop-blur-xl">
         <p className="text-emerald-500">$ doc2mcp generate ./stripe-docs</p>
         <p className="text-muted-foreground">→ crawled 1,284 pages</p>
@@ -238,7 +238,7 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
     );
   }
   if (visual === "retrieval") {
-  return (
+    return (
       <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-1.5">
         {[
           { label: "createCustomer", score: "0.94" },
@@ -266,7 +266,7 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
     );
   }
   if (visual === "sync") {
-  return (
+    return (
       <div className="relative flex h-full min-h-[120px] w-full items-center justify-center">
         <span className="relative inline-flex size-20 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10">
           <RefreshCw
@@ -360,15 +360,15 @@ function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-foreground/85">
               <Icon className="size-4" />
-          </span>
-        </div>
-          <h3 className="font-display font-semibold text-foreground text-lg tracking-tight sm:text-xl">
-              {feature.title}
-            </h3>
-          <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-              {feature.description}
-            </p>
+            </span>
           </div>
+          <h3 className="font-display font-semibold text-foreground text-lg tracking-tight sm:text-xl">
+            {feature.title}
+          </h3>
+          <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+            {feature.description}
+          </p>
+        </div>
 
         <div className="text-foreground/70 transition-transform duration-500 group-hover:translate-y-[-2px]">
           <CardVisual visual={feature.visual} />

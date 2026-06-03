@@ -12,7 +12,14 @@
 
 "use client";
 
-import { Check, Copy, ExternalLink, Globe2, Lock, Sparkles } from "lucide-react";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  Globe2,
+  Lock,
+  Sparkles,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -57,7 +64,9 @@ export function CustomDomainCard({ plan }: Props) {
   const [copied, setCopied] = useState<string | null>(null);
 
   function copy(value: string, label: string) {
-    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    if (typeof navigator === "undefined" || !navigator.clipboard) {
+      return;
+    }
     navigator.clipboard
       .writeText(value)
       .then(() => {
@@ -94,8 +103,8 @@ export function CustomDomainCard({ plan }: Props) {
             <code className="font-mono text-foreground">
               mcp.your-domain.com
             </code>{" "}
-            so it&apos;s obvious to your team and customers what the endpoint
-            is for. Any subdomain works — pick what fits your brand.
+            so it&apos;s obvious to your team and customers what the endpoint is
+            for. Any subdomain works — pick what fits your brand.
           </Step>
           <Step n={2} title="Add these DNS records at your registrar">
             <div className="mt-2 grid gap-2">
@@ -109,9 +118,7 @@ export function CustomDomainCard({ plan }: Props) {
                       {rec.type}
                     </span>
                     <code className="truncate font-mono text-foreground">
-                      <span className="text-muted-foreground">
-                        {rec.host}.
-                      </span>
+                      <span className="text-muted-foreground">{rec.host}.</span>
                       your-domain.com → {rec.value}
                     </code>
                     <Button
@@ -186,9 +193,7 @@ export function CustomDomainCard({ plan }: Props) {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild size="sm" type="button" variant="outline">
-              <a
-                href="/contact?topic=Partnership%20%2F%20press&prefill=custom-domain"
-              >
+              <a href="/contact?topic=Partnership%20%2F%20press&prefill=custom-domain">
                 <Sparkles aria-hidden="true" className="mr-1.5 size-3.5" />
                 Request setup
               </a>

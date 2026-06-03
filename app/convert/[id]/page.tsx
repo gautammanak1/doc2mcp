@@ -32,9 +32,9 @@ async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
 
 function ConvertFallback() {
   return (
-    <div className="flex min-h-dvh items-center justify-center">
+    <div className="dark flex min-h-dvh items-center justify-center bg-[#040409] text-foreground">
       <div className="flex flex-col items-center gap-3 text-muted-foreground">
-        <Loader2 className="size-5 animate-spin" />
+        <Loader2 className="size-5 animate-spin text-violet-400" />
         <p className="font-mono text-xs">loading conversion…</p>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
 import { DocsMobileNavLoader } from "@/components/docs/docs-mobile-nav-loader";
+import { DocsSearchLoader } from "@/components/docs/docs-search-loader";
 import { DocsSidebarLoader } from "@/components/docs/docs-sidebar-loader";
 import { Button } from "@/components/ui/button";
 
@@ -60,6 +61,11 @@ export function DocsShell({ children }: { children: React.ReactNode }) {
             <Link className="flex shrink-0 items-center" href="/">
               <Doc2McpLogo size={28} />
             </Link>
+          </div>
+          <div className="mx-4 hidden max-w-xs flex-1 justify-end sm:flex">
+            <Suspense fallback={null}>
+              <DocsSearchLoader />
+            </Suspense>
           </div>
           <div className="flex shrink-0 items-center gap-1 text-sm sm:gap-3">
             <Link

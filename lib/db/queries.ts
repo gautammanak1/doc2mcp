@@ -1261,7 +1261,7 @@ export async function getMarketplaceProjects({
     }
   }
 
-  return db
+  return await db
     .select({
       id: platformProject.id,
       name: platformProject.name,
@@ -1299,7 +1299,10 @@ export async function getMarketplaceProjectById(id: string) {
     .innerJoin(user, eq(platformProject.userId, user.id))
     .where(eq(platformProject.id, id));
 
-  if (!row || row.status !== "ready" || row.ownerDisabled) {
+  if (!row) {
+    return null;
+  }
+  if (row.status !== "ready" || row.ownerDisabled) {
     return null;
   }
   return row;
