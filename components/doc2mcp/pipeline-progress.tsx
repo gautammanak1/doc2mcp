@@ -36,13 +36,13 @@ export function PipelineProgress({
             className={cn(
               "flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] transition-colors",
               done &&
-                "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
-              active && "border-violet-500/50 bg-violet-500/15 text-violet-300",
+                "border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+              active && "border-primary/20 bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary",
               !done &&
                 !active &&
                 !failed &&
-                "border-white/10 text-muted-foreground",
-              failed && "border-red-500/40 bg-red-500/10 text-red-400"
+                "border-border bg-muted/20 text-muted-foreground",
+              failed && "border-destructive/20 bg-destructive/5 text-destructive"
             )}
             key={step}
             layout

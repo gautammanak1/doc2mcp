@@ -116,7 +116,7 @@ export function ConvertExperience({
     <div className="relative min-h-dvh">
       <AnimatedBackground />
 
-      <header className="relative z-10 border-b border-white/5 bg-background/60 backdrop-blur-xl">
+      <header className="relative z-10 border-b border-border bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <Link className="flex items-center gap-4" href="/">
             <Doc2McpLogo size={32} />
@@ -149,9 +149,9 @@ export function ConvertExperience({
         </section>
 
         {/* Live logs */}
-        <section className="glass-card neon-border rounded-2xl p-5">
-          <p className="mb-3 font-mono text-muted-foreground text-xs">
-            terminal
+        <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <p className="mb-3 font-mono text-muted-foreground text-xs uppercase tracking-wider">
+            terminal logs
           </p>
           {logs.length > 0 ? (
             <TerminalLog
@@ -175,51 +175,50 @@ export function ConvertExperience({
             >
               {/* Quality scorecard */}
               {artifacts.qualityScore && (
-                <section className="glass-card rounded-2xl p-6 border border-white/5 bg-black/30">
-                  <h2 className="font-display font-semibold text-xl text-white">
-                    AI Quality Scorecard
+                <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                  <h2 className="font-semibold text-lg text-foreground">
+                    Quality Scorecard
                   </h2>
-                  <p className="mt-1 text-muted-foreground text-sm">
-                    Independent analysis of the documentation quality and
-                    generated MCP reliability
+                  <p className="mt-1 text-muted-foreground text-xs">
+                    Analysis of the source documentation structure and generated MCP compliance
                   </p>
                   <div className="mt-6 grid gap-4 sm:grid-cols-4">
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-                      <p className="font-mono text-muted-foreground text-[10px] uppercase">
+                    <div className="rounded-xl border border-border bg-muted/40 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-wider">
                         Docs Quality
                       </p>
-                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                      <p className="mt-2 text-2xl font-bold text-foreground">
                         {artifacts.qualityScore.docsScore}%
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-                      <p className="font-mono text-muted-foreground text-[10px] uppercase">
+                    <div className="rounded-xl border border-border bg-muted/40 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-wider">
                         Auth Confidence
                       </p>
-                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                      <p className="mt-2 text-2xl font-bold text-foreground">
                         {artifacts.qualityScore.authConfidence}%
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-                      <p className="font-mono text-muted-foreground text-[10px] uppercase">
+                    <div className="rounded-xl border border-border bg-muted/40 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-wider">
                         Workflow Inference
                       </p>
-                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                      <p className="mt-2 text-2xl font-bold text-foreground">
                         {artifacts.qualityScore.workflowConfidence}%
                       </p>
                     </div>
-                    <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-center">
-                      <p className="font-mono text-muted-foreground text-[10px] uppercase">
+                    <div className="rounded-xl border border-border bg-muted/40 p-4 text-center">
+                      <p className="font-mono text-muted-foreground text-[10px] uppercase tracking-wider">
                         MCP Score
                       </p>
-                      <p className="mt-2 text-3xl font-semibold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
+                      <p className="mt-2 text-2xl font-bold text-foreground">
                         {artifacts.qualityScore.mcpScore}%
                       </p>
                     </div>
                   </div>
                   {artifacts.qualityScore.explanation && (
-                    <div className="mt-4 rounded-lg bg-white/5 border border-white/5 p-3 text-xs text-muted-foreground font-mono">
-                      <span className="text-white font-semibold">
+                    <div className="mt-4 rounded-lg bg-muted/60 border border-border p-3 text-xs text-muted-foreground font-mono">
+                      <span className="text-foreground font-semibold">
                         Evaluation:
                       </span>{" "}
                       {artifacts.qualityScore.explanation}
@@ -229,27 +228,26 @@ export function ConvertExperience({
               )}
 
               {artifacts.workflows && artifacts.workflows.length > 0 ? (
-                <section className="glass-card rounded-2xl border border-emerald-500/15 bg-emerald-500/[0.03] p-6">
+                <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
-                      <p className="flex items-center gap-2 font-mono text-emerald-300 text-xs uppercase tracking-wider">
+                      <p className="flex items-center gap-2 font-mono text-emerald-600 dark:text-emerald-400 text-xs uppercase tracking-wider">
                         <Workflow className="size-3.5" />
-                        Workflow AI Engine
+                        Workflow Engine
                       </p>
-                      <h2 className="mt-2 font-display font-semibold text-xl text-white">
-                        Suggested AI Workflows
+                      <h2 className="mt-2 font-semibold text-lg text-foreground">
+                        Suggested Workflows
                       </h2>
-                      <p className="mt-1 text-muted-foreground text-sm">
-                        Inferred from docs, endpoint relationships, auth
-                        signals, and semantic MCP tools.
+                      <p className="mt-1 text-muted-foreground text-xs">
+                        Recommended agent flows inferred from endpoint dependencies and API semantics.
                       </p>
                     </div>
                     {artifacts.workflowDetection ? (
-                      <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-right">
-                        <p className="font-mono text-[10px] text-emerald-300 uppercase">
+                      <div className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-right">
+                        <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
                           Confidence
                         </p>
-                        <p className="mt-1 font-display font-semibold text-2xl text-emerald-200">
+                        <p className="mt-1 font-semibold text-xl text-foreground">
                           {artifacts.workflowDetection.confidence}%
                         </p>
                       </div>
@@ -263,16 +261,16 @@ export function ConvertExperience({
                   </div>
 
                   {artifacts.workflowDetection?.recommendations.length ? (
-                    <div className="mt-5 rounded-xl border border-white/5 bg-white/5 p-4">
+                    <div className="mt-5 rounded-xl border border-border bg-muted/20 p-4">
                       <p className="mb-2 flex items-center gap-2 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                        <Brain className="size-3.5 text-violet-300" />
-                        AI recommendations
+                        <Brain className="size-3.5 text-muted-foreground" />
+                        Optimization Recommendations
                       </p>
                       <ul className="space-y-1.5 text-muted-foreground text-xs">
                         {artifacts.workflowDetection.recommendations.map(
                           (recommendation) => (
                             <li className="flex gap-2" key={recommendation}>
-                              <span className="text-emerald-300">•</span>
+                              <span className="text-primary">•</span>
                               <span>{recommendation}</span>
                             </li>
                           )
@@ -286,9 +284,9 @@ export function ConvertExperience({
               {/* Compressed tools */}
               <section>
                 <div className="mb-4 flex items-center justify-between">
-                  <h2 className="font-display font-semibold text-xl">
-                    AI Tools
-                    <span className="ml-2 font-mono text-muted-foreground text-sm">
+                  <h2 className="font-semibold text-lg text-foreground">
+                    Generated Tools
+                    <span className="ml-2 font-mono text-muted-foreground text-xs font-normal">
                       {tools.length} compressed
                     </span>
                   </h2>
@@ -301,14 +299,14 @@ export function ConvertExperience({
               </section>
 
               {/* MCP output */}
-              <section className="glass-card rounded-2xl p-6">
-                <h2 className="font-display font-semibold text-xl">
+              <section className="rounded-xl border border-border bg-card p-6 shadow-sm">
+                <h2 className="font-semibold text-lg text-foreground">
                   MCP Server
                 </h2>
-                <p className="mt-1 text-muted-foreground text-sm">
+                <p className="mt-1 text-muted-foreground text-xs">
                   Production-ready MCP configuration
                 </p>
-                <pre className="mt-4 max-h-64 overflow-auto rounded-xl border border-white/5 bg-black/40 p-4 font-mono text-[11px] leading-relaxed">
+                <pre className="mt-4 max-h-64 overflow-auto rounded-xl border border-border bg-muted p-4 font-mono text-[11px] leading-relaxed">
                   {JSON.stringify(artifacts.mcpConfig, null, 2)}
                 </pre>
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -343,17 +341,17 @@ export function ConvertExperience({
               {/* MCP setup — platform token only */}
               <section className="col-span-full space-y-4">
                 {artifacts.mcpAccessToken ? (
-                  <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-5">
-                    <p className="font-medium text-emerald-200 text-sm">
+                  <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 p-5">
+                    <p className="font-medium text-emerald-800 dark:text-emerald-300 text-sm">
                       Cursor MCP — no install, no third-party API key
                     </p>
-                    <p className="mt-2 text-muted-foreground text-sm">
+                    <p className="mt-2 text-muted-foreground text-xs leading-relaxed">
                       Paste the JSON below into Cursor → Settings → MCP. doc2mcp
                       serves {artifacts.docsPageCount ?? 0} pages over a remote
                       URL with the Bearer token shown below.
                     </p>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
-                      <code className="max-w-full truncate rounded-lg bg-black/50 px-3 py-2 font-mono text-[11px]">
+                      <code className="max-w-full truncate rounded-lg border border-border bg-muted px-3 py-2 font-mono text-[11px]">
                         {artifacts.mcpAccessToken}
                       </code>
                       <Button
@@ -388,30 +386,100 @@ export function ConvertExperience({
               {exportBundle ? (
                 <section className="space-y-4">
                   <div>
-                    <h2 className="font-display font-semibold text-xl">
+                    <h2 className="font-semibold text-lg text-foreground">
                       One-click IDE exports
                     </h2>
-                    <p className="mt-1 text-muted-foreground text-sm">
+                    <p className="mt-1 text-muted-foreground text-xs">
                       Installable configs for Cursor, Claude Desktop, VSCode,
                       Windsurf, OpenAI Agents SDK, hosted MCP endpoints, and
                       validation reports.
                     </p>
                   </div>
                   <div className="grid gap-4 lg:grid-cols-2">
-                    {exportBundle.artifacts.map((artifact) => (
-                      <ConfigPanel
-                        config={artifact.content}
-                        hint={artifact.installHint}
-                        key={artifact.id}
-                        onCopy={() =>
-                          copyText(artifact.content, artifact.label)
+                    {exportBundle.artifacts.map((artifact) => {
+                      const deepLink = (() => {
+                        if (artifact.id === "cursor") {
+                          try {
+                            const parsed = JSON.parse(artifact.content);
+                            const name = Object.keys(parsed.mcpServers || {})[0] || "doc2mcp";
+                            const serverVal = parsed.mcpServers?.[name];
+                            if (serverVal) {
+                              const configObj = {
+                                type: "sse",
+                                url: serverVal.url,
+                                headers: serverVal.headers,
+                              };
+                              const b64 = btoa(JSON.stringify(configObj));
+                              return `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(name)}&config=${encodeURIComponent(b64)}`;
+                            }
+                          } catch (e) {
+                            console.error(e);
+                          }
                         }
-                        onDownload={() =>
-                          download(artifact.filename, artifact.content)
+                        if (artifact.id === "vscode") {
+                          try {
+                            const parsed = JSON.parse(artifact.content);
+                            const name = Object.keys(parsed.mcp?.servers || {})[0] || "doc2mcp";
+                            const serverVal = parsed.mcp?.servers?.[name];
+                            if (serverVal) {
+                              const payload = {
+                                name: name,
+                                type: "http",
+                                url: serverVal.url,
+                                headers: serverVal.headers,
+                              };
+                              return `vscode:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`;
+                            }
+                          } catch (e) {
+                            console.error(e);
+                          }
                         }
-                        title={artifact.label}
-                      />
-                    ))}
+                        if (artifact.id === "windsurf") {
+                          try {
+                            const parsed = JSON.parse(artifact.content);
+                            const name = Object.keys(parsed.mcpServers || {})[0] || "doc2mcp";
+                            const serverVal = parsed.mcpServers?.[name];
+                            if (serverVal) {
+                              const configObj = {
+                                type: "sse",
+                                url: serverVal.serverUrl,
+                                headers: serverVal.headers,
+                              };
+                              const b64 = btoa(JSON.stringify(configObj));
+                              return `windsurf://mcp/install?name=${encodeURIComponent(name)}&config=${encodeURIComponent(b64)}`;
+                            }
+                          } catch (e) {
+                            console.error(e);
+                          }
+                        }
+                        return undefined;
+                      })();
+
+                      const deepLinkLabel = (() => {
+                        if (artifact.id === "cursor") return "Add to Cursor";
+                        if (artifact.id === "vscode") return "Add to VS Code";
+                        if (artifact.id === "windsurf") return "Add to Windsurf";
+                        return undefined;
+                      })();
+
+                      return (
+                        <ConfigPanel
+                          config={artifact.content}
+                          hint={artifact.installHint}
+                          key={artifact.id}
+                          onCopy={() =>
+                            copyText(artifact.content, artifact.label)
+                          }
+                          onDownload={() =>
+                            download(artifact.filename, artifact.content)
+                          }
+                          title={artifact.label}
+                          deepLink={deepLink}
+                          deepLinkLabel={deepLinkLabel}
+                          id={artifact.id}
+                        />
+                      );
+                    })}
                   </div>
                 </section>
               ) : null}
@@ -454,9 +522,9 @@ export function ConvertExperience({
               ) : null}
 
               {/* Done CTA */}
-              <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 py-6">
-                <Check className="size-5 text-emerald-400" />
-                <p className="font-medium text-emerald-300">
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-500/10 py-6">
+                <Check className="size-5 text-emerald-600 dark:text-emerald-400" />
+                <p className="font-medium text-emerald-800 dark:text-emerald-300 text-sm">
                   MCP ready — paste config into Cursor and reload
                 </p>
               </div>
@@ -488,32 +556,32 @@ function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
   const visibleSteps = workflow.steps.slice(0, 4);
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-black/25 p-5">
+    <div className="rounded-xl border border-border bg-muted/20 p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display font-semibold text-white">
+            <h3 className="font-semibold text-foreground">
               {workflow.name}
             </h3>
-            <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300 uppercase">
+            <span className="rounded-full border border-border bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground uppercase">
               {workflow.category}
             </span>
           </div>
-          <p className="mt-1 text-muted-foreground text-sm leading-relaxed">
+          <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
             {workflow.description}
           </p>
         </div>
-        <div className="shrink-0 rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-right">
+        <div className="shrink-0 rounded-lg border border-border bg-muted/50 px-2 py-1 text-right">
           <p className="font-mono text-[9px] text-muted-foreground uppercase">
             score
           </p>
-          <p className="font-semibold text-emerald-300 text-sm">
+          <p className="font-semibold text-foreground text-sm">
             {workflow.confidence}%
           </p>
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-white/5 bg-white/[0.03] p-3">
+      <div className="mt-4 rounded-xl border border-border bg-muted/40 p-3">
         <p className="font-mono text-[10px] text-muted-foreground uppercase">
           Agent use case
         </p>
@@ -525,13 +593,13 @@ function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
       <div className="mt-4 space-y-2">
         {visibleSteps.map((step, index) => (
           <div className="flex gap-3" key={step.id}>
-            <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10 font-mono text-[10px] text-emerald-300">
+            <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted font-mono text-[10px] text-foreground">
               {index + 1}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium text-sm">{step.name}</p>
-                <span className="rounded-full bg-white/5 px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground uppercase">
+                <p className="font-medium text-sm text-foreground">{step.name}</p>
+                <span className="rounded-full bg-muted/50 px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground uppercase">
                   {step.type}
                 </span>
               </div>
@@ -539,7 +607,7 @@ function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
                 {step.description}
               </p>
               {step.toolName ? (
-                <p className="mt-1 font-mono text-[10px] text-violet-300">
+                <p className="mt-1 font-mono text-[10px] text-muted-foreground/80">
                   tool: {step.toolName}
                 </p>
               ) : null}
@@ -551,20 +619,20 @@ function WorkflowCard({ workflow }: { workflow: SuggestedWorkflow }) {
       <div className="mt-4 flex flex-wrap gap-1.5">
         {relatedTools.map((tool) => (
           <span
-            className="rounded-full border border-violet-500/20 bg-violet-500/10 px-2 py-0.5 font-mono text-[10px] text-violet-200"
+            className="rounded-full border border-border bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
             key={tool}
           >
             {tool}
           </span>
         ))}
         {workflow.relatedTools.length > relatedTools.length ? (
-          <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+          <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
             +{workflow.relatedTools.length - relatedTools.length} more
           </span>
         ) : null}
       </div>
 
-      <details className="mt-4 rounded-xl border border-white/5 bg-black/30 p-3">
+      <details className="mt-4 rounded-xl border border-border bg-muted/30 p-3">
         <summary className="cursor-pointer font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
           Agent prompt
         </summary>
@@ -582,32 +650,61 @@ function ConfigPanel({
   hint,
   onCopy,
   onDownload,
+  deepLink,
+  deepLinkLabel,
+  id,
 }: {
   title: string;
   config: string;
   hint?: string;
   onCopy: () => void;
   onDownload: () => void;
+  deepLink?: string;
+  deepLinkLabel?: string;
+  id: string;
 }) {
   return (
-    <div className="glass-card rounded-2xl p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium">{title}</h3>
-        <div className="flex gap-1">
-          <Button onClick={onCopy} size="sm" type="button" variant="ghost">
-            <Copy className="size-3.5" />
-          </Button>
-          <Button onClick={onDownload} size="sm" type="button" variant="ghost">
-            <Download className="size-3.5" />
-          </Button>
+    <div className="rounded-xl border border-border bg-card p-5 shadow-sm flex flex-col justify-between h-full">
+      <div>
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium text-foreground text-sm">{title}</h3>
+          <div className="flex items-center gap-1.5">
+            <Button onClick={onCopy} size="sm" type="button" variant="ghost" className="size-8 p-0">
+              <Copy className="size-3.5" />
+            </Button>
+            <Button onClick={onDownload} size="sm" type="button" variant="ghost" className="size-8 p-0">
+              <Download className="size-3.5" />
+            </Button>
+          </div>
         </div>
+        {hint ? (
+          <p className="mt-2 text-muted-foreground text-xs">{hint}</p>
+        ) : null}
+        <pre className="mt-3 max-h-48 overflow-auto rounded-lg border border-border bg-muted p-3 font-mono text-[10px]">
+          {config}
+        </pre>
       </div>
-      {hint ? (
-        <p className="mt-2 text-muted-foreground text-xs">{hint}</p>
-      ) : null}
-      <pre className="mt-3 max-h-48 overflow-auto rounded-lg bg-black/40 p-3 font-mono text-[10px]">
-        {config}
-      </pre>
+      <div className="mt-4 pt-2">
+        {deepLink && deepLinkLabel ? (
+          <Button asChild className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs h-9 font-medium">
+            <a href={deepLink}>
+              {deepLinkLabel}
+            </a>
+          </Button>
+        ) : id === "openai-agents-sdk" ? (
+          <Button onClick={onCopy} className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs h-9 font-medium">
+            Copy TypeScript Code
+          </Button>
+        ) : ["mcp-json", "validation-report", "claude-desktop"].includes(id) ? (
+          <Button onClick={onDownload} className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs h-9 font-medium">
+            Download JSON File
+          </Button>
+        ) : (
+          <Button onClick={onCopy} className="w-full bg-primary hover:bg-primary/95 text-primary-foreground text-xs h-9 font-medium">
+            Copy Config JSON
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

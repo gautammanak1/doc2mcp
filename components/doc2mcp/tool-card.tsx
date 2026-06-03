@@ -13,11 +13,11 @@ export function ToolCard({
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-xl border border-violet-500/20 p-4 transition-colors hover:border-violet-500/40"
+      className="rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted/40"
       initial={{ opacity: 0, y: 8 }}
       transition={{ delay: index * 0.04 }}
     >
-      <p className="font-mono text-violet-300 text-sm">
+      <p className="font-mono text-foreground font-medium text-sm">
         {tool.name}
         <span className="text-muted-foreground">()</span>
       </p>
@@ -25,7 +25,7 @@ export function ToolCard({
         {tool.description}
       </p>
       {tool.endpoints.length > 0 && (
-        <p className="mt-2 font-mono text-[10px] text-muted-foreground/60">
+        <p className="mt-3 font-mono text-[10px] text-muted-foreground/60">
           {tool.endpoints.join(" · ")}
         </p>
       )}
