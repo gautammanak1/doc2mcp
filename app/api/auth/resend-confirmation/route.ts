@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getDoc2McpBaseUrl } from "@/lib/doc2mcp/app-url";
+import { getConfirmRedirectUrl } from "@/lib/auth/redirect-url";
 import { createClient } from "@/lib/supabase/server";
 
 const bodySchema = z.object({
@@ -31,13 +31,13 @@ export async function POST(request: Request) {
   inflight.set(email, Date.now());
 
   const supabase = await createClient();
-  const baseUrl = getDoc2McpBaseUrl();
+  const emailRedirectTo = await getConfirmRedirectUrl("/chat");
 
   const { error } = await supabase.auth.resend({
     type: "signup",
     email,
     options: {
-      emailRedirectTo: `${baseUrl}/auth/confirm?next=${encodeURIComponent("/chat")}`,
+      emailRedirectTo,
     },
   });
 
