@@ -1,0 +1,69 @@
+name: PR
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches: [main, master]
+
+# Only the latest push per PR needs checking.
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  title:
+    name: Conventional PR title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Enforces a Conventional Commits PR title (feat:, fix:, docs:, ...).
+      # The squash-merge commit inherits the PR title, so this keeps the
+      # main history clean and machine-parseable for changelogs.
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" should start with a lowercase letter.
+          # Single-commit PRs are allowed to use the commit message verbatim.
+          validateSingleCommit: false
+
+  format:
+    name: Biome format check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Fails when any file is not formatted or lint-clean.
+      # Run `pnpm fix` locally to resolve.
+      - name: Verify formatting + lint
+        run: pnpm check
