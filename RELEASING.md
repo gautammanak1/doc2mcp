@@ -80,10 +80,12 @@ cat .vercel/project.json
 2. **Staging branch domain**: Settings → Domains → add `staging.doc2mcp.site`
    (or use the auto `*-git-staging-*.vercel.app` URL) and assign it to the
    `staging` branch so QA always has a stable link.
-3. **Environment variables**: ensure Supabase vars exist for **Preview** so
-   feature/staging deployments can authenticate. Keep `NEXT_PUBLIC_APP_URL`
-   set only for **Production** (`https://doc2mcp.site`); leave it unset on
-   Preview so previews resolve their own deployment origin. See
+3. **Environment variables**: ensure `POSTGRES_URL` and Supabase vars exist
+   for **Preview** so feature/staging deployments can authenticate and use
+   database-backed routes (`/api/history`, `/api/chat`, dashboard, project
+   reads). Keep `NEXT_PUBLIC_APP_URL` set only for **Production**
+   (`https://doc2mcp.site`); leave it unset on Preview so previews resolve
+   their own deployment origin. See
    [CONTRIBUTING.md](./CONTRIBUTING.md#working-with-vercel-preview-deployments).
 
 ### Supabase Auth redirect URLs

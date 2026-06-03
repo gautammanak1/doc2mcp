@@ -38,12 +38,15 @@ Every PR gets a unique Vercel **preview URL** (for example
 In the Vercel dashboard, the Supabase variables must be enabled for the
 **Preview** (and Development) environments, not only Production:
 
+- `POSTGRES_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
-If they are missing on preview, the app throws `Missing environment variable`
-and the whole deployment 500s.
+If `POSTGRES_URL` is missing on preview, database-backed routes such as
+`/api/history`, `/api/chat`, `/dashboard`, and conversion project reads fail.
+If Supabase public vars are missing, the app throws `Missing environment
+variable` and auth breaks.
 
 Leave `NEXT_PUBLIC_APP_URL` **unset** for the Preview environment. The app
 then resolves the live request host (or `VERCEL_URL`) at runtime, so auth
