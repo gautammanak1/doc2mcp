@@ -77,15 +77,49 @@ export function ConvertExperience({
       return;
     }
 
-    const interval = setInterval(async () => {
-      const res = await fetch(`/api/projects/${project.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setProject(data.project);
-      }
-    }, 2500);
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    let delay = 2000;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 150;
 
-    return () => clearInterval(interval);
+    const poll = async () => {
+      if (cancelled) {
+        return;
+      }
+      attempts += 1;
+
+      try {
+        const res = await fetch(`/api/projects/${project.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (cancelled) {
+            return;
+          }
+          setProject(data.project);
+          if (["ready", "error"].includes(data.project.status)) {
+            return;
+          }
+        }
+      } catch {
+        // Transient network error — keep polling with backoff.
+      }
+
+      if (cancelled || attempts >= MAX_ATTEMPTS) {
+        return;
+      }
+      // Back off gradually so a slow pipeline doesn't hammer the API,
+      // capping at 10s to keep the UI reasonably fresh.
+      delay = Math.min(Math.round(delay * 1.25), 10_000);
+      timer = setTimeout(poll, delay);
+    };
+
+    timer = setTimeout(poll, delay);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [isProcessing, project.id]);
 
   const share = async () => {
