@@ -8,22 +8,15 @@ import {
   Copy,
   Download,
   FileText,
-  Gauge,
-  Globe,
-  Layers,
-  MessageSquare,
-  Server,
-  TerminalSquare,
-  Workflow,
-  Wrench,
+  Plus,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { InstallButtons } from "@/components/doc2mcp/install-buttons";
 import { McpChat } from "@/components/doc2mcp/mcp-chat";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { PlatformProject } from "@/lib/db/schema";
 import { buildInstallTargets } from "@/lib/marketplace/install";
 import { cn } from "@/lib/utils";
@@ -95,11 +88,6 @@ function dedupeTools(tools: CompressedTool[]): CompressedTool[] {
 
 type DisplayTool = { name: string; description: string; endpoints: string[] };
 
-/**
- * Merge the canonical doc2mcp toolset with any project-specific tools and
- * dedupe by name. This removes the duplicate entries the generator sometimes
- * emits while guaranteeing the standard tools always show up.
- */
 function buildDisplayTools(project: CompressedTool[]): DisplayTool[] {
   const map = new Map<string, DisplayTool>();
   for (const tool of DOC_MCP_TOOLS) {
@@ -210,200 +198,119 @@ function useCountUp(target: number, durationMs = 900): number {
   return value;
 }
 
-function MetricCard({
-  icon: Icon,
+/** Editorial corner crosshairs that frame a bordered block. */
+function CornerPlus() {
+  const base = "pointer-events-none absolute size-3 text-muted-foreground/40";
+  return (
+    <>
+      <Plus className={cn(base, "-left-1.5 -top-1.5")} />
+      <Plus className={cn(base, "-right-1.5 -top-1.5")} />
+      <Plus className={cn(base, "-bottom-1.5 -left-1.5")} />
+      <Plus className={cn(base, "-right-1.5 -bottom-1.5")} />
+    </>
+  );
+}
+
+/** Hairline-bordered container; cells inside add border-b / border-r. */
+function Framed({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative border-border/60 border-t border-l bg-background/30",
+        className
+      )}
+    >
+      <CornerPlus />
+      {children}
+    </div>
+  );
+}
+
+function SectionIntro({
+  eyebrow,
+  title,
+  highlight,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  highlight?: string;
+  description?: string;
+}) {
+  return (
+    <div className="mx-auto mb-10 max-w-2xl text-center">
+      <p className="font-serif text-muted-foreground text-sm italic underline decoration-border underline-offset-4">
+        {eyebrow}
+      </p>
+      <h2 className="mt-4 font-display font-semibold text-3xl tracking-tight sm:text-4xl">
+        {title}
+        {highlight ? (
+          <>
+            {" "}
+            <span className="underline decoration-2 decoration-foreground/30 underline-offset-[6px]">
+              {highlight}
+            </span>
+          </>
+        ) : null}
+      </h2>
+      {description ? (
+        <p className="mt-3 text-balance text-muted-foreground">{description}</p>
+      ) : null}
+    </div>
+  );
+}
+
+const CELL = "border-border/60 border-r border-b p-6";
+
+function MetricCell({
   label,
   value,
   suffix,
 }: {
-  icon: typeof FileText;
   label: string;
   value: number;
   suffix?: string;
 }) {
   const display = useCountUp(value);
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Icon className="size-4" />
-        <span className="text-xs">{label}</span>
-      </div>
-      <p className="mt-2 font-semibold text-2xl tabular-nums">
+    <div className={cn(CELL, "flex flex-col gap-2")}>
+      <span className="font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+        {label}
+      </span>
+      <span className="font-display font-semibold text-4xl tabular-nums tracking-tight">
         {display}
         {suffix}
-      </p>
-    </div>
-  );
-}
-
-function SectionHeading({
-  icon: Icon,
-  title,
-  description,
-}: {
-  icon: typeof FileText;
-  title: string;
-  description?: string;
-}) {
-  return (
-    <div className="mb-4 flex items-start gap-2.5">
-      <span className="mt-0.5 flex size-7 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground">
-        <Icon className="size-4" />
       </span>
-      <div>
-        <h2 className="font-semibold text-base">{title}</h2>
-        {description ? (
-          <p className="text-muted-foreground text-sm">{description}</p>
-        ) : null}
-      </div>
     </div>
   );
 }
 
-function ConnectTab({
-  config,
-  endpoint,
-  token,
-  pageCount,
-}: {
-  config: McpServerConfig | null;
-  endpoint: string | null;
-  token: string | null;
-  pageCount: number;
-}) {
-  const json = useMemo(() => JSON.stringify(config, null, 2), [config]);
-  const serverName = config?.name ?? "mcp";
-
+function ToolsGrid({ tools }: { tools: DisplayTool[] }) {
   return (
-    <div className="space-y-5">
-      {endpoint ? (
-        <div className="rounded-xl border border-border bg-card p-5">
-          <SectionHeading
-            description="Hosted, remote MCP endpoint — no local install required."
-            icon={Server}
-            title="MCP endpoint"
-          />
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-1.5 pl-3">
-            <code className="min-w-0 flex-1 truncate font-mono text-foreground/90 text-xs">
-              {endpoint}
-            </code>
-            <Button
-              onClick={() => copyText(endpoint, "Endpoint")}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              <Copy className="mr-1 size-3.5" />
-              Copy
-            </Button>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {AGENT_BADGES.map((badge) => (
-              <span
-                className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2.5 py-1 font-mono text-[10px] text-muted-foreground"
-                key={badge}
-              >
-                <span className="size-1.5 rounded-full bg-emerald-400" />
-                {badge}
-              </span>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {token ? (
-        <div className="rounded-xl border border-border bg-card p-5">
-          <SectionHeading
-            description="Paste the config into Cursor → Settings → MCP. doc2mcp serves the docs over the remote URL using this Bearer token."
-            icon={Check}
-            title="Access token"
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <code className="min-w-0 max-w-full flex-1 truncate rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-[11px]">
-              {token}
-            </code>
-            <Button
-              onClick={() => copyText(token, "Project token")}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              <Copy className="mr-1 size-3.5" />
-              Copy token
-            </Button>
-          </div>
-        </div>
-      ) : null}
-
-      <details className="group rounded-xl border border-border bg-card">
-        <summary className="flex cursor-pointer items-center justify-between p-4 font-medium text-sm">
-          <span className="flex items-center gap-2">
-            <FileText className="size-4 text-muted-foreground" />
-            MCP configuration (JSON) · {pageCount} pages
-          </span>
-          <span className="flex gap-1">
-            <Button
-              onClick={(event) => {
-                event.preventDefault();
-                copyText(json, "MCP config");
-              }}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              <Copy className="size-3.5" />
-            </Button>
-            <Button
-              onClick={(event) => {
-                event.preventDefault();
-                downloadFile(`${serverName}-server.json`, json);
-              }}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              <Download className="size-3.5" />
-            </Button>
-          </span>
-        </summary>
-        <pre className="max-h-80 overflow-auto border-border border-t p-4 font-mono text-[11px] leading-relaxed">
-          {json}
-        </pre>
-      </details>
-    </div>
-  );
-}
-
-function ToolsTab({ tools }: { tools: DisplayTool[] }) {
-  return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <SectionHeading
-        description={`${tools.length} tools your AI agent can call against these docs.`}
-        icon={Wrench}
-        title="MCP tools"
-      />
-      <div className="grid gap-3 sm:grid-cols-2">
-        {tools.map((tool) => (
-          <div
-            className="rounded-lg border border-border bg-background p-4 transition-colors hover:bg-muted/40"
-            key={tool.name}
-          >
-            <p className="font-medium font-mono text-foreground text-sm">
-              {tool.name}
-              <span className="text-muted-foreground">()</span>
+    <Framed className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {tools.map((tool) => (
+        <div className={cn(CELL, "flex flex-col gap-2")} key={tool.name}>
+          <p className="font-medium font-mono text-foreground text-sm">
+            {tool.name}
+            <span className="text-muted-foreground">()</span>
+          </p>
+          <p className="text-muted-foreground text-xs leading-relaxed">
+            {tool.description}
+          </p>
+          {tool.endpoints.length > 0 ? (
+            <p className="mt-auto truncate pt-2 font-mono text-[10px] text-muted-foreground/60">
+              {tool.endpoints.join(" · ")}
             </p>
-            <p className="mt-1.5 text-muted-foreground text-xs leading-relaxed">
-              {tool.description}
-            </p>
-            {tool.endpoints.length > 0 ? (
-              <p className="mt-2.5 truncate font-mono text-[10px] text-muted-foreground/60">
-                {tool.endpoints.join(" · ")}
-              </p>
-            ) : null}
-          </div>
-        ))}
-      </div>
-    </div>
+          ) : null}
+        </div>
+      ))}
+    </Framed>
   );
 }
 
@@ -414,82 +321,77 @@ const LOG_TONE: Record<string, string> = {
   info: "bg-sky-400",
 };
 
-function InsightsTab({
+function InsightsSection({
   workflows,
   logs,
 }: {
   workflows: SuggestedWorkflow[];
   logs: ProcessingLog[];
 }) {
+  if (workflows.length === 0 && logs.length === 0) {
+    return null;
+  }
   return (
-    <div className="space-y-5">
-      {workflows.length > 0 ? (
-        <div className="rounded-xl border border-border bg-card p-5">
-          <SectionHeading
-            description="Common multi-step flows doc2mcp inferred from your docs."
-            icon={Workflow}
-            title="Suggested workflows"
-          />
-          <div className="grid gap-3 lg:grid-cols-2">
-            {workflows.map((workflow) => (
-              <div
-                className="rounded-lg border border-border bg-background p-4"
-                key={workflow.id}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-medium text-sm">{workflow.name}</h3>
+    <section>
+      <SectionIntro
+        description="What doc2mcp inferred while building your server."
+        eyebrow="Under the hood"
+        highlight="Insights"
+        title="Behind the"
+      />
+      <div className="grid gap-px overflow-hidden lg:grid-cols-2">
+        {workflows.length > 0 ? (
+          <Framed className="p-6">
+            <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+              Suggested workflows
+            </p>
+            <div className="mt-4 space-y-3">
+              {workflows.slice(0, 5).map((workflow) => (
+                <div
+                  className="flex items-start justify-between gap-3"
+                  key={workflow.id}
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm">{workflow.name}</p>
+                    <p className="truncate text-muted-foreground text-xs">
+                      {workflow.description}
+                    </p>
+                  </div>
                   <span className="shrink-0 font-mono text-emerald-600 text-xs dark:text-emerald-300">
                     {workflow.confidence}%
                   </span>
                 </div>
-                <p className="mt-1 text-muted-foreground text-xs leading-relaxed">
-                  {workflow.description}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {workflow.relatedTools.slice(0, 4).map((tool) => (
-                    <span
-                      className="rounded-full border border-border bg-muted/40 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
-                      key={tool}
-                    >
-                      {tool}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+              ))}
+            </div>
+          </Framed>
+        ) : null}
 
-      {logs.length > 0 ? (
-        <div className="rounded-xl border border-border bg-card p-5">
-          <SectionHeading icon={Activity} title="Build activity" />
-          <ol className="relative ml-1 space-y-4 border-border border-l pl-6">
-            {logs.map((log) => (
-              <li className="relative" key={log.id}>
-                <span
-                  className={cn(
-                    "-left-[1.7rem] absolute top-1 size-2.5 rounded-full",
-                    LOG_TONE[log.level] ?? LOG_TONE.info
-                  )}
-                />
-                <p className="text-foreground/90 text-sm">{log.message}</p>
-                <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
-                  {formatDateTime(log.timestamp)}
-                  {log.phase ? ` · ${log.phase}` : ""}
-                </p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
-
-      {workflows.length === 0 && logs.length === 0 ? (
-        <p className="py-10 text-center text-muted-foreground text-sm">
-          No additional insights for this project.
-        </p>
-      ) : null}
-    </div>
+        {logs.length > 0 ? (
+          <Framed className="p-6">
+            <p className="flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+              <Activity className="size-3.5" />
+              Build activity
+            </p>
+            <ol className="relative mt-4 ml-1 space-y-3 border-border border-l pl-5">
+              {logs.slice(-8).map((log) => (
+                <li className="relative" key={log.id}>
+                  <span
+                    className={cn(
+                      "-left-[1.55rem] absolute top-1 size-2 rounded-full",
+                      LOG_TONE[log.level] ?? LOG_TONE.info
+                    )}
+                  />
+                  <p className="text-foreground/90 text-sm">{log.message}</p>
+                  <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">
+                    {formatDateTime(log.timestamp)}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </Framed>
+        ) : null}
+      </div>
+    </section>
   );
 }
 
@@ -517,6 +419,11 @@ export function ResultDashboard({
     [artifacts.mcpConfig, origin]
   );
   const endpoint = useMemo(() => getServerUrl(fixedConfig), [fixedConfig]);
+  const json = useMemo(
+    () => JSON.stringify(fixedConfig, null, 2),
+    [fixedConfig]
+  );
+  const serverName = fixedConfig?.name ?? "mcp";
 
   const pageCount = artifacts.docsPageCount ?? 0;
   const endpointCount = artifacts.endpoints?.length ?? 0;
@@ -541,30 +448,29 @@ export function ResultDashboard({
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
+      className="space-y-20 pb-10"
       initial={{ opacity: 0, y: 12 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Header */}
-      <section>
-        <div className="flex items-center gap-3">
-          <h1 className="font-semibold text-3xl tracking-tight">
-            {project.name}
-          </h1>
+      {/* Hero */}
+      <section className="text-center">
+        <div className="flex justify-center">
           <StatusBadge status="ready" />
         </div>
-        <p className="mt-1.5 text-muted-foreground">
+        <h1 className="mt-5 font-display font-semibold text-5xl tracking-tight sm:text-6xl">
+          {project.name}
+        </h1>
+        <p className="mt-3 text-balance text-lg text-muted-foreground">
           Documentation infrastructure for AI agents
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
           <a
             className="inline-flex max-w-full items-center gap-1.5 truncate font-mono text-muted-foreground text-xs hover:text-foreground"
             href={project.sourceUrl ?? "#"}
             rel="noopener noreferrer"
             target="_blank"
           >
-            <Globe className="size-3.5 shrink-0" />
-            <span className="truncate">{project.sourceUrl}</span>
+            {project.sourceUrl}
             <ArrowUpRight className="size-3 shrink-0" />
           </a>
           <span className="font-mono text-muted-foreground text-xs">
@@ -574,146 +480,219 @@ export function ResultDashboard({
       </section>
 
       {/* Metrics */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <MetricCard icon={FileText} label="Pages indexed" value={pageCount} />
-        <MetricCard
-          icon={Wrench}
-          label="MCP tools"
-          value={displayTools.length}
-        />
-        <MetricCard icon={Layers} label="API endpoints" value={endpointCount} />
-        <MetricCard
-          icon={Gauge}
-          label="MCP score"
-          suffix="%"
-          value={mcpScore}
-        />
+      <section>
+        <Framed className="grid grid-cols-2 lg:grid-cols-4">
+          <MetricCell label="Pages indexed" value={pageCount} />
+          <MetricCell label="MCP tools" value={displayTools.length} />
+          <MetricCell label="API endpoints" value={endpointCount} />
+          <MetricCell label="MCP score" suffix="%" value={mcpScore} />
+        </Framed>
       </section>
 
-      {/* Install */}
-      {installTargets ? <InstallButtons targets={installTargets} /> : null}
+      {/* Connect */}
+      <section>
+        <SectionIntro
+          description="One endpoint, one token. Drop it into any AI editor — no local install, no API keys."
+          eyebrow="Get connected"
+          highlight="in seconds"
+          title="Plug into your editor"
+        />
 
-      {/* Workspace tabs */}
-      <Tabs className="w-full" defaultValue="connect">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1">
-          <TabsTrigger className="gap-1.5" value="connect">
-            <Server className="size-3.5" />
-            Connect
-          </TabsTrigger>
-          <TabsTrigger className="gap-1.5" value="chat">
-            <MessageSquare className="size-3.5" />
-            Chat
-          </TabsTrigger>
-          <TabsTrigger className="gap-1.5" value="tools">
-            <Wrench className="size-3.5" />
-            Tools
-          </TabsTrigger>
-          <TabsTrigger className="gap-1.5" value="test">
-            <TerminalSquare className="size-3.5" />
-            Test
-          </TabsTrigger>
-          <TabsTrigger className="gap-1.5" value="insights">
-            <Activity className="size-3.5" />
-            Insights
-          </TabsTrigger>
-        </TabsList>
+        {installTargets ? (
+          <div className="mb-px">
+            <InstallButtons targets={installTargets} />
+          </div>
+        ) : null}
 
-        <TabsContent className="mt-5" value="connect">
-          <ConnectTab
-            config={fixedConfig}
-            endpoint={endpoint}
-            pageCount={pageCount}
-            token={token}
-          />
-          {exportBundle ? (
-            <div className="mt-5 rounded-xl border border-border bg-card p-5">
-              <SectionHeading
-                description="Configs for Claude Desktop, Windsurf, OpenAI Agents SDK, and custom MCP clients."
-                icon={FileText}
-                title="Advanced configs"
-              />
-              <div className="grid gap-3 lg:grid-cols-2">
-                {exportBundle.artifacts.map((artifact) => {
-                  const content = fixMcpUrlsInText(artifact.content, origin);
-                  return (
-                    <div
-                      className="rounded-lg border border-border bg-background p-4"
-                      key={artifact.id}
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium text-sm">
-                          {artifact.label}
-                        </h3>
-                        <div className="flex gap-1">
-                          <Button
-                            onClick={() => copyText(content, artifact.label)}
-                            size="sm"
-                            type="button"
-                            variant="ghost"
-                          >
-                            <Copy className="size-3.5" />
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              downloadFile(artifact.filename, content)
-                            }
-                            size="sm"
-                            type="button"
-                            variant="ghost"
-                          >
-                            <Download className="size-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                      <pre className="mt-3 max-h-40 overflow-auto rounded-lg bg-muted/40 p-3 font-mono text-[10px]">
-                        {content}
-                      </pre>
-                    </div>
-                  );
-                })}
+        <Framed className="grid grid-cols-1 lg:grid-cols-2">
+          {endpoint ? (
+            <div className={cn(CELL, "space-y-3")}>
+              <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+                Remote endpoint
+              </p>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/40 p-1.5 pl-3">
+                <code className="min-w-0 flex-1 truncate font-mono text-foreground/90 text-xs">
+                  {endpoint}
+                </code>
+                <Button
+                  onClick={() => copyText(endpoint, "Endpoint")}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <Copy className="mr-1 size-3.5" />
+                  Copy
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {AGENT_BADGES.map((badge) => (
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2.5 py-1 font-mono text-[10px] text-muted-foreground"
+                    key={badge}
+                  >
+                    <span className="size-1.5 rounded-full bg-emerald-400" />
+                    {badge}
+                  </span>
+                ))}
               </div>
             </div>
           ) : null}
-        </TabsContent>
 
-        <TabsContent className="mt-5" value="chat">
           {token ? (
-            <McpChat
-              pageCount={pageCount}
-              projectId={project.id}
-              token={token}
-            />
-          ) : (
-            <p className="py-10 text-center text-muted-foreground text-sm">
-              Chat becomes available once the MCP token is provisioned.
-            </p>
-          )}
-        </TabsContent>
+            <div className={cn(CELL, "space-y-3")}>
+              <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+                Access token
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="min-w-0 flex-1 truncate rounded-lg border border-border bg-muted/40 px-3 py-2 font-mono text-[11px]">
+                  {token}
+                </code>
+                <Button
+                  onClick={() => copyText(token, "Project token")}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <Copy className="mr-1 size-3.5" />
+                  Copy
+                </Button>
+              </div>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Paste the config into Cursor → Settings → MCP. doc2mcp serves
+                {` ${pageCount} `}
+                pages over the remote URL with this Bearer token.
+              </p>
+            </div>
+          ) : null}
+        </Framed>
 
-        <TabsContent className="mt-5" value="tools">
-          <ToolsTab tools={displayTools} />
-        </TabsContent>
+        <details className="group relative mt-px border-border/60 border-t border-l bg-background/30">
+          <CornerPlus />
+          <summary className="flex cursor-pointer items-center justify-between border-border/60 border-r border-b p-4 font-medium text-sm">
+            <span className="flex items-center gap-2">
+              <FileText className="size-4 text-muted-foreground" />
+              MCP configuration (JSON)
+            </span>
+            <span className="flex gap-1">
+              <Button
+                onClick={(event) => {
+                  event.preventDefault();
+                  copyText(json, "MCP config");
+                }}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                <Copy className="size-3.5" />
+              </Button>
+              <Button
+                onClick={(event) => {
+                  event.preventDefault();
+                  downloadFile(`${serverName}-server.json`, json);
+                }}
+                size="sm"
+                type="button"
+                variant="ghost"
+              >
+                <Download className="size-3.5" />
+              </Button>
+            </span>
+          </summary>
+          <pre className="max-h-80 overflow-auto border-border/60 border-r border-b p-4 font-mono text-[11px] leading-relaxed">
+            {json}
+          </pre>
+        </details>
+      </section>
 
-        <TabsContent className="mt-5" value="test">
-          {token ? (
-            <McpPlayground
-              projectId={project.id}
-              token={token}
-              tools={compressedTools}
-            />
-          ) : (
-            <p className="py-10 text-center text-muted-foreground text-sm">
-              The test playground needs an MCP token.
-            </p>
-          )}
-        </TabsContent>
+      {/* Chat */}
+      {token ? (
+        <section>
+          <SectionIntro
+            description="Ask anything — the MCP runs real tool calls over your crawled pages and streams a cited answer, just like Cursor."
+            eyebrow="Try it live"
+            highlight="your docs"
+            title="Chat with"
+          />
+          <McpChat pageCount={pageCount} projectId={project.id} token={token} />
+        </section>
+      ) : null}
 
-        <TabsContent className="mt-5" value="insights">
-          <InsightsTab logs={logs} workflows={artifacts.workflows ?? []} />
-        </TabsContent>
-      </Tabs>
+      {/* Tools */}
+      <section>
+        <SectionIntro
+          description={`${displayTools.length} tools your AI agent can call against this documentation.`}
+          eyebrow="Capabilities"
+          highlight="can call"
+          title="Tools your agent"
+        />
+        <ToolsGrid tools={displayTools} />
+      </section>
 
-      <div className="flex items-center justify-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 py-5">
+      {/* Test */}
+      {token ? (
+        <section>
+          <SectionIntro
+            description="Invoke any tool with raw JSON-RPC — exactly what Cursor and Claude send."
+            eyebrow="Sandbox"
+            highlight="the MCP"
+            title="Test"
+          />
+          <McpPlayground
+            projectId={project.id}
+            token={token}
+            tools={compressedTools}
+          />
+        </section>
+      ) : null}
+
+      {/* Advanced configs */}
+      {exportBundle ? (
+        <section>
+          <SectionIntro
+            description="Configs for Claude Desktop, Windsurf, OpenAI Agents SDK, and custom MCP clients."
+            eyebrow="Everywhere"
+            highlight="configs"
+            title="Advanced"
+          />
+          <Framed className="grid grid-cols-1 lg:grid-cols-2">
+            {exportBundle.artifacts.map((artifact) => {
+              const content = fixMcpUrlsInText(artifact.content, origin);
+              return (
+                <div className={CELL} key={artifact.id}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-sm">{artifact.label}</h3>
+                    <div className="flex gap-1">
+                      <Button
+                        onClick={() => copyText(content, artifact.label)}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <Copy className="size-3.5" />
+                      </Button>
+                      <Button
+                        onClick={() => downloadFile(artifact.filename, content)}
+                        size="sm"
+                        type="button"
+                        variant="ghost"
+                      >
+                        <Download className="size-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <pre className="mt-3 max-h-40 overflow-auto rounded-lg bg-muted/40 p-3 font-mono text-[10px]">
+                    {content}
+                  </pre>
+                </div>
+              );
+            })}
+          </Framed>
+        </section>
+      ) : null}
+
+      <InsightsSection logs={logs} workflows={artifacts.workflows ?? []} />
+
+      <div className="flex items-center justify-center gap-2 border-emerald-500/30 border-y bg-emerald-500/5 py-6">
         <Check className="size-5 text-emerald-500" />
         <p className="font-medium text-emerald-600 dark:text-emerald-300">
           MCP ready — paste the config into Cursor and reload
