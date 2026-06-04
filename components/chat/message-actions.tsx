@@ -1,5 +1,6 @@
 import equal from "fast-deep-equal";
-import { memo } from "react";
+import { Square, Volume2 } from "lucide-react";
+import { memo, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { useCopyToClipboard } from "usehooks-ts";
@@ -10,6 +11,17 @@ import {
   MessageActions as Actions,
 } from "../ai-elements/message";
 import { CopyIcon, PencilEditIcon, ThumbDownIcon, ThumbUpIcon } from "./icons";
+
+/** Strip markdown noise so the speech synthesizer reads clean prose. */
+function plainSpeech(text: string): string {
+  return text
+    .replace(/```[\s\S]*?```/g, " code block ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/[*#>_~|]/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export function PureMessageActions({
   chatId,
@@ -26,6 +38,16 @@ export function PureMessageActions({
 }) {
   const { mutate } = useSWRConfig();
   const [_, copyToClipboard] = useCopyToClipboard();
+  const [speaking, setSpeaking] = useState(false);
+
+  useEffect(
+    () => () => {
+      if (typeof window !== "undefined") {
+        window.speechSynthesis?.cancel();
+      }
+    },
+    []
+  );
 
   if (isLoading) {
     return null;
@@ -36,6 +58,29 @@ export function PureMessageActions({
     .map((part) => part.text)
     .join("\n")
     .trim();
+
+  const toggleSpeak = () => {
+    if (typeof window === "undefined" || !window.speechSynthesis) {
+      toast.error("Voice playback isn't supported in this browser.");
+      return;
+    }
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+    if (!textFromParts) {
+      toast.error("There's nothing to read aloud!");
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(plainSpeech(textFromParts));
+    utterance.rate = 1.05;
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+    setSpeaking(true);
+  };
 
   const handleCopy = async () => {
     if (!textFromParts) {
@@ -81,6 +126,23 @@ export function PureMessageActions({
         tooltip="Copy"
       >
         <CopyIcon />
+      </Action>
+
+      <Action
+        className={
+          speaking
+            ? "text-foreground"
+            : "text-muted-foreground/50 hover:text-foreground"
+        }
+        data-testid="message-speak"
+        onClick={toggleSpeak}
+        tooltip={speaking ? "Stop voice" : "Read aloud"}
+      >
+        {speaking ? (
+          <Square className="size-3.5 fill-current" />
+        ) : (
+          <Volume2 className="size-4" />
+        )}
       </Action>
 
       <Action

@@ -332,7 +332,7 @@ function InsightsSection({
     return null;
   }
   return (
-    <section>
+    <section className="scroll-mt-8" id="insights">
       <SectionIntro
         description="What doc2mcp inferred while building your server."
         eyebrow="Under the hood"
@@ -453,7 +453,7 @@ export function ResultDashboard({
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Hero */}
-      <section className="text-center">
+      <section className="scroll-mt-8 text-center" id="overview">
         <div className="flex justify-center">
           <StatusBadge status="ready" />
         </div>
@@ -490,7 +490,7 @@ export function ResultDashboard({
       </section>
 
       {/* Connect */}
-      <section>
+      <section className="scroll-mt-8" id="connect">
         <SectionIntro
           description="One endpoint, one token. Drop it into any AI editor — no local install, no API keys."
           eyebrow="Get connected"
@@ -606,7 +606,7 @@ export function ResultDashboard({
 
       {/* Chat */}
       {token ? (
-        <section>
+        <section className="scroll-mt-8" id="chat">
           <SectionIntro
             description="Ask anything — the MCP runs real tool calls over your crawled pages and streams a cited answer, just like Cursor."
             eyebrow="Try it live"
@@ -618,7 +618,7 @@ export function ResultDashboard({
       ) : null}
 
       {/* Tools */}
-      <section>
+      <section className="scroll-mt-8" id="tools">
         <SectionIntro
           description={`${displayTools.length} tools your AI agent can call against this documentation.`}
           eyebrow="Capabilities"
@@ -630,7 +630,7 @@ export function ResultDashboard({
 
       {/* Test */}
       {token ? (
-        <section>
+        <section className="scroll-mt-8" id="test">
           <SectionIntro
             description="Invoke any tool with raw JSON-RPC — exactly what Cursor and Claude send."
             eyebrow="Sandbox"

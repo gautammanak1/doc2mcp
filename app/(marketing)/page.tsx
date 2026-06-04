@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { CliSection } from "@/components/landing/cli-section";
 import { ComparisonSection } from "@/components/landing/comparison-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { EnterpriseSection } from "@/components/landing/enterprise-section";
@@ -35,6 +36,7 @@ export default function Page() {
       <ComparisonSection />
       <EnterpriseSection />
       <WhyNowSection />
+      <CliSection />
       <SocialProofSection />
       <PricingSection />
       <FaqSection />

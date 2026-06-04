@@ -1,11 +1,21 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, Loader2, Share2 } from "lucide-react";
+import {
+  Activity,
+  ArrowLeft,
+  LayoutDashboard,
+  LayoutGrid,
+  Loader2,
+  MessageSquare,
+  Server,
+  Share2,
+  TerminalSquare,
+  Wrench,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AnimatedBackground } from "@/components/doc2mcp/animated-background";
 import { PipelineProgress } from "@/components/doc2mcp/pipeline-progress";
 import {
   ResultDashboard,
@@ -24,6 +34,15 @@ const PIPELINE_STEPS = [
   "compress",
   "mcp",
   "config",
+] as const;
+
+const SECTIONS = [
+  { id: "overview", label: "Overview", icon: LayoutGrid },
+  { id: "connect", label: "Connect", icon: Server },
+  { id: "chat", label: "Chat", icon: MessageSquare },
+  { id: "tools", label: "Tools", icon: Wrench },
+  { id: "test", label: "Test", icon: TerminalSquare },
+  { id: "insights", label: "Insights", icon: Activity },
 ] as const;
 
 function stepFromStatus(status: string): number {
@@ -45,21 +64,6 @@ function stepFromStatus(status: string): number {
   }
 }
 
-function formatCreated(value: Date | string | null | undefined): string {
-  if (!value) {
-    return "";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
 export function ConvertExperience({
   initialProject,
 }: {
@@ -69,6 +73,7 @@ export function ConvertExperience({
   const artifacts = project.artifacts as ProjectArtifacts | null;
   const logs = (project.logs as ProcessingLog[]) ?? [];
   const isProcessing = !["ready", "error"].includes(project.status);
+  const isReady = project.status === "ready" && Boolean(artifacts);
   const currentStep = stepFromStatus(project.status);
 
   useEffect(() => {
@@ -107,8 +112,6 @@ export function ConvertExperience({
       if (cancelled || attempts >= MAX_ATTEMPTS) {
         return;
       }
-      // Back off gradually so a slow pipeline doesn't hammer the API,
-      // capping at 10s to keep the UI reasonably fresh.
       delay = Math.min(Math.round(delay * 1.25), 10_000);
       timer = setTimeout(poll, delay);
     };
@@ -127,103 +130,161 @@ export function ConvertExperience({
   };
 
   return (
-    <div className="relative text-foreground">
-      <AnimatedBackground />
+    <div className="min-h-dvh bg-background text-foreground">
+      <div className="mx-auto flex w-full max-w-7xl">
+        {/* Sidebar */}
+        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-border/60 border-r px-4 py-5 md:flex">
+          <Link className="flex items-center gap-2 px-2" href="/">
+            <span className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-[11px] text-white">
+              d2
+            </span>
+            <span className="font-display font-semibold text-sm">doc2mcp</span>
+          </Link>
 
-      {/* Project context bar — sits beneath the global site navigation. */}
-      <motion.div
-        animate={{ y: 0, opacity: 1 }}
-        className="relative z-10 mt-20 border-border/60 border-b bg-background/60 backdrop-blur-xl sm:mt-24"
-        initial={{ y: -20, opacity: 0 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="min-w-0">
-              <p className="truncate font-medium text-sm">{project.name}</p>
-              <p className="truncate font-mono text-[11px] text-muted-foreground">
-                {project.sourceUrl}
-              </p>
+          <div className="mt-6 rounded-lg border border-border/60 bg-muted/30 p-3">
+            <p className="truncate font-medium text-sm">{project.name}</p>
+            <p className="mt-0.5 truncate font-mono text-[10px] text-muted-foreground">
+              {project.sourceUrl}
+            </p>
+            <div className="mt-2">
+              <StatusBadge status={project.status} />
             </div>
-            <StatusBadge status={project.status} />
           </div>
-          <div className="flex items-center gap-1.5">
-            {formatCreated(project.createdAt) ? (
-              <span className="hidden font-mono text-[11px] text-muted-foreground md:inline">
-                {formatCreated(project.createdAt)}
-              </span>
-            ) : null}
-            <Button onClick={share} size="sm" type="button" variant="outline">
-              <Share2 className="mr-1 size-3.5" />
+
+          {isReady ? (
+            <nav className="mt-6 flex flex-col gap-0.5">
+              <p className="px-2 pb-1 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                Sections
+              </p>
+              {SECTIONS.map((section) => (
+                <a
+                  className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-accent hover:text-foreground"
+                  href={`#${section.id}`}
+                  key={section.id}
+                >
+                  <section.icon className="size-4" />
+                  {section.label}
+                </a>
+              ))}
+            </nav>
+          ) : (
+            <div className="mt-6 flex items-center gap-2 px-2 text-muted-foreground text-xs">
+              <Loader2 className="size-3.5 animate-spin" />
+              Building your MCP…
+            </div>
+          )}
+
+          <div className="mt-auto flex flex-col gap-1 border-border/60 border-t pt-3">
+            <Button
+              className="justify-start"
+              onClick={share}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              <Share2 className="mr-2 size-3.5" />
               Share
             </Button>
-            <Button asChild size="sm" variant="ghost">
+            <Button asChild className="justify-start" size="sm" variant="ghost">
               <Link href="/chat">
-                <ArrowLeft className="mr-1 size-3.5" />
-                New
+                <ArrowLeft className="mr-2 size-3.5" />
+                New chat
+              </Link>
+            </Button>
+            <Button asChild className="justify-start" size="sm" variant="ghost">
+              <Link href="/dashboard">
+                <LayoutDashboard className="mr-2 size-3.5" />
+                Dashboard
               </Link>
             </Button>
           </div>
-        </div>
-      </motion.div>
+        </aside>
 
-      <main className="relative z-10 mx-auto max-w-6xl space-y-10 px-6 py-10">
-        {isProcessing ? (
-          <>
-            <section>
-              <p className="font-mono text-muted-foreground text-xs">source</p>
-              <p className="mt-1 truncate font-mono text-sm">
-                {project.sourceUrl}
-              </p>
-              <div className="mt-6">
-                <PipelineProgress
-                  currentStep={currentStep}
-                  status={project.status}
-                  steps={PIPELINE_STEPS}
-                />
-              </div>
-            </section>
-
-            <section className="glass-card neon-border rounded-2xl p-5">
-              <p className="mb-3 font-mono text-muted-foreground text-xs">
-                terminal
-              </p>
-              {logs.length > 0 ? (
-                <TerminalLog
-                  lines={logs.map((l) => `[${l.level}] ${l.message}`)}
-                  streaming={isProcessing}
-                />
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="size-4 animate-spin" />
-                  Starting pipeline...
-                </div>
-              )}
-            </section>
-          </>
-        ) : null}
-
-        <AnimatePresence>
-          {project.status === "ready" && artifacts ? (
-            <ResultDashboard artifacts={artifacts} project={project} />
-          ) : null}
-
-          {project.status === "error" ? (
-            <motion.div
-              animate={{ opacity: 1 }}
-              className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center"
-              initial={{ opacity: 0 }}
-            >
-              <p className="text-red-300">
-                Conversion failed. Try another URL.
-              </p>
-              <Button asChild className="mt-4" variant="outline">
-                <Link href="/">Start over</Link>
+        {/* Main */}
+        <main className="min-w-0 flex-1 px-5 py-8 lg:px-10 lg:py-12">
+          {/* Mobile header */}
+          <div className="mb-6 flex items-center justify-between gap-3 md:hidden">
+            <Link className="flex items-center gap-2" href="/">
+              <span className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-[11px] text-white">
+                d2
+              </span>
+              <span className="font-display font-semibold text-sm">
+                doc2mcp
+              </span>
+            </Link>
+            <div className="flex items-center gap-1.5">
+              <Button onClick={share} size="sm" type="button" variant="outline">
+                <Share2 className="mr-1 size-3.5" />
+                Share
               </Button>
-            </motion.div>
+              <Button asChild size="sm" variant="ghost">
+                <Link href="/chat">
+                  <ArrowLeft className="mr-1 size-3.5" />
+                  New
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {isProcessing ? (
+            <div className="space-y-10">
+              <section>
+                <p className="font-mono text-muted-foreground text-xs">
+                  source
+                </p>
+                <p className="mt-1 truncate font-mono text-sm">
+                  {project.sourceUrl}
+                </p>
+                <div className="mt-6">
+                  <PipelineProgress
+                    currentStep={currentStep}
+                    status={project.status}
+                    steps={PIPELINE_STEPS}
+                  />
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-border/60 bg-muted/30 p-5">
+                <p className="mb-3 font-mono text-muted-foreground text-xs">
+                  terminal
+                </p>
+                {logs.length > 0 ? (
+                  <TerminalLog
+                    lines={logs.map((l) => `[${l.level}] ${l.message}`)}
+                    streaming={isProcessing}
+                  />
+                ) : (
+                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                    <Loader2 className="size-4 animate-spin" />
+                    Starting pipeline...
+                  </div>
+                )}
+              </section>
+            </div>
           ) : null}
-        </AnimatePresence>
-      </main>
+
+          <AnimatePresence>
+            {isReady && artifacts ? (
+              <ResultDashboard artifacts={artifacts} project={project} />
+            ) : null}
+
+            {project.status === "error" ? (
+              <motion.div
+                animate={{ opacity: 1 }}
+                className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center"
+                initial={{ opacity: 0 }}
+              >
+                <p className="text-red-500 dark:text-red-300">
+                  Conversion failed. Try another URL.
+                </p>
+                <Button asChild className="mt-4" variant="outline">
+                  <Link href="/">Start over</Link>
+                </Button>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </main>
+      </div>
     </div>
   );
 }
