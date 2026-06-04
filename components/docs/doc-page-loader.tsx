@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { DocBreadcrumbs } from "@/components/docs/doc-breadcrumbs";
 import { DocContent } from "@/components/docs/doc-content";
+import { DocCta } from "@/components/docs/doc-cta";
+import { DocFeedback } from "@/components/docs/doc-feedback";
 import { DocPager } from "@/components/docs/doc-pager";
 import { DocToc } from "@/components/docs/doc-toc";
 import { DocsHome } from "@/components/docs/docs-home";
@@ -44,6 +46,8 @@ export async function DocPageLoader({
         <div className="mt-8">
           <DocContent content={page.content} />
         </div>
+        <DocCta />
+        <DocFeedback pageHref={href} />
         <DocPager next={next} prev={prev} />
       </div>
       <aside className="hidden lg:block">

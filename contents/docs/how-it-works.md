@@ -2,7 +2,7 @@
 title: How it works
 description: The full pipeline from a pasted URL to a live MCP server.
 category: Getting Started
-order: 3
+order: 4
 ---
 
 ## Overview
