@@ -20,6 +20,15 @@ export function AnimatedBackground() {
         }}
       />
 
+      {/* Bottom glow for depth */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse 60% 40% at 50% 110%, oklch(0.6 0.18 250 / 0.1), transparent 60%)",
+        }}
+      />
+
       {/* Panning grid — uses currentColor so it flips with the theme */}
       <div
         className="absolute inset-0 text-foreground opacity-[0.035] [animation:grid-pan_22s_linear_infinite] dark:opacity-[0.045]"
