@@ -4,10 +4,27 @@ import { cacheLife } from "next/cache";
 
 const DOCS_ROOT = path.join(process.cwd(), "contents", "docs");
 
+const UNCATEGORIZED = "More";
+
+/** Sidebar section order. Categories not listed here are appended last. */
+const CATEGORY_ORDER = [
+  "Getting Started",
+  "Core Concepts",
+  "Guides",
+  "Examples",
+  "API Reference",
+  "Deployment",
+  "Enterprise",
+  "Reference",
+  UNCATEGORIZED,
+  "Legal",
+] as const;
+
 export type DocPage = {
   slug: string[];
   title: string;
   description: string;
+  category: string;
   content: string;
 };
 
@@ -15,6 +32,13 @@ export type DocNavItem = {
   slug: string[];
   title: string;
   href: string;
+  category: string;
+  order: number;
+};
+
+export type DocNavGroup = {
+  category: string;
+  items: DocNavItem[];
 };
 
 function parseFrontmatter(raw: string): {
@@ -50,15 +74,19 @@ function slugFromFilename(filename: string): string[] {
   return base.split("/");
 }
 
-export async function getDocNav(): Promise<DocNavItem[]> {
-  "use cache";
-  cacheLife("max");
+function categoryRank(category: string): number {
+  const idx = CATEGORY_ORDER.indexOf(
+    category as (typeof CATEGORY_ORDER)[number]
+  );
+  return idx === -1 ? CATEGORY_ORDER.length : idx;
+}
 
+async function readNavItems(): Promise<DocNavItem[]> {
   const entries = await readdir(DOCS_ROOT, { withFileTypes: true });
   const items: DocNavItem[] = [];
 
   for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith(".md")) {
+    if (!(entry.isFile() && entry.name.endsWith(".md"))) {
       continue;
     }
 
@@ -69,29 +97,50 @@ export async function getDocNav(): Promise<DocNavItem[]> {
 
     items.push({
       slug,
-      title: meta.title ?? slug.at(-1) ?? "Overview",
+      title: meta.nav_title ?? meta.title ?? slug.at(-1) ?? "Overview",
       href,
+      category: meta.category ?? UNCATEGORIZED,
+      order: Number.parseInt(meta.order ?? "999", 10),
     });
   }
 
-  const order = [
-    "index",
-    "getting-started",
-    "api-keys",
-    "mcp-setup",
-    "convert-flow",
-    "workflow",
-    "security",
-    "acceptable-use",
-    "terms",
-    "privacy",
-  ];
-
   return items.sort((a, b) => {
-    const aKey = a.slug.at(-1) ?? "index";
-    const bKey = b.slug.at(-1) ?? "index";
-    return order.indexOf(aKey) - order.indexOf(bKey);
+    const byCategory = categoryRank(a.category) - categoryRank(b.category);
+    if (byCategory !== 0) {
+      return byCategory;
+    }
+    if (a.order !== b.order) {
+      return a.order - b.order;
+    }
+    return a.title.localeCompare(b.title);
   });
+}
+
+/** Flat, fully ordered nav — used for previous/next navigation. */
+export async function getDocNav(): Promise<DocNavItem[]> {
+  "use cache";
+  cacheLife("max");
+  return await readNavItems();
+}
+
+/** Nav grouped by category in sidebar order — used for the sidebar. */
+export async function getDocNavGroups(): Promise<DocNavGroup[]> {
+  "use cache";
+  cacheLife("max");
+
+  const items = await readNavItems();
+  const groups: DocNavGroup[] = [];
+
+  for (const item of items) {
+    const existing = groups.find((group) => group.category === item.category);
+    if (existing) {
+      existing.items.push(item);
+    } else {
+      groups.push({ category: item.category, items: [item] });
+    }
+  }
+
+  return groups;
 }
 
 export async function getDocPage(slug: string[]): Promise<DocPage | null> {
@@ -109,6 +158,7 @@ export async function getDocPage(slug: string[]): Promise<DocPage | null> {
       slug,
       title: meta.title ?? "Documentation",
       description: meta.description ?? "",
+      category: meta.category ?? UNCATEGORIZED,
       content: body,
     };
   } catch {

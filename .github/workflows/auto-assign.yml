@@ -1,0 +1,31 @@
+name: Auto-assign PR
+
+# Every newly opened PR is assigned to the maintainer so nothing falls
+# through the cracks. Skips assignment only if the PR already has assignees.
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (pr.assignees && pr.assignees.length > 0) {
+              core.info('PR already has assignees; skipping.');
+              return;
+            }
+            await github.rest.issues.addAssignees({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              assignees: ['gautammanak1'],
+            });
+            core.info('Assigned PR #' + pr.number + ' to gautammanak1');

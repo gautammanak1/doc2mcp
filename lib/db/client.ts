@@ -7,7 +7,14 @@ const globalForPostgres = globalThis as unknown as {
 
 export function getPostgresClient() {
   if (!globalForPostgres.postgresClient) {
-    globalForPostgres.postgresClient = postgres(resolvePostgresUrl(), {
+    const url = resolvePostgresUrl();
+    if (!url) {
+      throw new Error(
+        "POSTGRES_URL is required for database-backed routes. Set it in Vercel for Production and Preview environments."
+      );
+    }
+
+    globalForPostgres.postgresClient = postgres(url, {
       prepare: false,
       max: 1,
       idle_timeout: 20,

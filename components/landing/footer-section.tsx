@@ -16,8 +16,8 @@ const FEATURES_LINKS = [
 const RESOURCES_LINKS = [
   { label: "Docs", href: "/docs" },
   { label: "Blog", href: "/blog" },
-  { label: "Getting started", href: "/docs/getting-started" },
-  { label: "Workflow", href: "/docs/workflow" },
+  { label: "Quick start", href: "/docs/quickstart" },
+  { label: "Architecture", href: "/docs/workflow" },
   { label: "Security", href: "/docs/security" },
 ];
 
