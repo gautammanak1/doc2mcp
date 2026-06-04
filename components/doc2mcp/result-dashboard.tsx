@@ -678,7 +678,11 @@ export function ResultDashboard({
 
         <TabsContent className="mt-5" value="chat">
           {token ? (
-            <McpChat projectId={project.id} token={token} />
+            <McpChat
+              pageCount={pageCount}
+              projectId={project.id}
+              token={token}
+            />
           ) : (
             <p className="py-10 text-center text-muted-foreground text-sm">
               Chat becomes available once the MCP token is provisioned.
