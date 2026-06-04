@@ -141,7 +141,7 @@ function PureMultimodalInput({
   }, []);
   const doc2mcpMode = hasMounted ? persistedDoc2mcpMode : false;
   const setDoc2mcpMode = setPersistedDoc2mcpMode;
-  
+
   useEffect(() => {
     const urlParam = searchParams.get("url");
     if (urlParam) {

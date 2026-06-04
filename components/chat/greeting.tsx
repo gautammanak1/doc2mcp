@@ -2,7 +2,10 @@ import { motion } from "framer-motion";
 
 export const Greeting = () => {
   return (
-    <div className="flex flex-col items-center px-4 max-w-xl mx-auto py-12" key="overview">
+    <div
+      className="flex flex-col items-center px-4 max-w-xl mx-auto py-12"
+      key="overview"
+    >
       <motion.div
         animate={{ opacity: 1, y: 0 }}
         className="text-center font-display font-semibold text-4xl sm:text-5xl bg-gradient-to-r from-[#4285f4] via-[#9b72cb] to-[#d96570] bg-clip-text text-transparent tracking-tight"
@@ -20,7 +23,8 @@ export const Greeting = () => {
         How can I help you build or query your AI context today?
         <br />
         <span className="text-xs text-muted-foreground/50 mt-1 block">
-          Toggle doc2mcp below to instantly transform any docs URL into a queryable MCP server.
+          Toggle doc2mcp below to instantly transform any docs URL into a
+          queryable MCP server.
         </span>
       </motion.div>
     </div>

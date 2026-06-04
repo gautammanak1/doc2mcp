@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ArrowRight,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  Sparkles
-} from "lucide-react";
+import { ArrowRight, Calendar, CheckCircle2, Clock } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -31,12 +25,12 @@ export function CtaSection() {
         </span>
         <h2 className="mt-5 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
           Make your documentation{" "}
-          <span className="text-[#4285f4] dark:text-[#8ab4f8]">
-            AI-native.
-          </span>
+          <span className="text-[#4285f4] dark:text-[#8ab4f8]">AI-native.</span>
         </h2>
         <p className="mt-5 max-w-xl text-muted-foreground leading-relaxed text-sm sm:text-base">
-          Stop building MCP servers manually. Generate AI-ready infrastructure directly from documentation — and let every agent your team uses speak the same language.
+          Stop building MCP servers manually. Generate AI-ready infrastructure
+          directly from documentation — and let every agent your team uses speak
+          the same language.
         </p>
 
         <div className="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">

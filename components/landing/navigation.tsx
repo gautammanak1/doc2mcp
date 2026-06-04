@@ -23,7 +23,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
-import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +43,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useSupabaseAuth } from "@/lib/supabase/auth";
+import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { name: "Home", href: "/", icon: Home },
@@ -112,9 +112,9 @@ export function LandingNavigation({
           const isActive = isHome
             ? pathname === "/"
             : !isHashLink && pathname.startsWith(link.href);
-          
+
           const Icon = link.icon;
-          
+
           return (
             <a
               className={cn(
@@ -130,8 +130,8 @@ export function LandingNavigation({
               <span>{link.name}</span>
               {isActive && (
                 <motion.span
-                  layoutId="active-nav-bg"
                   className="absolute inset-0 -z-10 rounded-full bg-[#e9eef6] dark:bg-[#282a2d]"
+                  layoutId="active-nav-bg"
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}
@@ -259,10 +259,7 @@ export function LandingNavigation({
                     className="w-full rounded-lg"
                     variant="outline"
                   >
-                    <Link
-                      href="/login"
-                      onClick={() => setIsMobileOpen(false)}
-                    >
+                    <Link href="/login" onClick={() => setIsMobileOpen(false)}>
                       Sign in
                     </Link>
                   </Button>

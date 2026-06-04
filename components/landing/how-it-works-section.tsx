@@ -1,17 +1,17 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  ArrowRight,
+  Code2,
+  Database,
+  FileText,
+  Globe,
+  Settings,
+  Terminal,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ArrowRight, 
-  Globe, 
-  FileText, 
-  Terminal, 
-  Database, 
-  Code2, 
-  Settings 
-} from "lucide-react";
 
 const steps = [
   {
@@ -26,9 +26,9 @@ https://docs.langchain.com
     files: [
       { name: "stripe_docs.url", active: true, icon: "url" },
       { name: "langchain.url", active: false, icon: "url" },
-      { name: "sources.txt", active: false, icon: "file" }
+      { name: "sources.txt", active: false, icon: "file" },
     ],
-    fileType: "URLs"
+    fileType: "URLs",
   },
   {
     number: "02",
@@ -42,9 +42,9 @@ code_blocks: 2,406`,
     files: [
       { name: "crawler.log", active: true, icon: "terminal" },
       { name: "routes.json", active: false, icon: "json" },
-      { name: "pages.db", active: false, icon: "database" }
+      { name: "pages.db", active: false, icon: "database" },
     ],
-    fileType: "Log"
+    fileType: "Log",
   },
   {
     number: "03",
@@ -58,9 +58,9 @@ retrieval   → ASI1 Engine`,
     files: [
       { name: "chunks.db", active: true, icon: "database" },
       { name: "embeddings.bin", active: false, icon: "file" },
-      { name: "schema.json", active: false, icon: "json" }
+      { name: "schema.json", active: false, icon: "json" },
     ],
-    fileType: "Database"
+    fileType: "Database",
   },
   {
     number: "04",
@@ -74,9 +74,9 @@ auth:      bearer token`,
     files: [
       { name: "server.ts", active: true, icon: "ts" },
       { name: "tools.json", active: false, icon: "json" },
-      { name: "auth.config", active: false, icon: "settings" }
+      { name: "auth.config", active: false, icon: "settings" },
     ],
-    fileType: "TypeScript"
+    fileType: "TypeScript",
   },
   {
     number: "05",
@@ -96,9 +96,9 @@ auth:      bearer token`,
     files: [
       { name: "cursor.json", active: true, icon: "json" },
       { name: "claude.json", active: false, icon: "json" },
-      { name: "vscode.json", active: false, icon: "json" }
+      { name: "vscode.json", active: false, icon: "json" },
     ],
-    fileType: "JSON"
+    fileType: "JSON",
   },
 ];
 
@@ -159,10 +159,11 @@ export function HowItWorksSection() {
       ref={sectionRef}
     >
       {/* Background Subtle Gradient */}
-      <div 
+      <div
         className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px]"
         style={{
-          background: "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)"
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)",
         }}
       />
 
@@ -185,7 +186,8 @@ export function HowItWorksSection() {
           </div>
           <div className="flex flex-col justify-end lg:pb-2">
             <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-xl">
-              Five steps to go from a public documentation URL to an auto-synced, hosted MCP server running in your workspace.
+              Five steps to go from a public documentation URL to an
+              auto-synced, hosted MCP server running in your workspace.
             </p>
             <div className="mt-4 flex flex-wrap gap-4 text-xs font-mono text-muted-foreground/80">
               <span className="flex items-center gap-1.5">
@@ -206,7 +208,6 @@ export function HowItWorksSection() {
 
         {/* Dynamic Walkthrough Grid */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-16 items-center">
-          
           {/* Step Selector List */}
           <div className="relative space-y-4">
             {/* Timeline Background Track Line */}
@@ -214,9 +215,11 @@ export function HowItWorksSection() {
 
             {/* Timeline Active Progress Line */}
             <div className="absolute left-[38px] top-[34px] bottom-[34px] w-[2px] bg-transparent hidden sm:block">
-              <motion.div 
-                className="w-full bg-gradient-to-b from-[#4285f4] to-[#8ab4f8] relative" 
-                animate={{ height: `${(activeStep / (steps.length - 1)) * 100}%` }}
+              <motion.div
+                animate={{
+                  height: `${(activeStep / (steps.length - 1)) * 100}%`,
+                }}
+                className="w-full bg-gradient-to-b from-[#4285f4] to-[#8ab4f8] relative"
                 transition={{ type: "spring", stiffness: 80, damping: 15 }}
               >
                 {/* Glowing tip */}
@@ -241,45 +244,61 @@ export function HowItWorksSection() {
                   {/* Glowing active step background pill */}
                   {isActive && (
                     <motion.div
-                      layoutId="activeStepBackground"
                       className="absolute inset-0 bg-card -z-10 rounded-2xl border border-border/10"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      layoutId="activeStepBackground"
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
                     />
                   )}
 
                   {/* Step Number Circle */}
                   <div className="relative z-10 shrink-0">
-                    <span className={cn(
-                      "font-mono text-xs shrink-0 flex items-center justify-center size-9 rounded-full font-semibold transition-all duration-300 border",
-                      isActive 
-                        ? "bg-[#4285f4] dark:bg-[#8ab4f8] border-[#4285f4] dark:border-[#8ab4f8] text-white dark:text-[#131314] shadow-[0_0_12px_rgba(66,133,244,0.3)] dark:shadow-[0_0_12px_rgba(138,180,248,0.25)]"
-                        : "bg-background dark:bg-background border-border/60 text-muted-foreground group-hover:border-border group-hover:text-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        "font-mono text-xs shrink-0 flex items-center justify-center size-9 rounded-full font-semibold transition-all duration-300 border",
+                        isActive
+                          ? "bg-[#4285f4] dark:bg-[#8ab4f8] border-[#4285f4] dark:border-[#8ab4f8] text-white dark:text-[#131314] shadow-[0_0_12px_rgba(66,133,244,0.3)] dark:shadow-[0_0_12px_rgba(138,180,248,0.25)]"
+                          : "bg-background dark:bg-background border-border/60 text-muted-foreground group-hover:border-border group-hover:text-foreground"
+                      )}
+                    >
                       {step.number}
                     </span>
                   </div>
 
                   {/* Step Title */}
                   <div className="relative z-10">
-                    <h3 className={cn(
-                      "font-display font-medium text-base sm:text-lg tracking-tight transition-colors duration-300",
-                      isActive
-                        ? "text-foreground font-semibold"
-                        : "text-muted-foreground/70 group-hover:text-foreground"
-                    )}>
+                    <h3
+                      className={cn(
+                        "font-display font-medium text-base sm:text-lg tracking-tight transition-colors duration-300",
+                        isActive
+                          ? "text-foreground font-semibold"
+                          : "text-muted-foreground/70 group-hover:text-foreground"
+                      )}
+                    >
                       {step.title}
                     </h3>
                   </div>
 
                   {/* Right side arrow indicator */}
-                  <div className={cn(
-                    "ml-auto relative z-10 transition-all duration-300",
-                    isActive ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
-                  )}>
-                    <ArrowRight className={cn(
-                      "size-4",
-                      isActive ? "text-[#4285f4] dark:text-[#8ab4f8]" : "text-muted-foreground"
-                    )} />
+                  <div
+                    className={cn(
+                      "ml-auto relative z-10 transition-all duration-300",
+                      isActive
+                        ? "opacity-100 translate-x-0"
+                        : "opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0"
+                    )}
+                  >
+                    <ArrowRight
+                      className={cn(
+                        "size-4",
+                        isActive
+                          ? "text-[#4285f4] dark:text-[#8ab4f8]"
+                          : "text-muted-foreground"
+                      )}
+                    />
                   </div>
                 </button>
               );
@@ -288,17 +307,16 @@ export function HowItWorksSection() {
 
           {/* Step Preview & Content Box */}
           <div className="flex flex-col lg:sticky lg:top-28 lg:self-center">
-            
             {/* Active Step Description Card */}
             <div className="mb-6 min-h-[90px] sm:min-h-[75px] flex flex-col justify-end">
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeStep}
-                  initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
                   className="space-y-2.5"
+                  exit={{ opacity: 0, y: -12 }}
+                  initial={{ opacity: 0, y: 12 }}
+                  key={activeStep}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                 >
                   <div className="inline-flex items-center gap-2">
                     <span className="font-mono text-[10px] text-[#4285f4] dark:text-[#8ab4f8] uppercase tracking-[0.15em] font-semibold">
@@ -325,12 +343,12 @@ export function HowItWorksSection() {
             >
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={activeStep}
-                  initial={{ opacity: 0, y: 8, scale: 0.99 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.99 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="relative overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
+                  exit={{ opacity: 0, y: -8, scale: 0.99 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.99 }}
+                  key={activeStep}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   {/* Chrome headers */}
                   <div className="flex items-center justify-between border-border/40 border-b px-4 py-2.5 bg-secondary/35">
@@ -344,7 +362,7 @@ export function HowItWorksSection() {
                     </span>
                     <span className="w-10" />
                   </div>
-                  
+
                   {/* IDE Body */}
                   <div className="flex h-[200px] bg-card overflow-hidden">
                     {/* Sidebar */}
@@ -355,13 +373,13 @@ export function HowItWorksSection() {
                       <div className="space-y-1">
                         {steps[activeStep].files.map((file) => (
                           <div
-                            key={file.name}
                             className={cn(
                               "flex items-center gap-2 px-2 py-1.5 rounded-md text-[11px] font-mono transition-colors",
                               file.active
                                 ? "bg-secondary/40 text-foreground font-medium"
                                 : "text-muted-foreground/70 hover:text-foreground hover:bg-secondary/20"
                             )}
+                            key={file.name}
                           >
                             {getFileIcon(file.icon, file.active)}
                             <span className="truncate">{file.name}</span>
@@ -395,21 +413,23 @@ export function HowItWorksSection() {
 
               {/* Clients Row */}
               <div className="mt-5 flex flex-wrap items-center gap-2">
-                <span className="text-[11px] text-muted-foreground mr-1">Integrates with:</span>
-                {["Cursor", "Claude", "VS Code", "Windsurf", "AI SDK"].map((t) => (
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider"
-                    key={t}
-                  >
-                    <span className="size-1.5 rounded-full bg-[#4285f4]" />
-                    {t}
-                  </span>
-                ))}
+                <span className="text-[11px] text-muted-foreground mr-1">
+                  Integrates with:
+                </span>
+                {["Cursor", "Claude", "VS Code", "Windsurf", "AI SDK"].map(
+                  (t) => (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider"
+                      key={t}
+                    >
+                      <span className="size-1.5 rounded-full bg-[#4285f4]" />
+                      {t}
+                    </span>
+                  )
+                )}
               </div>
             </div>
-
           </div>
-
         </div>
       </div>
     </section>

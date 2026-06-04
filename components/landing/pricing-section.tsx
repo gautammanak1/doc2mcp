@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { RazorpayCheckoutButton } from "@/components/billing/razorpay-checkout-button";
 import {
@@ -148,11 +148,7 @@ export function PricingSection() {
   }, []);
 
   return (
-    <section
-      className="relative py-20 sm:py-28"
-      id="pricing"
-      ref={sectionRef}
-    >
+    <section className="relative py-20 sm:py-28" id="pricing" ref={sectionRef}>
       <div className="mx-auto max-w-[1200px] px-6">
         <div className="mb-12 text-center sm:mb-16">
           <span className="text-muted-foreground/60 text-xs sm:text-sm font-mono tracking-wider uppercase">
@@ -169,7 +165,8 @@ export function PricingSection() {
             Simple, builder-friendly pricing.
           </h2>
           <p className="mt-4 text-muted-foreground text-sm max-w-lg mx-auto">
-            Every plan deploy the same robust remote MCP interface. Select a tier based on page capacity and sync frequency.
+            Every plan deploy the same robust remote MCP interface. Select a
+            tier based on page capacity and sync frequency.
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3">
@@ -254,16 +251,16 @@ export function PricingSection() {
               <span className="font-display font-bold text-4xl tracking-tight text-foreground">
                 {currency === "USD" ? "$0" : "₹0"}
               </span>
-              <span className="text-muted-foreground text-xs">
-                / forever
-              </span>
+              <span className="text-muted-foreground text-xs">/ forever</span>
             </div>
 
             <ul className="flex flex-1 flex-col gap-2.5 text-xs">
               {FREE_PLAN.features.map((feature) => (
                 <li className="flex items-start gap-2.5" key={feature}>
                   <Check className="mt-0.5 size-3.5 shrink-0 text-[#4285f4]" />
-                  <span className="text-muted-foreground leading-relaxed">{feature}</span>
+                  <span className="text-muted-foreground leading-relaxed">
+                    {feature}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -314,7 +311,7 @@ export function PricingSection() {
                   {CYCLE_SUFFIX[cycle].split(" billed")[0]}
                 </span>
               </div>
-              
+
               <p className="-mt-3 font-mono text-[9px] text-muted-foreground/60 uppercase tracking-wider">
                 Charged once as{" "}
                 {formatMoney(getPlanPrice(plan.id, currency, cycle), currency)}
@@ -323,11 +320,17 @@ export function PricingSection() {
               <ul className="flex flex-1 flex-col gap-2.5 text-xs">
                 {plan.features.map((feature) => (
                   <li className="flex items-start gap-2.5" key={feature}>
-                    <Check className={cn(
-                      "mt-0.5 size-3.5 shrink-0",
-                      plan.highlight ? "text-[#4285f4] dark:text-[#8ab4f8]" : "text-[#4285f4] dark:text-[#8ab4f8]"
-                    )} />
-                    <span className="text-muted-foreground leading-relaxed">{feature}</span>
+                    <Check
+                      className={cn(
+                        "mt-0.5 size-3.5 shrink-0",
+                        plan.highlight
+                          ? "text-[#4285f4] dark:text-[#8ab4f8]"
+                          : "text-[#4285f4] dark:text-[#8ab4f8]"
+                      )}
+                    />
+                    <span className="text-muted-foreground leading-relaxed">
+                      {feature}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -344,7 +347,8 @@ export function PricingSection() {
         </div>
 
         <p className="mt-12 text-center text-muted-foreground/60 text-[10px] font-mono uppercase tracking-wider">
-          Unlimited MCP reads included · Conversions run once per docs portal · Cancel anytime.
+          Unlimited MCP reads included · Conversions run once per docs portal ·
+          Cancel anytime.
         </p>
       </div>
     </section>

@@ -201,8 +201,8 @@ export function RazorpayCheckoutButton({
       <Button
         className={cn(
           "w-full rounded-full transition-all duration-300 active:scale-[0.98]",
-          highlight 
-            ? "bg-gradient-to-r from-[#4285f4] via-[#9b72cb] to-[#d96570] text-white hover:opacity-90 border-0 shadow-md" 
+          highlight
+            ? "bg-gradient-to-r from-[#4285f4] via-[#9b72cb] to-[#d96570] text-white hover:opacity-90 border-0 shadow-md"
             : "border-border/60 hover:bg-secondary/40 hover:text-foreground text-muted-foreground"
         )}
         disabled={pending || authLoading}

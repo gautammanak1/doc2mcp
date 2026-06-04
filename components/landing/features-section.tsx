@@ -5,12 +5,12 @@ import {
   Check,
   FileText,
   Folder,
+  HardDrive,
+  Lock,
   Network,
   RefreshCw,
   Target,
-  Lock,
-  HardDrive,
-  Users2
+  Users2,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -57,11 +57,24 @@ function CrawlerVisual() {
             }}
           >
             {row.kind === "folder" ? (
-              <Folder aria-hidden="true" className="size-3 shrink-0 text-[#4285f4]" />
+              <Folder
+                aria-hidden="true"
+                className="size-3 shrink-0 text-[#4285f4]"
+              />
             ) : (
-              <FileText aria-hidden="true" className="size-3 shrink-0 text-muted-foreground/60" />
+              <FileText
+                aria-hidden="true"
+                className="size-3 shrink-0 text-muted-foreground/60"
+              />
             )}
-            <span className={cn("truncate", row.kind === "folder" ? "text-foreground font-medium" : "text-muted-foreground")}>
+            <span
+              className={cn(
+                "truncate",
+                row.kind === "folder"
+                  ? "text-foreground font-medium"
+                  : "text-muted-foreground"
+              )}
+            >
               {row.label}
             </span>
             <Check
@@ -123,14 +136,23 @@ type Feature = {
   description: string;
   icon: any;
   span: string;
-  visual: "crawler" | "mcp" | "retrieval" | "sync" | "security" | "scale" | "collab" | "agents";
+  visual:
+    | "crawler"
+    | "mcp"
+    | "retrieval"
+    | "sync"
+    | "security"
+    | "scale"
+    | "collab"
+    | "agents";
 };
 
 const features: Feature[] = [
   {
     id: "crawler",
     title: "Sitemap Documentation Crawling",
-    description: "Auto-crawls schemas and articles from any portal—Mintlify, Docusaurus, GitHub repositories, or raw HTML pages.",
+    description:
+      "Auto-crawls schemas and articles from any portal—Mintlify, Docusaurus, GitHub repositories, or raw HTML pages.",
     icon: Network,
     span: "lg:col-span-2 lg:row-span-2",
     visual: "crawler",
@@ -138,7 +160,8 @@ const features: Feature[] = [
   {
     id: "mcp",
     title: "Production Ready MCP Generation",
-    description: "Generate and deploy hosted Model Context Protocol servers automatically. Done in seconds with zero custom config.",
+    description:
+      "Generate and deploy hosted Model Context Protocol servers automatically. Done in seconds with zero custom config.",
     icon: Bot,
     span: "lg:col-span-1",
     visual: "mcp",
@@ -146,7 +169,8 @@ const features: Feature[] = [
   {
     id: "retrieval",
     title: "Agent-Optimized Retrieval",
-    description: "Stop LLM hallucinations. Serve clean heading-aware chunks, parameter definitions, and schemas directly to AI clients.",
+    description:
+      "Stop LLM hallucinations. Serve clean heading-aware chunks, parameter definitions, and schemas directly to AI clients.",
     icon: Target,
     span: "lg:col-span-1",
     visual: "retrieval",
@@ -154,7 +178,8 @@ const features: Feature[] = [
   {
     id: "sync",
     title: "Live Documentation Sync",
-    description: "Your remote servers pull down the newest updates every 24h. Say goodbye to outdated code blocks and broken paths.",
+    description:
+      "Your remote servers pull down the newest updates every 24h. Say goodbye to outdated code blocks and broken paths.",
     icon: RefreshCw,
     span: "lg:col-span-1",
     visual: "sync",
@@ -162,7 +187,8 @@ const features: Feature[] = [
   {
     id: "security",
     title: "Privacy First Security",
-    description: "No local clones or shared keys. Remote token authentication guarantees secure, credential-free read operations.",
+    description:
+      "No local clones or shared keys. Remote token authentication guarantees secure, credential-free read operations.",
     icon: Lock,
     span: "lg:col-span-1",
     visual: "security",
@@ -170,7 +196,8 @@ const features: Feature[] = [
   {
     id: "scale",
     title: "Enterprise Scale Limits",
-    description: "Parse extensive schemas of 2500+ documentation pages, heavy OpenAPI specifications, and multi-nested repositories.",
+    description:
+      "Parse extensive schemas of 2500+ documentation pages, heavy OpenAPI specifications, and multi-nested repositories.",
     icon: HardDrive,
     span: "lg:col-span-1",
     visual: "scale",
@@ -178,7 +205,8 @@ const features: Feature[] = [
   {
     id: "collab",
     title: "Teammate Collaboration",
-    description: "Share servers across engineering teams, manage access scopes, and deploy custom domain endpoints for internal agents.",
+    description:
+      "Share servers across engineering teams, manage access scopes, and deploy custom domain endpoints for internal agents.",
     icon: Users2,
     span: "lg:col-span-1",
     visual: "collab",
@@ -186,7 +214,8 @@ const features: Feature[] = [
   {
     id: "agents",
     title: "Seamless Workspace Integration",
-    description: "Copy-paste standard credentials directly into your editor config file. Fully supports Cursor, Claude, Windsurf, VS Code, or custom AI agents.",
+    description:
+      "Copy-paste standard credentials directly into your editor config file. Fully supports Cursor, Claude, Windsurf, VS Code, or custom AI agents.",
     icon: Bot,
     span: "lg:col-span-2",
     visual: "agents",
@@ -204,7 +233,9 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
         <p className="mt-1">→ crawled 1,284 pages ... [ok]</p>
         <p>→ structured 4,182 chunks ... [ok]</p>
         <p>→ tools: 23 · workflows: 6 ... [ok]</p>
-        <p className="text-[#4285f4] dark:text-[#8ab4f8]">✓ mcp ready · hosted</p>
+        <p className="text-[#4285f4] dark:text-[#8ab4f8]">
+          ✓ mcp ready · hosted
+        </p>
       </div>
     );
   }
@@ -221,10 +252,14 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
             key={row.label}
           >
             <span className="font-mono text-foreground">{row.label}</span>
-            <span className={cn(
-              "font-mono text-[9px] px-1.5 py-0.5 rounded-full font-medium",
-              i === 0 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
-            )}>
+            <span
+              className={cn(
+                "font-mono text-[9px] px-1.5 py-0.5 rounded-full font-medium",
+                i === 0
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                  : "bg-muted text-muted-foreground"
+              )}
+            >
               {row.score}
             </span>
           </div>
@@ -263,8 +298,12 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
     return (
       <div className="relative flex h-full min-h-[110px] w-full items-center justify-center">
         <div className="text-center">
-          <span className="text-2xl font-semibold tracking-tight text-foreground font-mono">2,500+</span>
-          <p className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">Pages indexed / site</p>
+          <span className="text-2xl font-semibold tracking-tight text-foreground font-mono">
+            2,500+
+          </span>
+          <p className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">
+            Pages indexed / site
+          </p>
         </div>
       </div>
     );
@@ -277,7 +316,11 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
             <span
               className={cn(
                 "flex size-7 items-center justify-center rounded-full border border-card font-mono text-[10px] text-white font-semibold",
-                i === 0 ? "bg-[#4285f4]" : i === 1 ? "bg-[#8ab4f8]" : "bg-neutral-600"
+                i === 0
+                  ? "bg-[#4285f4]"
+                  : i === 1
+                    ? "bg-[#8ab4f8]"
+                    : "bg-neutral-600"
               )}
               key={initial}
             >
@@ -291,24 +334,26 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
       </div>
     );
   }
-  
+
   // agents
   return (
     <div className="relative flex h-full min-h-[110px] w-full items-center justify-center flex-wrap gap-1.5 p-2">
-      {["Cursor", "Claude.desktop", "Windsurf", "VS Code", "OpenAI Agents"].map((label) => (
-        <span
-          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/65 px-3 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider backdrop-blur-md"
-          key={label}
-        >
-          <span className="size-1 rounded-full bg-[#4285f4] dark:bg-[#8ab4f8]" />
-          {label}
-        </span>
-      ))}
+      {["Cursor", "Claude.desktop", "Windsurf", "VS Code", "OpenAI Agents"].map(
+        (label) => (
+          <span
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/65 px-3 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider backdrop-blur-md"
+            key={label}
+          >
+            <span className="size-1 rounded-full bg-[#4285f4] dark:bg-[#8ab4f8]" />
+            {label}
+          </span>
+        )
+      )}
     </div>
   );
 }
 
-function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
+function FeatureCard({ feature }: { feature: Feature }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const Icon = feature.icon;
 
@@ -368,10 +413,11 @@ export function FeaturesSection() {
       ref={sectionRef}
     >
       {/* Spark Glow Element */}
-      <div 
+      <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none opacity-20 dark:opacity-10 blur-[120px]"
         style={{
-          background: "radial-gradient(circle, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.03) 60%, transparent 100%)"
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.03) 60%, transparent 100%)",
         }}
       />
 
@@ -389,11 +435,12 @@ export function FeaturesSection() {
           <h2
             className={cn(
               "font-display text-2xl font-semibold tracking-tight transition-all duration-700 sm:text-4xl lg:text-5xl text-foreground",
-              isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+              isVisible
+                ? "translate-y-0 opacity-100"
+                : "translate-y-4 opacity-0"
             )}
           >
-            Engineered for developers.{" "}
-            <br className="hidden sm:block" />
+            Engineered for developers. <br className="hidden sm:block" />
             <span className="text-[#4285f4] dark:text-[#8ab4f8]">
               Trusted by teams.
             </span>
@@ -404,14 +451,15 @@ export function FeaturesSection() {
               isVisible ? "opacity-100" : "opacity-0"
             )}
           >
-            The production-ready bridge connecting documentation portals directly to the local memory context of your coding assistants.
+            The production-ready bridge connecting documentation portals
+            directly to the local memory context of your coding assistants.
           </p>
         </div>
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
-            <FeatureCard feature={feature} index={index} key={feature.id} />
+          {features.map((feature) => (
+            <FeatureCard feature={feature} key={feature.id} />
           ))}
         </div>
       </div>

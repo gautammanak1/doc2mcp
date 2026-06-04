@@ -30,8 +30,10 @@ export function HeroSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!urlInput.trim()) return;
-    
+    if (!urlInput.trim()) {
+      return;
+    }
+
     // Redirect to the chat page with the URL prefilled
     router.push(`/chat?url=${encodeURIComponent(urlInput.trim())}`);
   };
@@ -39,10 +41,11 @@ export function HeroSection() {
   return (
     <section className="relative flex flex-col min-h-screen items-center justify-center overflow-hidden py-24 sm:py-32">
       {/* Premium Gemini Gradient Glow */}
-      <div 
+      <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none opacity-45 dark:opacity-20 blur-[120px]"
         style={{
-          background: "radial-gradient(circle, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.04) 60%, transparent 100%)"
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.04) 60%, transparent 100%)",
         }}
       />
 
@@ -75,7 +78,9 @@ export function HeroSection() {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           }`}
         >
-          Paste a docs URL—Mintlify, Docusaurus, GitHub, OpenAPI—and get a hosted, Cursor-ready MCP server in seconds. No setup, no local scripts.
+          Paste a docs URL—Mintlify, Docusaurus, GitHub, OpenAPI—and get a
+          hosted, Cursor-ready MCP server in seconds. No setup, no local
+          scripts.
         </p>
 
         {/* Gemini Pill Input Form with Bluish Glow */}

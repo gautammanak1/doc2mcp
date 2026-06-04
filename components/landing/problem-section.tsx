@@ -3,15 +3,12 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   AlertTriangle,
-  Bot,
+  ArrowRight,
   ClipboardX,
   Clock,
   Ghost,
-  Sparkles,
-  ArrowRight,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 
 const PAIN_POINTS = [
   {
@@ -50,7 +47,9 @@ function ChaosVisual() {
   const reduce = useReducedMotion();
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce) {
+      return;
+    }
     const id = setInterval(() => setTick((t) => t + 1), 2800);
     return () => clearInterval(id);
   }, [reduce]);
@@ -76,20 +75,30 @@ function ChaosVisual() {
       <div className="space-y-3.5 text-[11px] sm:text-xs">
         {/* User prompt */}
         <div className="flex items-start gap-2.5 bg-secondary/40 p-2.5 rounded-lg border border-border/40">
-          <span className="size-5 rounded-full bg-secondary flex items-center justify-center text-[9px] font-bold text-muted-foreground shrink-0">U</span>
+          <span className="size-5 rounded-full bg-secondary flex items-center justify-center text-[9px] font-bold text-muted-foreground shrink-0">
+            U
+          </span>
           <div className="flex-1 min-w-0">
-            <div className="text-[9px] text-muted-foreground font-semibold">USER</div>
-            <p className="text-foreground/90 mt-0.5 truncate">Generate code to create a customer checkout session.</p>
+            <div className="text-[9px] text-muted-foreground font-semibold">
+              USER
+            </div>
+            <p className="text-foreground/90 mt-0.5 truncate">
+              Generate code to create a customer checkout session.
+            </p>
           </div>
         </div>
 
         {/* AI response with visual errors */}
         <div className="space-y-2.5">
           <div className="flex items-center gap-2">
-            <span className="size-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-[9px] font-bold text-rose-500 dark:text-rose-400 shrink-0">AI</span>
-            <div className="text-[9px] text-rose-500 dark:text-rose-400 font-semibold uppercase">Hallucinating Assistant</div>
+            <span className="size-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-[9px] font-bold text-rose-500 dark:text-rose-400 shrink-0">
+              AI
+            </span>
+            <div className="text-[9px] text-rose-500 dark:text-rose-400 font-semibold uppercase">
+              Hallucinating Assistant
+            </div>
           </div>
-          
+
           <div className="bg-background border border-border/40 rounded-lg p-3 relative overflow-hidden">
             {/* Deprecated warning overlay */}
             <div className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-md border border-rose-500/20 bg-rose-500/5 dark:bg-rose-500/10 px-1.5 py-0.5 text-[8px] sm:text-[9px] text-rose-500 dark:text-rose-400 font-medium">
@@ -98,13 +107,21 @@ function ChaosVisual() {
 
             <pre className="text-foreground/70 dark:text-foreground/80 leading-relaxed overflow-x-auto text-[10px] sm:text-[11px]">
               <code>
-{`import stripe from 'stripe';
+                {`import stripe from 'stripe';
 
-await stripe.`}<span className="text-rose-500 dark:text-rose-400 border-b border-dashed border-rose-500 font-bold">checkout.sessions.create</span>{`({
+await stripe.`}
+                <span className="text-rose-500 dark:text-rose-400 border-b border-dashed border-rose-500 font-bold">
+                  checkout.sessions.create
+                </span>
+                {`({
   customer: 'usr_123',
   payment_method_types: ['card'],
   // ⚠️ Hallucinated parameter
-  `}<span className="text-amber-500 dark:text-amber-400 border-b border-dashed border-amber-500 font-bold">enable_mcp_routing</span>{`: true
+  `}
+                <span className="text-amber-500 dark:text-amber-400 border-b border-dashed border-amber-500 font-bold">
+                  enable_mcp_routing
+                </span>
+                {`: true
 });`}
               </code>
             </pre>
@@ -169,15 +186,15 @@ export function ProblemSection() {
       id="problem"
       ref={ref}
     >
-      <div 
+      <div
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none opacity-20 dark:opacity-10 blur-[120px]"
         style={{
-          background: "radial-gradient(circle, rgba(239, 68, 68, 0.04) 0%, transparent 100%)"
+          background:
+            "radial-gradient(circle, rgba(239, 68, 68, 0.04) 0%, transparent 100%)",
         }}
       />
 
       <div className="relative z-10 mx-auto max-w-[1200px] px-6">
-        
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-16 mb-12 sm:mb-16">
           <div>
             <span className="font-mono text-muted-foreground/60 text-xs sm:text-sm tracking-wider uppercase block">
@@ -185,7 +202,10 @@ export function ProblemSection() {
             </span>
             <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               AI agents are only as good as{" "}
-              <span className="text-rose-500 dark:text-rose-400">their context</span>.
+              <span className="text-rose-500 dark:text-rose-400">
+                their context
+              </span>
+              .
             </h2>
           </div>
           <div className="flex flex-col justify-end lg:pb-2">
@@ -212,20 +232,19 @@ export function ProblemSection() {
         </div>
 
         <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-          
           <motion.div
+            animate={isVisible ? { opacity: 1, scale: 1, y: 0 } : {}}
             className="w-full flex flex-col justify-center"
             initial={{ opacity: 0, scale: 0.98, y: 15 }}
-            animate={isVisible ? { opacity: 1, scale: 1, y: 0 } : {}}
             transition={{ duration: 0.7, ease: "easeOut" }}
           >
             <ChaosVisual />
           </motion.div>
 
           <motion.ul
+            animate={isVisible ? "visible" : "hidden"}
             className="space-y-4 flex flex-col justify-center"
             initial="hidden"
-            animate={isVisible ? "visible" : "hidden"}
             transition={{ staggerChildren: 0.12, delayChildren: 0.15 }}
           >
             {PAIN_POINTS.map((pt) => {
@@ -243,7 +262,7 @@ export function ProblemSection() {
                     aria-hidden="true"
                     className="absolute top-0 right-0 w-[120px] h-[120px] rounded-full pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-[40px] bg-gradient-to-br from-rose-500/10 to-transparent"
                   />
-                  
+
                   <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-secondary/40 border border-border/60 text-rose-500 dark:text-rose-400 transition-all duration-300 group-hover:bg-rose-500/10 group-hover:border-rose-500/20">
                     <Icon className="size-4" />
                   </span>
@@ -262,33 +281,39 @@ export function ProblemSection() {
         </div>
 
         <motion.div
+          animate={isVisible ? { opacity: 1, y: 0 } : {}}
           className="mx-auto mt-24 max-w-3xl text-center space-y-6"
           initial={{ opacity: 0, y: 15 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
           <div className="flex justify-center">
             <div className="h-10 w-[1px] bg-gradient-to-b from-transparent to-border/80" />
           </div>
-          
+
           <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-normal tracking-tight text-foreground leading-tight max-w-2xl mx-auto italic">
-            &ldquo;What if your AI assistant actually knew every endpoint, version, and example?&rdquo;
+            &ldquo;What if your AI assistant actually knew every endpoint,
+            version, and example?&rdquo;
           </h3>
-          
+
           <p className="text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">
-            No more guessing, outdated stacks, or manual MCP setups. Just instant, perfect context served directly to your agent.
+            No more guessing, outdated stacks, or manual MCP setups. Just
+            instant, perfect context served directly to your agent.
           </p>
-          
+
           <div className="pt-4 flex justify-center">
             <motion.div
               animate={{ y: [0, 6, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               className="flex flex-col items-center gap-1.5 cursor-pointer"
               onClick={() => {
                 const target = document.getElementById("how-it-works");
                 if (target) {
                   target.scrollIntoView({ behavior: "smooth" });
                 }
+              }}
+              transition={{
+                duration: 2,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
               }}
             >
               <span className="font-mono text-[9px] text-muted-foreground/60 tracking-[0.18em] uppercase">
@@ -300,47 +325,5 @@ export function ProblemSection() {
         </motion.div>
       </div>
     </section>
-  );
-}
-
-function FloatingChip({
-  children,
-  className,
-  delay,
-  tone,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay: number;
-  tone: "rose" | "amber" | "violet" | "cyan";
-}) {
-  const reduce = useReducedMotion();
-  const toneClass = {
-    rose: "border-rose-500/20 bg-background dark:bg-zinc-900 text-rose-600 dark:text-rose-400",
-    amber: "border-amber-500/20 bg-background dark:bg-zinc-900 text-amber-600 dark:text-amber-400",
-    violet: "border-violet-500/20 bg-background dark:bg-zinc-900 text-violet-600 dark:text-violet-400",
-    cyan: "border-cyan-500/20 bg-background dark:bg-zinc-900 text-cyan-600 dark:text-cyan-400",
-  }[tone];
-
-  return (
-    <motion.span
-      animate={
-        reduce
-          ? { opacity: 1, y: 0 }
-          : { opacity: [0, 1, 1, 0.85], y: [-4, 0, 0, -2] }
-      }
-      className={`absolute inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-wider backdrop-blur-md ${toneClass} ${className ?? ""}`}
-      initial={{ opacity: 0, y: -8 }}
-      transition={{
-        duration: 4.5,
-        delay,
-        repeat: reduce ? 0 : Number.POSITIVE_INFINITY,
-        repeatType: "reverse",
-        ease: "easeInOut",
-      }}
-    >
-      <span className="size-1 rounded-full bg-current opacity-60 animate-pulse" />
-      {children}
-    </motion.span>
   );
 }

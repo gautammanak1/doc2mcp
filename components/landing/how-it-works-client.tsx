@@ -6,9 +6,7 @@ const HowItWorksSection = dynamic(
   () => import("./how-it-works-section").then((m) => m.HowItWorksSection),
   {
     ssr: false,
-    loading: () => (
-      <section className="relative h-[600px] bg-background" />
-    ),
+    loading: () => <section className="relative h-[600px] bg-background" />,
   }
 );
 
