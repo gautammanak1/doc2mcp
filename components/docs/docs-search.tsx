@@ -91,7 +91,19 @@ export function DocsSearch({ items }: { items: DocNavItem[] }) {
           ⌘K
         </kbd>
       </div>
-      {open && results.length > 0 ? (
+const onKeyDown = (event: React.KeyboardEvent) => {
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    setActive((i) => Math.min(i + 1, results.length - 1));
+  } else if (event.key === "ArrowUp") {
+    event.preventDefault();
+    setActive((i) => Math.max(i - 1, 0));
+  } else if (event.key === "Enter" && results[active]) {
+    go(results[active].href);
+  } else if (event.key === "Escape") {
+    setOpen(false);
+  }
+};
         <ul className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-border/60 bg-popover p-1 shadow-lg">
           {results.map((item, index) => (
             <li key={item.href}>
