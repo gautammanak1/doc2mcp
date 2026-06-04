@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { UsersTable } from "@/components/admin/users-table";
 import { SkeletonTable } from "@/components/ui/page-skeleton";
@@ -21,6 +22,7 @@ export default function AdminUsersPage() {
 }
 
 async function UsersRows() {
+  await connection();
   const users = await getAllUsersWithStats(200);
   return (
     <UsersTable

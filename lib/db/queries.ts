@@ -15,13 +15,12 @@ import {
   type SQL,
   sql,
 } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
 import type { ArtifactKind } from "@/components/chat/artifact";
 import type { VisibilityType } from "@/components/chat/visibility-selector";
 import type { BillingCycle, PlanId } from "@/lib/billing/plans";
 import { ChatbotError } from "../errors";
 import { generateUUID } from "../utils";
-import { getPostgresClient } from "./client";
+import { db } from "./client";
 import {
   aiWorkflow,
   type Chat,
@@ -42,8 +41,6 @@ import {
   vote,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
-
-const db = drizzle(getPostgresClient());
 
 export async function getUser(email: string): Promise<User[]> {
   try {

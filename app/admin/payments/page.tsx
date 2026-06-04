@@ -1,13 +1,10 @@
 import { desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { SkeletonTable } from "@/components/ui/page-skeleton";
 import { type BillingCurrency, formatMoney } from "@/lib/billing/plans";
-import { getPostgresClient } from "@/lib/db/client";
+import { db } from "@/lib/db/client";
 import { subscription, user } from "@/lib/db/schema";
-
-const db = drizzle(getPostgresClient());
 
 export default function AdminPaymentsPage() {
   return (

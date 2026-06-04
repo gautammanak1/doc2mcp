@@ -1,3 +1,4 @@
+import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { resolvePostgresUrl } from "./postgres-url";
 
@@ -24,3 +25,21 @@ export function getPostgresClient() {
 
   return globalForPostgres.postgresClient;
 }
+
+const createDb = () => drizzle(getPostgresClient());
+
+type Database = ReturnType<typeof createDb>;
+
+let dbInstance: Database | undefined;
+
+function getDb() {
+  dbInstance ??= createDb();
+  return dbInstance;
+}
+
+export const db = new Proxy({} as Database, {
+  get(_target, prop, receiver) {
+    const value = Reflect.get(getDb(), prop, receiver);
+    return typeof value === "function" ? value.bind(getDb()) : value;
+  },
+});
