@@ -7,10 +7,25 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
+const fallbackAppUrl = "https://doc2mcp.site";
+
+function getPublicAppUrl() {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  if (!configured) {
+    return fallbackAppUrl;
+  }
+
+  try {
+    return new URL(configured).origin;
+  } catch {
+    return fallbackAppUrl;
+  }
+}
+
+const publicAppUrl = getPublicAppUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://doc2mcp.site"
-  ),
+  metadataBase: new URL(publicAppUrl),
   title: "doc2mcp — Paste Docs URL, Get MCP Server",
   description:
     "Turn any documentation URL into a Cursor-ready MCP server in seconds. No install, no API keys.",
@@ -18,7 +33,7 @@ export const metadata: Metadata = {
     title: "doc2mcp — Any docs URL → Cursor-ready MCP",
     description:
       "Paste a documentation URL. Get a hosted MCP server Cursor can read in seconds. No install, no API keys.",
-    url: process.env.NEXT_PUBLIC_APP_URL ?? "https://doc2mcp.site",
+    url: publicAppUrl,
     siteName: "doc2mcp",
     images: [
       {
