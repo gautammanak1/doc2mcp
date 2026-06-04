@@ -104,7 +104,13 @@ export async function POST(request: Request) {
         differenceInHours: 1,
       });
 
-      if (messageCount > entitlementsByUserType[userType].maxMessagesPerHour) {
+      if (messageCount >= entitlementsByUserType[userType].maxMessagesPerHour) {
+        if (userType === "guest") {
+          return new ChatbotError(
+            "rate_limit:chat",
+            "You've used your 5 free messages. Sign in to keep chatting."
+          ).toResponse();
+        }
         return new ChatbotError("rate_limit:chat").toResponse();
       }
     }

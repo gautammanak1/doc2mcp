@@ -109,7 +109,7 @@ export function DocsShell({ children }: { children: React.ReactNode }) {
       </header>
 
       <div className="mx-auto flex w-full max-w-(--breakpoint-2xl) flex-1 flex-col lg:flex-row">
-        <aside className="hidden shrink-0 border-border/60 lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:w-64 lg:overflow-y-auto lg:border-r lg:px-4 lg:py-8">
+        <aside className="hidden shrink-0 border-border/60 [scrollbar-width:none] lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:w-64 lg:overflow-y-auto lg:border-r lg:px-4 lg:py-8 [&::-webkit-scrollbar]:hidden">
           <Suspense fallback={<SidebarFallback />}>
             <DocsSidebarLoader />
           </Suspense>

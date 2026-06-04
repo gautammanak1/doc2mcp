@@ -37,7 +37,12 @@ export async function DocPageLoader({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <DocBreadcrumbs category={page.category} title={page.title} />
-          <DocPageActions markdown={page.content} next={next} prev={prev} />
+          <DocPageActions
+            markdown={page.content}
+            next={next}
+            prev={prev}
+            title={page.title}
+          />
         </div>
         <h1 className="mt-4 font-display font-semibold text-3xl tracking-tight">
           {page.title}
