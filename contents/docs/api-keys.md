@@ -1,6 +1,8 @@
 ---
 title: API keys
 description: One token, on the result page. No third-party keys needed.
+category: Reference
+order: 2
 ---
 
 # API keys

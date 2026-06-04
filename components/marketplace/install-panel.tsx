@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, Copy, Download } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { InstallTargets } from "@/lib/marketplace/install";
@@ -49,40 +50,17 @@ function ConfigBlock({ json }: { json: string }) {
   );
 }
 
-function CursorIcon({ className }: { className?: string }) {
+function BrandIcon({ src, alt }: { src: string; alt: string }) {
   return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <title>Cursor</title>
-      <path
-        d="M12 2 21 7v10l-9 5-9-5V7l9-5Z"
-        fill="currentColor"
-        opacity="0.9"
+    <span className="flex size-9 items-center justify-center rounded-lg border border-border/50 bg-background">
+      <Image
+        alt={alt}
+        className="size-4 dark:invert"
+        height={16}
+        src={src}
+        width={16}
       />
-    </svg>
-  );
-}
-
-function VscodeIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      aria-hidden="true"
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <title>VS Code</title>
-      <path
-        d="m17 3-7 6.5L5.5 6 3 7.5 7 12l-4 4.5L5.5 18l4.5-3.5L17 21l4-2V5l-4-2Zm0 4.2v9.6L11.5 12 17 7.2Z"
-        fill="currentColor"
-      />
-    </svg>
+    </span>
   );
 }
 
@@ -101,9 +79,7 @@ export function InstallPanel({ targets }: { targets: InstallTargets }) {
         {/* Cursor */}
         <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/40 p-5">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg border border-border/50 bg-background text-foreground">
-              <CursorIcon className="size-4" />
-            </span>
+            <BrandIcon alt="Cursor" src="/icons/tools/cursor.svg" />
             <div>
               <h3 className="font-semibold text-foreground text-sm">Cursor</h3>
               <p className="text-[12px] text-muted-foreground">
@@ -132,9 +108,7 @@ export function InstallPanel({ targets }: { targets: InstallTargets }) {
         {/* VS Code */}
         <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-card/40 p-5">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-lg border border-border/50 bg-background text-[#0098FF]">
-              <VscodeIcon className="size-4" />
-            </span>
+            <BrandIcon alt="VS Code" src="/icons/tools/visualstudiocode.svg" />
             <div>
               <h3 className="font-semibold text-foreground text-sm">VS Code</h3>
               <p className="text-[12px] text-muted-foreground">

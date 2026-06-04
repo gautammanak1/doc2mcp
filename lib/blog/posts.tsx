@@ -83,8 +83,7 @@ function Pre({ children, lang }: { children: ReactNode; lang?: string }) {
 export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "better-docs-wont-fix-ai-hallucinations",
-    title:
-      "Why better documentation won't fix AI hallucinations",
+    title: "Why better documentation won't fix AI hallucinations",
     excerpt:
       "Documentation was written for humans. AI agents need infrastructure. Here is the structural problem nobody is solving — and what it looks like when you fix it.",
     heroImage: "/blog/better-docs-wont-fix-hallucinations.png",
@@ -115,16 +114,15 @@ export const BLOG_POSTS: BlogPost[] = [
         <P>The header does not exist.</P>
         <P>
           Stripe verifies Connect webhooks with <Code>Stripe-Signature</Code> —
-          the same header it uses for everything else. The
-          &ldquo;Connect&rdquo; version was something the model had quietly
-          invented at some point during fine-tuning, and now every agent in his
-          stack was confidently reproducing it on demand.
+          the same header it uses for everything else. The &ldquo;Connect&rdquo;
+          version was something the model had quietly invented at some point
+          during fine-tuning, and now every agent in his stack was confidently
+          reproducing it on demand.
         </P>
         <P>
-          He is not a junior engineer. He has shipped six startups. He just
-          made the same mistake that almost every team using AI coding
-          assistants is making right now: he assumed the documentation was the
-          problem.
+          He is not a junior engineer. He has shipped six startups. He just made
+          the same mistake that almost every team using AI coding assistants is
+          making right now: he assumed the documentation was the problem.
         </P>
         <P>It wasn&apos;t. It almost never is.</P>
 
@@ -139,8 +137,8 @@ export const BLOG_POSTS: BlogPost[] = [
         </Quote>
         <P>
           So teams improve the docs. They rewrite endpoints. They add code
-          samples. They commission better Markdown. They migrate to fancier
-          docs frameworks. They publish a Notion. They publish an OpenAPI. They
+          samples. They commission better Markdown. They migrate to fancier docs
+          frameworks. They publish a Notion. They publish an OpenAPI. They
           publish an LLMs.txt.
         </P>
         <P>And the hallucinations keep happening.</P>
@@ -156,7 +154,9 @@ export const BLOG_POSTS: BlogPost[] = [
           actually read.
         </P>
 
-        <H2 id="in-production">What hallucination actually looks like in production</H2>
+        <H2 id="in-production">
+          What hallucination actually looks like in production
+        </H2>
         <P>
           Open the network tab the next time you use any AI coding assistant
           against a real product&apos;s docs.
@@ -164,8 +164,8 @@ export const BLOG_POSTS: BlogPost[] = [
         <P>You will see one of three things:</P>
         <UL>
           <li>
-            The agent crawled the docs root, grabbed the first 12 KB of
-            rendered HTML, and called it a day.
+            The agent crawled the docs root, grabbed the first 12 KB of rendered
+            HTML, and called it a day.
           </li>
           <li>
             The agent retrieved three or four chunks from a vector index —
@@ -181,15 +181,15 @@ export const BLOG_POSTS: BlogPost[] = [
         </UL>
         <P>
           In every case, the model is being asked to answer a precise,
-          schema-level question — <em>&ldquo;what header do I use to verify
-          this webhook?&rdquo;</em> — using prose written for humans who are
-          expected to read the page top to bottom and understand context from
-          layout, sidebar, and tone.
+          schema-level question —{" "}
+          <em>&ldquo;what header do I use to verify this webhook?&rdquo;</em> —
+          using prose written for humans who are expected to read the page top
+          to bottom and understand context from layout, sidebar, and tone.
         </P>
         <P>
           The model doesn&apos;t get layout. It doesn&apos;t get sidebar. It
-          doesn&apos;t get tone. It gets a flattened bag of paragraphs with
-          most of the structural signal stripped out.
+          doesn&apos;t get tone. It gets a flattened bag of paragraphs with most
+          of the structural signal stripped out.
         </P>
         <P>
           So it fills in the blanks. It does what language models always do: it
@@ -202,7 +202,9 @@ export const BLOG_POSTS: BlogPost[] = [
           structure failure.
         </P>
 
-        <H2 id="better-docs-doesnt-help">Why &ldquo;better docs&rdquo; doesn&apos;t move the needle</H2>
+        <H2 id="better-docs-doesnt-help">
+          Why &ldquo;better docs&rdquo; doesn&apos;t move the needle
+        </H2>
         <P>
           Imagine you wanted to teach a brand new junior engineer how to call
           your API.
@@ -214,16 +216,16 @@ export const BLOG_POSTS: BlogPost[] = [
           <li>You&apos;d hand them a runnable example.</li>
         </UL>
         <P>
-          What you wouldn&apos;t do is tell them: &ldquo;Read these 400 pages
-          of Markdown and reason about which one is canonical.&rdquo;
+          What you wouldn&apos;t do is tell them: &ldquo;Read these 400 pages of
+          Markdown and reason about which one is canonical.&rdquo;
         </P>
         <P>
           That second option is exactly what we are doing with AI agents today.
         </P>
         <P>
           When we say &ldquo;improve the docs,&rdquo; we usually mean: write
-          better prose. Add a clearer intro paragraph. Move the warnings up.
-          Add another code sample.
+          better prose. Add a clearer intro paragraph. Move the warnings up. Add
+          another code sample.
         </P>
         <P>
           None of that helps the model. The model already had your prose. It
@@ -240,34 +242,36 @@ export const BLOG_POSTS: BlogPost[] = [
         <UL>
           <li>A canonical list of endpoints, not an HTML page of endpoints.</li>
           <li>
-            A canonical list of parameter names and their types — not
-            paragraphs about them.
+            A canonical list of parameter names and their types — not paragraphs
+            about them.
           </li>
           <li>
-            A canonical list of headers, codes, and constraints — not
-            &ldquo;see the section above.&rdquo;
+            A canonical list of headers, codes, and constraints — not &ldquo;see
+            the section above.&rdquo;
           </li>
           <li>
             A way for the agent to ask{" "}
-            <em>&ldquo;what&apos;s the latest version of this endpoint?&rdquo;</em>{" "}
+            <em>
+              &ldquo;what&apos;s the latest version of this endpoint?&rdquo;
+            </em>{" "}
             instead of being trapped in whatever HTML it crawled six minutes
             ago.
           </li>
         </UL>
-        <P>
-          This is not a writing exercise. It is an infrastructure exercise.
-        </P>
+        <P>This is not a writing exercise. It is an infrastructure exercise.</P>
 
-        <H2 id="markdown-vs-interface">Markdown was built for humans. Agents need something else.</H2>
+        <H2 id="markdown-vs-interface">
+          Markdown was built for humans. Agents need something else.
+        </H2>
         <P>
           The honest version of the problem is this: we built the entire
-          documentation web for a reader who is a human with patience, a
-          Ctrl-F box, and good judgment.
+          documentation web for a reader who is a human with patience, a Ctrl-F
+          box, and good judgment.
         </P>
         <P>Agents are none of those things.</P>
         <P>
-          An agent is closer to a programmable API consumer than a human
-          reader. It needs:
+          An agent is closer to a programmable API consumer than a human reader.
+          It needs:
         </P>
         <UL>
           <li>
@@ -304,9 +308,7 @@ export const BLOG_POSTS: BlogPost[] = [
         </P>
 
         <H2 id="mcp-layer">What an AI-native documentation layer looks like</H2>
-        <P>
-          The shape of the fix is already showing up in production stacks.
-        </P>
+        <P>The shape of the fix is already showing up in production stacks.</P>
         <P>
           It is called the <strong>Model Context Protocol</strong> — MCP for
           short. It is a small, simple protocol that lets an AI agent talk to a
@@ -325,13 +327,13 @@ export const BLOG_POSTS: BlogPost[] = [
             contract. The agent knows what comes back before it asks.
           </li>
           <li>
-            <strong>Versioning is first-class.</strong> v1, v2, beta —
-            explicit, queryable, never mixed.
+            <strong>Versioning is first-class.</strong> v1, v2, beta — explicit,
+            queryable, never mixed.
           </li>
           <li>
             <strong>Retrieval is workflow-aware.</strong> Asking{" "}
-            <em>&ldquo;how do I verify a Connect webhook&rdquo;</em> returns
-            the exact verification section, not a vector-search soup.
+            <em>&ldquo;how do I verify a Connect webhook&rdquo;</em> returns the
+            exact verification section, not a vector-search soup.
           </li>
           <li>
             <strong>Freshness is a property of the protocol.</strong> Docs
@@ -353,7 +355,10 @@ export const BLOG_POSTS: BlogPost[] = [
           Claude, OpenAI Agents, Windsurf, anything MCP-compatible — can call
           instead of guessing.
         </P>
-        <P>But the bigger point is not the product. The bigger point is the category.</P>
+        <P>
+          But the bigger point is not the product. The bigger point is the
+          category.
+        </P>
         <P>
           <strong>Documentation is becoming infrastructure.</strong> The next
           time you find yourself thinking{" "}
@@ -387,11 +392,13 @@ Agents       |  One-off Copilot demos   |  Long-running workflows that
           problem.
         </P>
 
-        <H2 id="this-week">What I would do this week if I led a developer-tools team</H2>
+        <H2 id="this-week">
+          What I would do this week if I led a developer-tools team
+        </H2>
         <UL>
           <li>
-            Open the network tab. Watch your agent try to read your docs in
-            real time. Notice how thin the signal is.
+            Open the network tab. Watch your agent try to read your docs in real
+            time. Notice how thin the signal is.
           </li>
           <li>
             Pick the top three questions a developer asks an AI assistant about
@@ -408,9 +415,9 @@ Agents       |  One-off Copilot demos   |  Long-running workflows that
             top.
           </li>
           <li>
-            Measure agent accuracy as a product metric, the same way you
-            measure pageviews. It is now a leading indicator for whether
-            developers will pick your product over your competitor&apos;s.
+            Measure agent accuracy as a product metric, the same way you measure
+            pageviews. It is now a leading indicator for whether developers will
+            pick your product over your competitor&apos;s.
           </li>
         </UL>
         <P>
@@ -431,15 +438,14 @@ Agents       |  One-off Copilot demos   |  Long-running workflows that
         <H2 id="closing">A closing thought</H2>
         <P>The most underrated trend in AI right now is this:</P>
         <Quote>
-          The next moat is not the model. It is the structured context the
-          model is allowed to see.
+          The next moat is not the model. It is the structured context the model
+          is allowed to see.
         </Quote>
         <P>
-          Companies that figure this out first will look, from the outside,
-          like they have <em>smarter agents</em>. They won&apos;t. They will
-          just be the ones who turned their documentation, their APIs, and
-          their internal knowledge into infrastructure that agents can actually
-          use.
+          Companies that figure this out first will look, from the outside, like
+          they have <em>smarter agents</em>. They won&apos;t. They will just be
+          the ones who turned their documentation, their APIs, and their
+          internal knowledge into infrastructure that agents can actually use.
         </P>
         <P>
           If you are running any kind of agent stack today — Cursor, Claude,
@@ -451,9 +457,7 @@ Agents       |  One-off Copilot demos   |  Long-running workflows that
           Drop a comment with one example of an AI agent confidently inventing
           something against your product. I want to read every one of them.
         </P>
-        <P>
-          The agents will read it. They just need it to be the right shape.
-        </P>
+        <P>The agents will read it. They just need it to be the right shape.</P>
       </>
     ),
   },

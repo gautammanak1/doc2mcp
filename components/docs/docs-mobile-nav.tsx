@@ -13,9 +13,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import type { DocNavItem } from "@/lib/docs/loader";
+import type { DocNavGroup } from "@/lib/docs/loader";
 
-export function DocsMobileNav({ items }: { items: DocNavItem[] }) {
+export function DocsMobileNav({ groups }: { groups: DocNavGroup[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -51,7 +51,7 @@ export function DocsMobileNav({ items }: { items: DocNavItem[] }) {
           </SheetDescription>
         </SheetHeader>
         <div className="overflow-y-auto p-4">
-          <DocsSidebar items={items} onNavigate={() => setOpen(false)} />
+          <DocsSidebar groups={groups} onNavigate={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>

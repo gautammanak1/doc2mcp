@@ -26,12 +26,33 @@ export const auth = cache(async () => {
     return null;
   }
 
-  const appUser = await ensureAppUserFromSupabase({
-    id: user.id,
-    email: user.email,
-    name: user.user_metadata?.name,
-    image: user.user_metadata?.avatar_url ?? user.user_metadata?.image,
-  });
+  let appUser: Awaited<ReturnType<typeof ensureAppUserFromSupabase>>;
+  try {
+    appUser = await ensureAppUserFromSupabase({
+      id: user.id,
+      email: user.email,
+      name: user.user_metadata?.name,
+      image: user.user_metadata?.avatar_url ?? user.user_metadata?.image,
+    });
+  } catch (error) {
+    if (process.env.VERCEL_ENV !== "preview") {
+      throw error;
+    }
+
+    const userType: UserType = guestRegex.test(user.email)
+      ? "guest"
+      : "regular";
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.user_metadata?.name,
+        image: user.user_metadata?.avatar_url ?? user.user_metadata?.image,
+        type: userType,
+      },
+    };
+  }
 
   if (appUser.disabled) {
     return null;

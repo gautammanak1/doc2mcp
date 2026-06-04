@@ -48,7 +48,9 @@ curl -sSL \\
 
 function sanitizeProjectSlug(name: string | null | undefined, id: string) {
   const fallback = `doc2mcp-${id.slice(0, 8)}`;
-  if (!name) return fallback;
+  if (!name) {
+    return fallback;
+  }
   const slug = name
     .toLowerCase()
     .normalize("NFKD")
@@ -112,7 +114,9 @@ export function PublishToRegistryPanel({
   }, [docsUrl, projectId, projectName, slug]);
 
   function copyText(value: string, label: string) {
-    if (typeof navigator === "undefined" || !navigator.clipboard) return;
+    if (typeof navigator === "undefined" || !navigator.clipboard) {
+      return;
+    }
     navigator.clipboard
       .writeText(value)
       .then(() => {
@@ -126,12 +130,14 @@ export function PublishToRegistryPanel({
   }
 
   function downloadServerJson() {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
     const blob = new Blob([serverJson], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `server.json`;
+    link.download = "server.json";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -166,9 +172,9 @@ export function PublishToRegistryPanel({
               >
                 MCP Registry
               </a>{" "}
-              so anyone using Cursor, Claude, or Windsurf can find it
-              alongside your docs. We can&apos;t publish under your namespace
-              for you (the registry requires{" "}
+              so anyone using Cursor, Claude, or Windsurf can find it alongside
+              your docs. We can&apos;t publish under your namespace for you (the
+              registry requires{" "}
               <span className="text-foreground">GitHub OIDC</span> or{" "}
               <span className="text-foreground">DNS verification</span>), but
               the bundle below is ready to push in ~2 minutes.
@@ -181,12 +187,10 @@ export function PublishToRegistryPanel({
             <p className="text-muted-foreground">
               Edit{" "}
               <code className="font-mono text-foreground">
-                {`<your-github-org>`}
+                {"<your-github-org>"}
               </code>{" "}
               and{" "}
-              <code className="font-mono text-foreground">
-                {`<your-repo>`}
-              </code>{" "}
+              <code className="font-mono text-foreground">{"<your-repo>"}</code>{" "}
               to point at a repo inside your GitHub organisation.
             </p>
             <pre className="mt-2 max-h-72 overflow-auto rounded-lg border border-border/50 bg-background/70 p-3 font-mono text-[11px] text-foreground/85 leading-relaxed">
@@ -240,12 +244,19 @@ export function PublishToRegistryPanel({
 
           <Step n={3} title="Or wire a GitHub Action for hands-off releases">
             <p className="text-muted-foreground">
-              Push <code className="font-mono text-foreground">server.json</code>{" "}
-              and a small workflow file to a repo in your GitHub org. Every{" "}
+              Push{" "}
+              <code className="font-mono text-foreground">server.json</code> and
+              a small workflow file to a repo in your GitHub org. Every{" "}
               <code className="font-mono text-foreground">v*</code> tag will
               re-publish the entry. Full template:
             </p>
-            <Button asChild className="mt-2" size="sm" type="button" variant="outline">
+            <Button
+              asChild
+              className="mt-2"
+              size="sm"
+              type="button"
+              variant="outline"
+            >
               <a
                 href={REGISTRY_DOCS_URL}
                 rel="noreferrer noopener"
@@ -260,10 +271,10 @@ export function PublishToRegistryPanel({
 
         <p className="rounded-lg border border-border/40 bg-background/30 px-3 py-2 text-[11px] text-muted-foreground">
           The bundle keeps your project token{" "}
-          <span className="text-foreground">out</span> of the public registry
-          — only the endpoint template lives there. Each AI client supplies
-          its own Bearer when it connects. You can rotate the token any time
-          from the Connect tab without re-publishing.
+          <span className="text-foreground">out</span> of the public registry —
+          only the endpoint template lives there. Each AI client supplies its
+          own Bearer when it connects. You can rotate the token any time from
+          the Connect tab without re-publishing.
         </p>
       </div>
     </div>

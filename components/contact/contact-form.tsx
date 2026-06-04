@@ -235,10 +235,7 @@ export function ContactForm() {
 
         <div className="mt-7 flex flex-col-reverse gap-4 border-border/40 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-center gap-1.5 text-muted-foreground text-xs">
-            <Sparkles
-              aria-hidden="true"
-              className="size-3 text-violet-500"
-            />
+            <Sparkles aria-hidden="true" className="size-3 text-violet-500" />
             Replies within 1 business day · refunds within 7 days
           </p>
           <Button
@@ -286,9 +283,7 @@ function Field({
       <span className="mb-2 flex items-center justify-between gap-2">
         <span className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.14em]">
           {label}
-          {required ? (
-            <span className="ml-1 text-violet-500">*</span>
-          ) : null}
+          {required ? <span className="ml-1 text-violet-500">*</span> : null}
         </span>
         {hint ? (
           <span className="font-mono text-[10px] text-muted-foreground/70">

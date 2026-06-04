@@ -1,6 +1,8 @@
 ---
 title: Acceptable Use Policy
 description: What you can and cannot do with doc2mcp.
+category: Legal
+order: 3
 ---
 
 # Acceptable Use Policy

@@ -47,7 +47,7 @@ export function McpRegistryBanner({ className }: { className?: string }) {
               Model Context Protocol Registry
             </a>{" "}
             as{" "}
-            <code className="rounded bg-black/40 px-1.5 py-0.5 font-mono text-[11px] text-foreground">
+            <code className="rounded bg-foreground/5 px-1.5 py-0.5 font-mono text-[11px] text-foreground">
               {REGISTRY_NAME}
             </code>
             . AI hosts can verify the server identity and resolve the latest

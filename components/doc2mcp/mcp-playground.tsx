@@ -181,8 +181,8 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
   };
 
   return (
-    <div className="grid gap-4 rounded-2xl border border-white/5 bg-card/45 p-5 backdrop-blur-xl lg:grid-cols-[280px_1fr]">
-      <div className="flex flex-col gap-1 max-h-[500px] overflow-y-auto pr-2 no-scrollbar border-r border-white/5">
+    <div className="grid gap-4 rounded-2xl border border-border/60 bg-card/45 p-5 backdrop-blur-xl lg:grid-cols-[280px_1fr]">
+      <div className="flex flex-col gap-1 max-h-[500px] overflow-y-auto pr-2 no-scrollbar border-r border-border/60">
         <p className="mb-2 font-mono text-muted-foreground text-xs uppercase tracking-wider">
           semantic tools
         </p>
@@ -191,7 +191,7 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
             className={`rounded-lg border px-3 py-2 text-left font-mono text-xs transition-all ${
               selected === t.key
                 ? "border-violet-500/30 bg-violet-500/10 text-violet-300 shadow-[0_0_12px_rgba(139,92,246,0.15)]"
-                : "border-white/5 text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                : "border-border/60 text-muted-foreground hover:bg-foreground/5 hover:text-foreground"
             }`}
             key={t.key}
             onClick={() => setExample(t.key)}
@@ -204,7 +204,7 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
 
       <div className="flex min-w-0 flex-col gap-4">
         <div>
-          <p className="font-semibold text-sm text-white font-mono">
+          <p className="font-semibold text-sm text-foreground font-mono">
             {tool.label}()
           </p>
           <p className="text-muted-foreground text-xs mt-1">
@@ -217,7 +217,7 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
             arguments (json schema)
           </p>
           <Textarea
-            className="min-h-[110px] border-white/5 bg-black/40 font-mono text-xs text-violet-200 focus-visible:ring-violet-500"
+            className="min-h-[110px] border-border/60 bg-foreground/5 font-mono text-xs text-violet-700 focus-visible:ring-violet-500 dark:text-violet-200"
             onChange={(e) => setArgs(e.target.value)}
             value={args}
           />
@@ -239,7 +239,7 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
             Run simulated sandbox call
           </Button>
           <Button
-            className="border-white/5 hover:bg-white/5 text-muted-foreground text-xs"
+            className="border-border/60 hover:bg-foreground/5 text-muted-foreground text-xs"
             onClick={() => setExample(selected)}
             size="sm"
             type="button"
@@ -254,7 +254,7 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
           <p className="mb-1.5 font-mono text-muted-foreground text-xs">
             live payload output
           </p>
-          <pre className="min-h-[220px] max-h-[300px] overflow-auto rounded-xl border border-white/5 bg-black/60 p-4 font-mono text-[11px] leading-relaxed text-cyan-300">
+          <pre className="min-h-[220px] max-h-[300px] overflow-auto rounded-xl border border-border/60 bg-muted/50 p-4 font-mono text-[11px] leading-relaxed text-cyan-700 dark:text-cyan-300">
             {output ??
               "// Pick a semantic tool and run sandbox to inspect JSON-RPC output."}
           </pre>

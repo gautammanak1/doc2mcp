@@ -6,7 +6,7 @@ import {
   Cog,
   Database,
   KeyRound,
-  Lock,
+  type Lock,
   ShieldCheck,
   Users2,
 } from "lucide-react";
