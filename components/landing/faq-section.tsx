@@ -74,16 +74,14 @@ export function FaqSection() {
         <div className="absolute top-1/2 left-1/2 size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/8 blur-[120px] dark:bg-violet-500/15" />
       </div>
 
-      <div className="relative mx-auto max-w-[860px] px-4 sm:px-6 lg:px-12">
+      <div className="relative mx-auto max-w-[800px] px-6">
         <div className="text-center">
-          <span className="inline-flex items-center gap-2 font-mono text-muted-foreground text-xs uppercase tracking-[0.18em] sm:text-sm">
-            <span className="h-px w-8 bg-foreground/30" />
+          <span className="text-muted-foreground/60 text-xs font-mono tracking-wider uppercase">
             FAQ
-            <span className="h-px w-8 bg-foreground/30" />
           </span>
           <h2
             className={cn(
-              "mt-5 font-display text-3xl tracking-tight transition-all duration-700 sm:text-5xl lg:text-6xl",
+              "mt-4 font-display text-2xl font-semibold tracking-tight text-foreground transition-all duration-700 sm:text-4xl",
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "translate-y-4 opacity-0"
@@ -91,22 +89,22 @@ export function FaqSection() {
           >
             Questions, answered.
           </h2>
-          <p className="mt-4 text-muted-foreground sm:text-lg">
-            Everything builders ask before shipping with doc2mcp.
+          <p className="mt-4 text-muted-foreground text-sm max-w-md mx-auto">
+            Everything developers and teams ask before generating MCP servers.
           </p>
         </div>
 
-        <div className="mt-10 flex flex-col gap-3 sm:mt-14">
+        <div className="mt-10 flex flex-col gap-2.5">
           {FAQS.map((faq, i) => {
             const isOpen = openId === faq.id;
             return (
               <div
                 className={cn(
-                  "overflow-hidden rounded-2xl border border-border/60 bg-card/40 backdrop-blur-xl transition-all duration-500",
+                  "overflow-hidden rounded-xl border border-border/50 bg-card/45 backdrop-blur-md transition-all duration-300",
                   isVisible
                     ? "translate-y-0 opacity-100"
                     : "translate-y-4 opacity-0",
-                  isOpen ? "border-border" : "hover:border-border/80"
+                  isOpen ? "border-border shadow-[0_4px_16px_rgba(0,0,0,0.02)]" : "hover:border-border/80"
                 )}
                 key={faq.id}
                 style={{ transitionDelay: `${i * 40}ms` }}
@@ -114,24 +112,24 @@ export function FaqSection() {
                 <button
                   aria-controls={`faq-panel-${faq.id}`}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6 sm:py-5"
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
                   onClick={() => setOpenId(isOpen ? null : faq.id)}
                   type="button"
                 >
-                  <span className="font-display font-semibold text-base sm:text-lg">
+                  <span className="font-display font-medium text-foreground text-sm sm:text-base">
                     {faq.q}
                   </span>
                   <ChevronDown
                     aria-hidden="true"
                     className={cn(
-                      "size-4 shrink-0 text-muted-foreground transition-transform duration-300",
-                      isOpen ? "rotate-180" : "rotate-0"
+                      "size-4 shrink-0 text-muted-foreground/60 transition-transform duration-300",
+                      isOpen ? "rotate-180 text-foreground" : "rotate-0"
                     )}
                   />
                 </button>
                 <div
                   className={cn(
-                    "grid transition-all duration-300 ease-out",
+                    "grid transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                     isOpen
                       ? "grid-rows-[1fr] opacity-100"
                       : "grid-rows-[0fr] opacity-0"
@@ -139,7 +137,7 @@ export function FaqSection() {
                   id={`faq-panel-${faq.id}`}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <p className="px-5 pb-5 text-muted-foreground text-sm leading-relaxed sm:px-6 sm:pb-6 sm:text-base">
+                    <p className="px-5 pb-5 text-muted-foreground text-xs sm:text-sm leading-relaxed">
                       {faq.a}
                     </p>
                   </div>
@@ -149,10 +147,10 @@ export function FaqSection() {
           })}
         </div>
 
-        <p className="mt-10 text-center text-muted-foreground text-sm">
+        <p className="mt-10 text-center text-muted-foreground text-xs">
           Still curious?{" "}
           <a
-            className="font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+            className="font-medium text-foreground underline underline-offset-4 hover:text-[#4285f4] transition-colors"
             href="https://calendly.com/doc2mcp/30min"
             rel="noopener noreferrer"
             target="_blank"

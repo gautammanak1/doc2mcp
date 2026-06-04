@@ -2,23 +2,26 @@ import { motion } from "framer-motion";
 
 export const Greeting = () => {
   return (
-    <div className="flex flex-col items-center px-4" key="overview">
+    <div className="flex flex-col items-center px-4 max-w-xl mx-auto py-12" key="overview">
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="text-center font-semibold text-2xl tracking-tight text-foreground md:text-3xl"
-        initial={{ opacity: 0, y: 10 }}
-        transition={{ delay: 0.35, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center font-display font-semibold text-4xl sm:text-5xl bg-gradient-to-r from-[#4285f4] via-[#9b72cb] to-[#d96570] bg-clip-text text-transparent tracking-tight"
+        initial={{ opacity: 0, y: 12 }}
+        transition={{ delay: 0.2, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
       >
-        AI Developer Assistant
+        Hello, Developer.
       </motion.div>
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="mt-3 text-center text-muted-foreground/80 text-sm"
-        initial={{ opacity: 0, y: 10 }}
-        transition={{ delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-4 text-center text-muted-foreground/75 text-sm sm:text-base leading-relaxed"
+        initial={{ opacity: 0, y: 12 }}
+        transition={{ delay: 0.35, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
       >
-        Ask anything — or toggle doc2mcp and paste a docs URL to build an MCP.
-        Powered by ASI1.
+        How can I help you build or query your AI context today?
+        <br />
+        <span className="text-xs text-muted-foreground/50 mt-1 block">
+          Toggle doc2mcp below to instantly transform any docs URL into a queryable MCP server.
+        </span>
       </motion.div>
     </div>
   );

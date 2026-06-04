@@ -10,7 +10,7 @@ import {
   LockIcon,
   WrenchIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   type ChangeEvent,
@@ -112,6 +112,7 @@ function PureMultimodalInput({
   isLoading?: boolean;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setTheme, resolvedTheme } = useTheme();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { width } = useWindowSize();
@@ -140,6 +141,16 @@ function PureMultimodalInput({
   }, []);
   const doc2mcpMode = hasMounted ? persistedDoc2mcpMode : false;
   const setDoc2mcpMode = setPersistedDoc2mcpMode;
+  
+  useEffect(() => {
+    const urlParam = searchParams.get("url");
+    if (urlParam) {
+      setInput(urlParam);
+      setDoc2mcpMode(true);
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, "", cleanUrl);
+    }
+  }, [searchParams, setInput, setDoc2mcpMode]);
   const [doc2mcpLoading, setDoc2mcpLoading] = useState(false);
   const { user } = useSupabaseAuth();
   const isGuest = guestRegex.test(user?.email ?? "");

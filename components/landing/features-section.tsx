@@ -3,18 +3,16 @@
 import {
   Bot,
   Check,
-  Download,
   FileText,
   Folder,
-  type LucideIcon,
   Network,
   RefreshCw,
-  Sparkles,
   Target,
-  Workflow,
+  Lock,
+  HardDrive,
+  Users2
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-
 import { cn } from "@/lib/utils";
 
 const CRAWLER_TREE = [
@@ -32,53 +30,38 @@ const CRAWLER_TREE = [
 
 function CrawlerVisual() {
   return (
-    <div className="relative h-full min-h-[280px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 backdrop-blur-xl sm:min-h-[320px]">
-      {/* Top bar */}
+    <div className="relative h-full min-h-[260px] w-full overflow-hidden rounded-xl border border-border/40 bg-secondary/20 p-3.5 backdrop-blur-xl sm:min-h-[300px]">
       <div className="flex items-center justify-between border-border/30 border-b pb-2">
         <div className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-rose-400/60" />
-          <span className="size-2 rounded-full bg-amber-400/60" />
-          <span className="size-2 rounded-full bg-emerald-400/60" />
+          <span className="size-2 rounded-full bg-[#4285f4]" />
+          <span className="size-2 rounded-full bg-[#8ab4f8]" />
+          <span className="size-2 rounded-full bg-[#dadce0]" />
         </div>
-        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-          docs.stripe.com · sitemap
+        <span className="font-mono text-[9px] text-muted-foreground/75 uppercase tracking-wider">
+          docs.stripe.com · crawl
         </span>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
-          <span className="crawler-pulse-dot size-1.5 rounded-full bg-emerald-500" />
-          crawling
+        <span className="flex items-center gap-1.5 font-mono text-[9px] text-[#4285f4]">
+          <span className="crawler-pulse-dot size-1.5 rounded-full bg-[#4285f4]" />
+          indexing
         </span>
       </div>
 
-      {/* File tree */}
-      <ul className="mt-2.5 space-y-1 font-mono text-[11px]">
+      <ul className="mt-3 space-y-1 font-mono text-[10px]">
         {CRAWLER_TREE.map((row, i) => (
           <li
             className="crawler-row flex items-center gap-1.5"
             key={`${row.label}-${String(i)}`}
             style={{
-              paddingLeft: `${row.indent * 14}px`,
+              paddingLeft: `${row.indent * 12}px`,
               animationDelay: `${row.delay}s`,
             }}
           >
             {row.kind === "folder" ? (
-              <Folder
-                aria-hidden="true"
-                className="size-3 shrink-0 text-violet-500"
-              />
+              <Folder aria-hidden="true" className="size-3 shrink-0 text-[#4285f4]" />
             ) : (
-              <FileText
-                aria-hidden="true"
-                className="size-3 shrink-0 text-foreground/55"
-              />
+              <FileText aria-hidden="true" className="size-3 shrink-0 text-muted-foreground/60" />
             )}
-            <span
-              className={cn(
-                "truncate",
-                row.kind === "folder"
-                  ? "text-foreground/85"
-                  : "text-muted-foreground"
-              )}
-            >
+            <span className={cn("truncate", row.kind === "folder" ? "text-foreground font-medium" : "text-muted-foreground")}>
               {row.label}
             </span>
             <Check
@@ -90,16 +73,7 @@ function CrawlerVisual() {
         ))}
       </ul>
 
-      {/* Scanner line */}
-      <span className="crawler-scanner pointer-events-none absolute inset-x-3 top-10 h-px bg-gradient-to-r from-transparent via-violet-400/70 to-transparent" />
-
-      {/* Stats footer */}
-      <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between border-border/30 border-t pt-2 font-mono text-[10px]">
-        <span className="text-muted-foreground">pages indexed</span>
-        <span className="font-display font-semibold text-foreground/85 text-sm">
-          1,284
-        </span>
-      </div>
+      <span className="crawler-scanner pointer-events-none absolute inset-x-3 top-12 h-px bg-gradient-to-r from-transparent via-[#4285f4]/70 to-transparent" />
 
       <style>{`
         .crawler-row {
@@ -107,7 +81,7 @@ function CrawlerVisual() {
           animation: crawler-row-in 0.4s ease-out both, crawler-row-loop 12s ease-in-out infinite;
         }
         @keyframes crawler-row-in {
-          from { opacity: 0; transform: translateX(-6px); }
+          from { opacity: 0; transform: translateX(-4px); }
           to   { opacity: 1; transform: translateX(0); }
         }
         @keyframes crawler-row-loop {
@@ -119,7 +93,7 @@ function CrawlerVisual() {
           animation: crawler-check-in 0.3s ease-out both;
         }
         @keyframes crawler-check-in {
-          from { opacity: 0; transform: scale(0.6); }
+          from { opacity: 0; transform: scale(0.7); }
           to   { opacity: 1; transform: scale(1); }
         }
         .crawler-scanner {
@@ -129,20 +103,14 @@ function CrawlerVisual() {
           0%   { transform: translateY(0);   opacity: 0; }
           10%  { opacity: 0.9; }
           90%  { opacity: 0.9; }
-          100% { transform: translateY(220px); opacity: 0; }
+          100% { transform: translateY(180px); opacity: 0; }
         }
         .crawler-pulse-dot {
           animation: crawler-dot-pulse 1.2s ease-in-out infinite;
         }
         @keyframes crawler-dot-pulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-          50%      { opacity: 0.6; box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .crawler-row, .crawler-check, .crawler-scanner, .crawler-pulse-dot {
-            animation: none;
-            opacity: 1;
-          }
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(66, 133, 244, 0.4); }
+          50%      { opacity: 0.5; box-shadow: 0 0 0 4px rgba(66, 133, 244, 0); }
         }
       `}</style>
     </div>
@@ -153,72 +121,75 @@ type Feature = {
   id: string;
   title: string;
   description: string;
-  icon: LucideIcon;
-  span: string; // tailwind grid span classes
-  accent: string; // gradient accent for glow
-  visual: "crawler" | "mcp" | "retrieval" | "sync" | "agents" | "export";
+  icon: any;
+  span: string;
+  visual: "crawler" | "mcp" | "retrieval" | "sync" | "security" | "scale" | "collab" | "agents";
 };
 
 const features: Feature[] = [
   {
     id: "crawler",
-    title: "Smart Documentation Crawling",
-    description:
-      "Automatically understands documentation hierarchy and structure — Mintlify, Docusaurus, Swagger, GitBook, raw markdown.",
+    title: "Sitemap Documentation Crawling",
+    description: "Auto-crawls schemas and articles from any portal—Mintlify, Docusaurus, GitHub repositories, or raw HTML pages.",
     icon: Network,
     span: "lg:col-span-2 lg:row-span-2",
-    accent: "from-sky-500/20 via-violet-500/10 to-transparent",
     visual: "crawler",
   },
   {
     id: "mcp",
     title: "Production Ready MCP Generation",
-    description:
-      "Generate MCP servers without writing MCP code. Tools, workflows, auth, hosting — done.",
-    icon: Workflow,
-    span: "lg:col-span-2",
-    accent: "from-violet-500/20 via-fuchsia-500/10 to-transparent",
+    description: "Generate and deploy hosted Model Context Protocol servers automatically. Done in seconds with zero custom config.",
+    icon: Bot,
+    span: "lg:col-span-1",
     visual: "mcp",
   },
   {
     id: "retrieval",
-    title: "Agent Optimized Retrieval",
-    description:
-      "Improve AI coding accuracy and reduce hallucinations with semantic, schema-aware retrieval.",
+    title: "Agent-Optimized Retrieval",
+    description: "Stop LLM hallucinations. Serve clean heading-aware chunks, parameter definitions, and schemas directly to AI clients.",
     icon: Target,
-    span: "lg:col-span-2",
-    accent: "from-fuchsia-500/20 via-rose-500/10 to-transparent",
+    span: "lg:col-span-1",
     visual: "retrieval",
   },
   {
     id: "sync",
     title: "Live Documentation Sync",
-    description:
-      "Keep documentation synchronized automatically — your MCP server tracks the source.",
+    description: "Your remote servers pull down the newest updates every 24h. Say goodbye to outdated code blocks and broken paths.",
     icon: RefreshCw,
-    span: "lg:col-span-2",
-    accent: "from-emerald-500/20 via-sky-500/10 to-transparent",
+    span: "lg:col-span-1",
     visual: "sync",
   },
   {
-    id: "agents",
-    title: "Multi-Agent Compatibility",
-    description:
-      "Works across the modern MCP ecosystem — Cursor, Claude, VS Code, Windsurf, OpenAI Agents.",
-    icon: Bot,
-    span: "lg:col-span-2",
-    accent: "from-amber-500/20 via-orange-500/10 to-transparent",
-    visual: "agents",
+    id: "security",
+    title: "Privacy First Security",
+    description: "No local clones or shared keys. Remote token authentication guarantees secure, credential-free read operations.",
+    icon: Lock,
+    span: "lg:col-span-1",
+    visual: "security",
   },
   {
-    id: "export",
-    title: "One Click Export",
-    description:
-      "Instant MCP configuration generation. Copy a JSON snippet, paste into your editor, done.",
-    icon: Download,
+    id: "scale",
+    title: "Enterprise Scale Limits",
+    description: "Parse extensive schemas of 2500+ documentation pages, heavy OpenAPI specifications, and multi-nested repositories.",
+    icon: HardDrive,
+    span: "lg:col-span-1",
+    visual: "scale",
+  },
+  {
+    id: "collab",
+    title: "Teammate Collaboration",
+    description: "Share servers across engineering teams, manage access scopes, and deploy custom domain endpoints for internal agents.",
+    icon: Users2,
+    span: "lg:col-span-1",
+    visual: "collab",
+  },
+  {
+    id: "agents",
+    title: "Seamless Workspace Integration",
+    description: "Copy-paste standard credentials directly into your editor config file. Fully supports Cursor, Claude, Windsurf, VS Code, or custom AI agents.",
+    icon: Bot,
     span: "lg:col-span-2",
-    accent: "from-cyan-500/20 via-blue-500/10 to-transparent",
-    visual: "export",
+    visual: "agents",
   },
 ];
 
@@ -227,37 +198,32 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
     return <CrawlerVisual />;
   }
   if (visual === "mcp") {
-  return (
-      <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 font-mono text-[10px] backdrop-blur-xl">
-        <p className="text-emerald-500">$ doc2mcp generate ./stripe-docs</p>
-        <p className="text-muted-foreground">→ crawled 1,284 pages</p>
-        <p className="text-muted-foreground">→ structured 4,182 chunks</p>
-        <p className="text-muted-foreground">→ tools: 23 · workflows: 6</p>
-        <p className="text-violet-500">✓ mcp ready · hosted</p>
+    return (
+      <div className="relative h-full min-h-[110px] w-full overflow-hidden rounded-xl border border-border/40 bg-secondary/10 p-3 font-mono text-[9px] text-muted-foreground">
+        <p className="text-[#4285f4]">$ doc2mcp pipeline --init</p>
+        <p className="mt-1">→ parsing sitemaps ... [ok]</p>
+        <p>→ creating embeddings ... [ok]</p>
+        <p className="text-[#4285f4] dark:text-[#8ab4f8]">✓ server online at doc2mcp.site/api/mcp/st_92k</p>
       </div>
     );
   }
   if (visual === "retrieval") {
-  return (
-      <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-1.5">
+    return (
+      <div className="relative flex h-full min-h-[110px] w-full flex-col justify-center gap-1">
         {[
-          { label: "createCustomer", score: "0.94" },
-          { label: "retrievePaymentIntent", score: "0.89" },
-          { label: "listSubscriptions", score: "0.82" },
+          { label: "checkoutSession", score: "96%" },
+          { label: "createCustomer", score: "89%" },
+          { label: "cancelSubscription", score: "74%" },
         ].map((row, i) => (
           <div
-            className="flex items-center justify-between rounded-lg border border-border/40 bg-card/60 px-3 py-1.5 text-[11px] backdrop-blur-xl"
+            className="flex items-center justify-between rounded-lg border border-border/40 bg-card/65 px-3 py-1.5 text-[10px] backdrop-blur-sm"
             key={row.label}
           >
-            <span className="font-mono text-foreground/85">{row.label}</span>
-            <span
-              className={cn(
-                "rounded-full px-2 py-0.5 font-mono text-[10px]",
-                i === 0
-                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                  : "bg-foreground/5 text-muted-foreground"
-              )}
-            >
+            <span className="font-mono text-foreground">{row.label}</span>
+            <span className={cn(
+              "font-mono text-[9px] px-1.5 py-0.5 rounded-full font-medium",
+              i === 0 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-muted text-muted-foreground"
+            )}>
               {row.score}
             </span>
           </div>
@@ -266,113 +232,109 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
     );
   }
   if (visual === "sync") {
-  return (
-      <div className="relative flex h-full min-h-[120px] w-full items-center justify-center">
-        <span className="relative inline-flex size-20 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10">
+    return (
+      <div className="relative flex h-full min-h-[110px] w-full items-center justify-center">
+        <span className="relative inline-flex size-14 items-center justify-center rounded-full border border-border/60 bg-secondary/20">
           <RefreshCw
-            className="size-7 animate-spin text-emerald-500"
-            style={{ animationDuration: "4s" }}
+            className="size-5 animate-spin text-[#4285f4] dark:text-[#8ab4f8]"
+            style={{ animationDuration: "5s" }}
           />
-          <span className="-inset-2 absolute rounded-full border border-emerald-500/20" />
-          <span className="-inset-5 absolute rounded-full border border-emerald-500/10" />
         </span>
       </div>
     );
   }
-  if (visual === "agents") {
+  if (visual === "security") {
     return (
-      <div className="relative flex h-full min-h-[120px] w-full flex-wrap items-center justify-center gap-1.5">
-        {["Cursor", "Claude", "VS Code", "Windsurf", "OpenAI"].map(
-          (label, i) => (
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-2.5 py-1 font-mono text-[10px] text-foreground/80 uppercase tracking-wider backdrop-blur-xl"
-              key={label}
-              style={{ animationDelay: `${i * 120}ms` }}
-            >
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              {label}
-            </span>
-          )
-        )}
+      <div className="relative flex h-full min-h-[110px] w-full flex-col justify-center gap-2">
+        <div className="flex items-center gap-2.5 rounded-lg border border-border/40 bg-card/65 px-3 py-2 text-[10px]">
+          <span className="flex size-6 items-center justify-center rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+            <Check className="size-3" />
+          </span>
+          <div>
+            <p className="font-medium text-foreground">API key protection</p>
+            <p className="text-muted-foreground text-[9px]">Keys never saved</p>
+          </div>
+        </div>
       </div>
     );
   }
-  // export
-  return (
-    <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 font-mono text-[10px] text-muted-foreground backdrop-blur-xl">
-      <pre className="whitespace-pre">{`{
-  "mcpServers": {
-    "stripe": {
-      "url": "https://…",
-      "headers": { "Authorization": "Bearer …" }
-    }
+  if (visual === "scale") {
+    return (
+      <div className="relative flex h-full min-h-[110px] w-full items-center justify-center">
+        <div className="text-center">
+          <span className="text-2xl font-semibold tracking-tight text-foreground font-mono">2,500+</span>
+          <p className="text-[9px] text-muted-foreground uppercase tracking-wider mt-0.5">Pages indexed / site</p>
+        </div>
+      </div>
+    );
   }
-}`}</pre>
+  if (visual === "collab") {
+    return (
+      <div className="relative flex h-full min-h-[110px] w-full items-center justify-center">
+        <div className="flex -space-x-2">
+          {["A", "K", "S"].map((initial, i) => (
+            <span
+              className={cn(
+                "flex size-7 items-center justify-center rounded-full border border-card font-mono text-[10px] text-white font-semibold",
+                i === 0 ? "bg-[#4285f4]" : i === 1 ? "bg-[#8ab4f8]" : "bg-neutral-600"
+              )}
+              key={initial}
+            >
+              {initial}
+            </span>
+          ))}
+          <span className="flex size-7 items-center justify-center rounded-full border border-card bg-secondary text-muted-foreground font-mono text-[9px]">
+            +5
+          </span>
+        </div>
+      </div>
+    );
+  }
+  
+  // agents
+  return (
+    <div className="relative flex h-full min-h-[110px] w-full items-center justify-center flex-wrap gap-1.5 p-2">
+      {["Cursor", "Claude.desktop", "Windsurf", "VS Code", "OpenAI Agents"].map((label) => (
+        <span
+          className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/65 px-3 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider backdrop-blur-md"
+          key={label}
+        >
+          <span className="size-1 rounded-full bg-[#4285f4] dark:bg-[#8ab4f8]" />
+          {label}
+        </span>
+      ))}
     </div>
   );
 }
 
 function FeatureCard({ feature, index }: { feature: Feature; index: number }) {
-  const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const Icon = feature.icon;
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.15 }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <div
       className={cn(
-        "group relative col-span-1 overflow-hidden rounded-3xl border border-border/60 bg-card/40 p-6 backdrop-blur-xl transition-all duration-700 hover:border-border sm:p-7",
-        feature.span,
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+        "group relative col-span-1 overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-xl transition-all duration-300 hover:border-border/80 flex flex-col justify-between gap-5 shadow-[0_4px_20px_rgba(0,0,0,0.02)]",
+        feature.span
       )}
       ref={cardRef}
-      style={{ transitionDelay: `${index * 80}ms` }}
     >
-      <div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br opacity-0 transition-opacity duration-500 group-hover:opacity-100",
-          feature.accent
-        )}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
-      />
-
-      <div className="flex h-full flex-col justify-between gap-5">
-        <div>
-          <div className="mb-4 flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-foreground/85">
-              <Icon className="size-4" />
+      <div>
+        <div className="mb-4 flex items-center gap-2.5">
+          <span className="flex size-8 items-center justify-center rounded-lg border border-border/60 bg-secondary/40 text-muted-foreground/80">
+            <Icon className="size-4" />
           </span>
         </div>
-          <h3 className="font-display font-semibold text-foreground text-lg tracking-tight sm:text-xl">
-              {feature.title}
-            </h3>
-          <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-              {feature.description}
-            </p>
-          </div>
+        <h3 className="font-display font-medium text-foreground text-base tracking-tight">
+          {feature.title}
+        </h3>
+        <p className="mt-1.5 text-muted-foreground text-xs leading-relaxed">
+          {feature.description}
+        </p>
+      </div>
 
-        <div className="text-foreground/70 transition-transform duration-500 group-hover:translate-y-[-2px]">
-          <CardVisual visual={feature.visual} />
-        </div>
+      <div className="mt-2 text-foreground/80">
+        <CardVisual visual={feature.visual} />
       </div>
     </div>
   );
@@ -400,62 +362,53 @@ export function FeaturesSection() {
 
   return (
     <section
-      className="relative overflow-hidden py-20 sm:py-24 lg:py-32"
+      className="relative overflow-hidden py-20 sm:py-28"
       id="features"
       ref={sectionRef}
     >
-      <div
-        aria-hidden="true"
-        className="-top-20 -translate-x-1/2 pointer-events-none absolute left-1/2 size-[560px] rounded-full bg-violet-500/10 blur-[140px]"
+      {/* Spark Glow Element */}
+      <div 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none opacity-20 dark:opacity-10 blur-[120px]"
+        style={{
+          background: "radial-gradient(circle, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.03) 60%, transparent 100%)"
+        }}
       />
 
-      <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
-        <div className="mx-auto mb-12 max-w-3xl text-center sm:mb-16">
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6">
+        {/* Header */}
+        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-16">
           <span
             className={cn(
-              "mb-5 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em] transition-all duration-700",
+              "mb-4 inline-flex items-center gap-3 font-mono text-[10px] text-muted-foreground/60 uppercase tracking-[0.15em] transition-all duration-700",
               isVisible ? "opacity-100" : "opacity-0"
             )}
           >
-            <span className="h-px w-8 bg-foreground/30" />
-            Platform
-            <span className="h-px w-8 bg-foreground/30" />
+            Capabilities
           </span>
           <h2
             className={cn(
-              "font-display text-3xl tracking-tight transition-all duration-700 sm:text-5xl lg:text-6xl",
-              isVisible
-                ? "translate-y-0 opacity-100"
-                : "translate-y-4 opacity-0"
+              "font-display text-2xl font-semibold tracking-tight transition-all duration-700 sm:text-4xl lg:text-5xl text-foreground",
+              isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
             )}
           >
-            One platform.{" "}
-            <span className="bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
-              Every layer
-            </span>{" "}
-            of AI documentation infrastructure.
+            Engineered for developers.{" "}
+            <br className="hidden sm:block" />
+            <span className="text-[#4285f4] dark:text-[#8ab4f8]">
+              Trusted by teams.
+            </span>
           </h2>
           <p
             className={cn(
-              "mt-5 text-base text-muted-foreground leading-relaxed transition-all duration-700 sm:text-lg",
+              "mt-4 text-sm text-muted-foreground leading-relaxed transition-all duration-700",
               isVisible ? "opacity-100" : "opacity-0"
             )}
           >
-            From crawl to retrieval to deployment — the full stack between your
-            docs and an AI agent.
+            The production-ready bridge connecting documentation portals directly to the local memory context of your coding assistants.
           </p>
-          <div
-            className={cn(
-              "mt-6 inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 font-mono text-[10px] text-violet-700 uppercase tracking-[0.16em] transition-all duration-700 dark:text-violet-200",
-              isVisible ? "opacity-100" : "opacity-0"
-            )}
-          >
-            <Sparkles aria-hidden="true" className="size-3" />6 capabilities · 1
-            endpoint
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-6 lg:auto-rows-[minmax(220px,auto)]">
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature, index) => (
             <FeatureCard feature={feature} index={index} key={feature.id} />
           ))}

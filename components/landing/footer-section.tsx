@@ -119,14 +119,14 @@ export function FooterSection() {
               </a>
               <a
                 aria-label="Sponsor gautammanak1 on GitHub"
-                className="group inline-flex h-9 items-center gap-2 rounded-full border border-pink-500/30 bg-pink-500/10 px-3.5 text-pink-700 text-xs transition-colors hover:border-pink-500/60 hover:bg-pink-500/15 dark:text-pink-300"
+                className="group inline-flex h-9 items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3.5 text-muted-foreground hover:text-foreground text-xs transition-colors hover:bg-secondary/40"
                 href="https://github.com/sponsors/gautammanak1"
                 rel="noopener noreferrer"
                 target="_blank"
               >
                 <Heart
                   aria-hidden="true"
-                  className="size-3.5 transition-transform group-hover:scale-110"
+                  className="size-3.5 text-[#4285f4] dark:text-[#8ab4f8] transition-transform group-hover:scale-110"
                   fill="currentColor"
                 />
                 <span className="font-medium">Sponsor on GitHub</span>
@@ -185,11 +185,11 @@ function AnimatedWordmark() {
         @keyframes wordmark-shimmer {
           0%, 100% {
             background-position: 0% 50%;
-            filter: drop-shadow(0 0 0 rgba(168, 85, 247, 0));
+            filter: drop-shadow(0 0 0 rgba(66, 133, 244, 0));
           }
           50% {
             background-position: 100% 50%;
-            filter: drop-shadow(0 8px 32px rgba(168, 85, 247, 0.18));
+            filter: drop-shadow(0 8px 32px rgba(66, 133, 244, 0.1));
           }
         }
         @media (prefers-reduced-motion: reduce) {

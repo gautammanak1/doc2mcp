@@ -36,7 +36,7 @@ function ToolPill({ tool }: { tool: Tool }) {
   return (
     <div
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3.5 py-2 text-foreground/80 text-sm transition-colors hover:border-border hover:text-foreground"
+      className="inline-flex shrink-0 items-center gap-2 border border-border bg-card/40 px-3.5 py-2 text-foreground/80 text-sm transition-colors hover:border-neon-lime/50 hover:text-foreground"
     >
       <Image
         alt=""
@@ -54,7 +54,7 @@ function ToolPill({ tool }: { tool: Tool }) {
 
 export function ToolsStripSection() {
   return (
-    <section className="relative border-border/40 border-y bg-background py-14 sm:py-20">
+    <section className="relative bg-background py-14 sm:py-20">
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
         <div className="text-center">
           <span className="inline-flex items-center gap-2 font-mono text-muted-foreground text-[11px] uppercase tracking-[0.18em] sm:text-xs">

@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -43,10 +43,10 @@ export const viewport = {
   maximumScale: 1,
 };
 
-const spaceGrotesk = Space_Grotesk({
+const inter = Inter({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-space-grotesk",
+  variable: "--font-inter",
   display: "swap",
 });
 
@@ -59,7 +59,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      className={`${spaceGrotesk.variable} ${geistMono.variable}`}
+      className={`${inter.variable} ${geistMono.variable}`}
       data-scroll-behavior="smooth"
       lang="en"
       suppressHydrationWarning

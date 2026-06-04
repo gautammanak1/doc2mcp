@@ -80,7 +80,7 @@ export function DashboardShell({
 
         <nav className="flex-1 space-y-1 px-3 py-4">
           <Link
-            className="mb-3 flex items-center justify-center gap-2 rounded-lg bg-violet-500/15 px-3 py-2 font-medium text-sm text-violet-700 transition-colors hover:bg-violet-500/25 dark:text-violet-300"
+            className="mb-3 flex items-center justify-center gap-2 rounded-full border border-border/80 bg-card/65 px-3 py-2 font-medium text-sm text-foreground transition-all hover:bg-secondary/60"
             href="/chat"
           >
             <Plus className="size-4" />

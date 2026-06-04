@@ -149,20 +149,18 @@ export function PricingSection() {
 
   return (
     <section
-      className="relative py-16 sm:py-24 lg:py-32"
+      className="relative py-20 sm:py-28"
       id="pricing"
       ref={sectionRef}
     >
-      <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-12">
+      <div className="mx-auto max-w-[1200px] px-6">
         <div className="mb-12 text-center sm:mb-16">
-          <span className="inline-flex items-center gap-3 text-muted-foreground text-sm font-mono">
-            <span className="h-px w-8 bg-foreground/30" />
-            Pricing
-            <span className="h-px w-8 bg-foreground/30" />
+          <span className="text-muted-foreground/60 text-xs sm:text-sm font-mono tracking-wider uppercase">
+            PRICING PLANS
           </span>
           <h2
             className={cn(
-              "mt-6 font-display text-3xl tracking-tight transition-all duration-700 sm:text-5xl lg:text-6xl",
+              "mt-4 font-display text-3xl font-semibold tracking-tight text-foreground transition-all duration-700 sm:text-4xl lg:text-5xl",
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "translate-y-4 opacity-0"
@@ -170,23 +168,23 @@ export function PricingSection() {
           >
             Simple, builder-friendly pricing.
           </h2>
-          <p className="mt-4 text-muted-foreground">
-            Every plan ships the same remote MCP. Bigger plans crawl more pages
-            and re-crawl more often.
+          <p className="mt-4 text-muted-foreground text-sm max-w-lg mx-auto">
+            Every plan deploy the same robust remote MCP interface. Select a tier based on page capacity and sync frequency.
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3">
+            {/* Cycle Selector */}
             <div
-              className="inline-flex w-full max-w-[420px] items-stretch gap-1 rounded-full border border-border/60 bg-card/60 p-1 text-xs backdrop-blur-xl sm:w-auto sm:max-w-none"
+              className="inline-flex w-full max-w-[360px] items-stretch gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-xs backdrop-blur-md sm:w-auto sm:max-w-none"
               role="tablist"
             >
               {(Object.keys(CYCLE_LABEL) as BillingCycle[]).map((c) => (
                 <button
                   aria-selected={cycle === c}
                   className={cn(
-                    "flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-2 font-medium transition-all sm:flex-none sm:px-4",
+                    "flex flex-1 items-center justify-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 font-medium transition-all duration-200 sm:flex-none",
                     cycle === c
-                      ? "bg-foreground text-background"
+                      ? "bg-[#e9eef6] text-[#1f1f1f] dark:bg-[#282a2d] dark:text-[#e3e3e3] shadow-sm font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                   key={c}
@@ -198,10 +196,10 @@ export function PricingSection() {
                   {CYCLE_DISCOUNT[c] ? (
                     <span
                       className={cn(
-                        "shrink-0 whitespace-nowrap rounded-full px-1.5 py-0.5 font-mono text-[9px] tracking-wide sm:text-[10px]",
+                        "shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 font-mono text-[9px] tracking-wide",
                         cycle === c
-                          ? "bg-background/20 text-background"
-                          : "bg-violet-500/20 text-violet-700 dark:text-violet-300"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                       )}
                     >
                       {CYCLE_DISCOUNT[c]}
@@ -211,14 +209,15 @@ export function PricingSection() {
               ))}
             </div>
 
-            <fieldset className="m-0 inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/60 p-1 text-[11px] backdrop-blur-xl">
+            {/* Currency Selector */}
+            <fieldset className="m-0 inline-flex items-center gap-1 rounded-full border border-border/80 bg-card/65 p-1 text-[10px] backdrop-blur-md">
               <legend className="sr-only">Currency</legend>
               {(["USD", "INR"] as BillingCurrency[]).map((cur) => (
                 <button
                   className={cn(
-                    "whitespace-nowrap rounded-full px-3 py-1 font-mono transition-all",
+                    "whitespace-nowrap rounded-full px-3 py-1 font-mono transition-all duration-200 text-xs",
                     currency === cur
-                      ? "bg-foreground text-background"
+                      ? "bg-[#e9eef6] text-[#1f1f1f] dark:bg-[#282a2d] dark:text-[#e3e3e3] shadow-sm font-semibold"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                   key={cur}
@@ -229,63 +228,62 @@ export function PricingSection() {
                 </button>
               ))}
             </fieldset>
-            <p className="text-center font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
-              Auto-detected from your location · switch any time
-            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 items-stretch">
+          {/* Free Card */}
           <div
             className={cn(
-              "relative flex flex-col gap-6 rounded-2xl border border-border/40 bg-card/30 p-6 backdrop-blur-xl transition-all duration-500 hover:border-border/60",
+              "relative flex flex-col gap-6 rounded-2xl border border-border/50 bg-card/40 p-6 backdrop-blur-xl transition-all duration-500 hover:border-border/80 shadow-[0_4px_24px_rgba(0,0,0,0.02)]",
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "translate-y-6 opacity-0"
             )}
           >
             <div>
-              <h3 className="font-display font-semibold text-2xl">
+              <h3 className="font-display font-semibold text-foreground text-xl">
                 {FREE_PLAN.name}
               </h3>
-              <p className="mt-1 text-muted-foreground text-sm">
+              <p className="mt-1.5 text-muted-foreground text-xs leading-relaxed">
                 {FREE_PLAN.tagline}
               </p>
             </div>
 
-            <div className="flex items-baseline gap-1">
-              <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
+            <div className="flex items-baseline gap-1 my-2">
+              <span className="font-display font-bold text-4xl tracking-tight text-foreground">
                 {currency === "USD" ? "$0" : "₹0"}
               </span>
               <span className="text-muted-foreground text-xs">
-                forever · no card
+                / forever
               </span>
             </div>
 
-            <ul className="flex flex-1 flex-col gap-2 text-sm">
+            <ul className="flex flex-1 flex-col gap-2.5 text-xs">
               {FREE_PLAN.features.map((feature) => (
-                <li className="flex items-start gap-2" key={feature}>
-                  <Check className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                  <span className="text-muted-foreground">{feature}</span>
+                <li className="flex items-start gap-2.5" key={feature}>
+                  <Check className="mt-0.5 size-3.5 shrink-0 text-[#4285f4]" />
+                  <span className="text-muted-foreground leading-relaxed">{feature}</span>
                 </li>
               ))}
             </ul>
 
             <a
-              className="inline-flex h-10 items-center justify-center rounded-full border border-border/60 bg-background/40 px-5 font-medium text-sm transition-colors hover:bg-foreground/5"
+              className="inline-flex h-10 items-center justify-center rounded-full border border-border/60 bg-transparent px-5 font-medium text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-colors"
               href="/register"
             >
               {FREE_PLAN.ctaLabel}
             </a>
           </div>
 
+          {/* Premium Cards */}
           {PLAN_COPY.map((plan, index) => (
             <div
               className={cn(
-                "relative flex flex-col gap-6 rounded-2xl border bg-card/40 p-6 backdrop-blur-xl transition-all duration-500",
+                "relative flex flex-col gap-6 rounded-2xl border bg-card/45 p-6 backdrop-blur-xl transition-all duration-500 shadow-[0_4px_24px_rgba(0,0,0,0.02)]",
                 plan.highlight
-                  ? "border-violet-500/40 shadow-[0_0_40px_oklch(0.55_0.2_280/15%)]"
-                  : "border-border/40 hover:border-border/60",
+                  ? "border-[#4285f4]/35 dark:border-[#8ab4f8]/35 shadow-[0_0_24px_rgba(66,133,244,0.06)]"
+                  : "border-border/50 hover:border-border/80",
                 isVisible
                   ? "translate-y-0 opacity-100"
                   : "translate-y-6 opacity-0"
@@ -294,40 +292,42 @@ export function PricingSection() {
               style={{ transitionDelay: `${(index + 1) * 80}ms` }}
             >
               {plan.badge ? (
-                <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-violet-500 px-3 py-1 font-medium text-white text-xs">
-                  <Sparkles className="size-3" />
+                <span className="absolute -top-3 left-6 inline-flex items-center gap-1 rounded-full bg-[#4285f4] dark:bg-[#8ab4f8] px-3 py-1 font-semibold text-white dark:text-[#131314] text-[9px] uppercase tracking-wider shadow-sm">
                   {plan.badge}
                 </span>
               ) : null}
 
               <div>
-                <h3 className="font-display font-semibold text-2xl">
+                <h3 className="font-display font-semibold text-foreground text-xl">
                   {plan.name}
                 </h3>
-                <p className="mt-1 text-muted-foreground text-sm">
+                <p className="mt-1.5 text-muted-foreground text-xs leading-relaxed">
                   {plan.tagline}
                 </p>
               </div>
 
-              <div className="flex items-baseline gap-1">
-                <span className="font-display font-bold text-4xl tracking-tight sm:text-5xl">
+              <div className="flex items-baseline gap-1 my-2">
+                <span className="font-display font-bold text-4xl tracking-tight text-foreground">
                   {monthlyHeadline(plan.id, currency, cycle)}
                 </span>
-                <span className="text-muted-foreground text-xs">
-                  {CYCLE_SUFFIX[cycle]}
+                <span className="text-muted-foreground text-xs font-mono">
+                  {CYCLE_SUFFIX[cycle].split(" billed")[0]}
                 </span>
               </div>
-              <p className="-mt-3 font-mono text-[10px] text-muted-foreground/70 uppercase tracking-wider">
+              
+              <p className="-mt-3 font-mono text-[9px] text-muted-foreground/60 uppercase tracking-wider">
                 Charged once as{" "}
-                {formatMoney(getPlanPrice(plan.id, currency, cycle), currency)}{" "}
-                · {currency}
+                {formatMoney(getPlanPrice(plan.id, currency, cycle), currency)}
               </p>
 
-              <ul className="flex flex-1 flex-col gap-2 text-sm">
+              <ul className="flex flex-1 flex-col gap-2.5 text-xs">
                 {plan.features.map((feature) => (
-                  <li className="flex items-start gap-2" key={feature}>
-                    <Check className="mt-0.5 size-4 shrink-0 text-violet-600 dark:text-violet-400" />
-                    <span className="text-muted-foreground">{feature}</span>
+                  <li className="flex items-start gap-2.5" key={feature}>
+                    <Check className={cn(
+                      "mt-0.5 size-3.5 shrink-0",
+                      plan.highlight ? "text-[#4285f4] dark:text-[#8ab4f8]" : "text-[#4285f4] dark:text-[#8ab4f8]"
+                    )} />
+                    <span className="text-muted-foreground leading-relaxed">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -343,10 +343,8 @@ export function PricingSection() {
           ))}
         </div>
 
-        <p className="mt-10 text-center text-muted-foreground text-xs">
-          All plans include unlimited MCP read calls from Cursor. Conversions
-          are the crawl + analyze step that runs once per docs site. Cancel
-          anytime.
+        <p className="mt-12 text-center text-muted-foreground/60 text-[10px] font-mono uppercase tracking-wider">
+          Unlimited MCP reads included · Conversions run once per docs portal · Cancel anytime.
         </p>
       </div>
     </section>

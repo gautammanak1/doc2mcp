@@ -1,57 +1,58 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 
 const steps = [
   {
-    number: "I",
+    number: "01",
     title: "Paste documentation URL",
     description:
-      "Drop any docs URL — Stripe, LangChain, your private docs portal. One input, no setup.",
+      "Drop any docs URL — Stripe, LangChain, or your private portal. Simple entry, no local setup.",
     code: `https://docs.stripe.com
 https://docs.langchain.com
 
-# doc2mcp toggle ON in chat`,
+# doc2mcp parsing triggered`,
   },
   {
-    number: "II",
+    number: "02",
     title: "Automatic crawling",
     description:
-      "Discovers APIs, guides, SDK references, and examples — preserving structure and code blocks.",
+      "Scrapes pages, articles, API endpoints, and github trees while preserving all code block blocks and structures.",
     code: `discovered: 1,284 pages
 api_routes: 312
 sdk_refs:   148
 code_blocks: 2,406`,
   },
   {
-    number: "III",
+    number: "03",
     title: "Knowledge structuring",
     description:
-      "Transforms content into AI-optimized context — semantic chunks, schemas, and retrieval-ready embeddings.",
+      "Transforms unstructured docs into clean semantic chunks and metadata indexes optimized for agent retrieval.",
     code: `chunks      → 4,182
 schemas     → 312
 embeddings  → 4,182 × 1536
-retrieval   → ASI1`,
+retrieval   → ASI1 Engine`,
   },
   {
-    number: "IV",
+    number: "04",
     title: "MCP generation",
     description:
-      "Creates production-ready MCP infrastructure — tools, workflows, and a remote endpoint, fully hosted.",
+      "Publishes a secure, hosted Model Context Protocol server exposing customized query tools and schemas.",
     code: `tools:     23
 workflows: 6
-endpoint:  hosted (remote MCP)
+endpoint:  https://doc2mcp.site/api/mcp/<id>
 auth:      bearer token`,
   },
   {
-    number: "V",
+    number: "05",
     title: "Connect anywhere",
     description:
-      "Plug the same MCP server into Cursor, Claude Desktop, VS Code, Windsurf, or OpenAI Agents.",
+      "Add the generated endpoint credentials into Cursor, Claude Desktop, Windsurf, or VS Code settings.",
     code: `{
   "mcpServers": {
     "stripe": {
-      "url": "https://your-doc2mcp.app/api/mcp/<id>/mcp",
+      "url": "https://doc2mcp.site/api/mcp/<id>/mcp",
       "headers": {
         "Authorization": "Bearer <token>"
       }
@@ -85,108 +86,120 @@ export function HowItWorksSection() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveStep((prev) => (prev + 1) % steps.length);
-    }, 5000);
+    }, 6000);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <section
-      className="relative overflow-hidden bg-foreground py-16 text-background sm:py-24 lg:py-32"
+      className="relative overflow-hidden bg-background py-20 sm:py-28"
       id="how-it-works"
       ref={sectionRef}
     >
-      <div className="pointer-events-none absolute inset-0 opacity-[0.03]">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 0, transparent 50%)",
-            backgroundSize: "12px 12px",
-          }}
-        />
-      </div>
+      {/* Background Subtle Gradient */}
+      <div 
+        className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px]"
+        style={{
+          background: "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)"
+        }}
+      />
 
-      <div className="relative z-10 mx-auto max-w-[1280px] px-6 lg:px-12">
+      <div className="relative z-10 mx-auto max-w-[1200px] px-6">
+        {/* Header */}
         <div
           className={`mb-12 transition-all duration-700 sm:mb-16 ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           }`}
         >
-          <span className="font-mono text-background/50 text-xs sm:text-sm">
+          <span className="font-mono text-muted-foreground/60 text-xs sm:text-sm tracking-wider uppercase">
             HOW IT WORKS
           </span>
-          <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
+          <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
             Documentation in.
             <br />
-            AI infrastructure out.
+            AI context out.
           </h2>
-          <p className="mt-5 max-w-2xl text-background/60 text-sm leading-relaxed sm:text-base">
-            Five steps from a URL to a production-ready MCP server, plugged into
-            your agent of choice.
+          <p className="mt-4 max-w-xl text-muted-foreground text-sm leading-relaxed">
+            Five steps to go from a public documentation URL to an auto-synced, hosted MCP server running in your workspace.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
-          <div className="space-y-3">
+        {/* Dynamic Walkthrough Grid */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-16 items-center">
+          
+          {/* Step Selector List */}
+          <div className="space-y-2">
             {steps.map((step, index) => (
               <button
-                className={`w-full border p-4 text-left transition-all sm:p-5 ${
+                className={cn(
+                  "w-full rounded-2xl p-4 text-left transition-all duration-300 flex gap-4 border",
                   activeStep === index
-                    ? "border-background/30 bg-background/10"
-                    : "border-background/10 hover:border-background/20"
-                }`}
+                    ? "bg-card border-border/80 shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
+                    : "bg-transparent border-transparent hover:bg-card/45 hover:border-border/30"
+                )}
                 key={step.number}
                 onClick={() => setActiveStep(index)}
                 type="button"
               >
-                <span className="font-mono text-background/40 text-xs">
+                <span className={cn(
+                  "font-mono text-sm shrink-0 flex items-center justify-center size-8 rounded-full font-semibold",
+                  activeStep === index 
+                    ? "bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314]"
+                    : "bg-secondary text-muted-foreground"
+                )}>
                   {step.number}
                 </span>
-                <h3 className="mt-2 font-medium text-base sm:text-lg">
-                  {step.title}
-                </h3>
-                <p className="mt-2 text-background/60 text-sm leading-relaxed">
-                  {step.description}
-                </p>
+                <div>
+                  <h3 className="font-display font-medium text-foreground text-base sm:text-lg">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-md">
+                    {step.description}
+                  </p>
+                </div>
               </button>
             ))}
           </div>
 
+          {/* Step Preview Box */}
           <div
-            className={`transition-all duration-500 lg:sticky lg:top-24 lg:self-start ${
-              isVisible ? "opacity-100" : "opacity-0"
-            }`}
+            className={cn(
+              "transition-all duration-500 lg:sticky lg:top-28 lg:self-center",
+              isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            )}
           >
-            <div className="relative overflow-hidden rounded-md border border-background/20 bg-background/5 backdrop-blur-xl">
-              <div className="flex items-center gap-2 border-background/10 border-b px-4 py-2.5">
-                <span className="size-2 rounded-full bg-rose-400/50" />
-                <span className="size-2 rounded-full bg-amber-400/50" />
-                <span className="size-2 rounded-full bg-emerald-400/50" />
-                <span className="ml-2 font-mono text-[10px] text-background/40 uppercase tracking-wider">
-                  step {steps[activeStep].number} ·{" "}
-                  {steps[activeStep].title.toLowerCase()}
+            <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-[0_8px_32px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+              {/* Chrome headers */}
+              <div className="flex items-center gap-1.5 border-border/40 border-b px-4 py-3 bg-secondary/35">
+                <span className="size-2 rounded-full bg-[#4285f4]" />
+                <span className="size-2 rounded-full bg-[#8ab4f8]" />
+                <span className="size-2 rounded-full bg-border" />
+                <span className="ml-2 font-mono text-[10px] text-muted-foreground/60 uppercase tracking-wider">
+                  step {steps[activeStep].number} · {steps[activeStep].title.toLowerCase()}
                 </span>
               </div>
-              <pre className="overflow-x-auto p-4 font-mono text-background/80 text-xs leading-relaxed sm:p-6 sm:text-sm">
+              
+              {/* Pre code */}
+              <pre className="overflow-x-auto p-5 font-mono text-foreground/80 text-[11px] sm:text-xs leading-relaxed bg-card">
                 {steps[activeStep].code}
               </pre>
             </div>
 
-            {/* Connect targets chip row */}
-            <div className="mt-4 flex flex-wrap gap-2">
-              {["Cursor", "Claude", "VS Code", "Windsurf", "OpenAI Agents"].map(
-                (t) => (
-                  <span
-                    className="inline-flex items-center gap-1.5 rounded-full border border-background/20 bg-background/5 px-3 py-1 font-mono text-[10px] text-background/70 uppercase tracking-wider"
-                    key={t}
-                  >
-                    <span className="size-1.5 rounded-full bg-emerald-400/70" />
-                    {t}
-                  </span>
-                )
-              )}
+            {/* Clients Row */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="text-[11px] text-muted-foreground mr-1">Integrates with:</span>
+              {["Cursor", "Claude", "VS Code", "Windsurf", "AI SDK"].map((t) => (
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/60 px-3 py-1 font-mono text-[9px] text-muted-foreground uppercase tracking-wider"
+                  key={t}
+                >
+                  <span className="size-1.5 rounded-full bg-[#4285f4]" />
+                  {t}
+                </span>
+              ))}
             </div>
           </div>
+
         </div>
       </div>
     </section>
