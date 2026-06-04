@@ -10,6 +10,11 @@ order: 1
 Connect a generated MCP server to Cursor so the agent can read, search, and cite
 your documentation.
 
+## Prerequisites
+
+- A **ready** project on [doc2mcp.site](https://doc2mcp.site) (see [Quick start](/docs/quickstart))
+- **Cursor** with MCP enabled (Settings → MCP)
+
 ## Step-by-step
 
 1. Convert a docs URL (see [Quick start](/docs/quickstart)) and copy the config:
@@ -28,6 +33,17 @@ your documentation.
 2. Open **Cursor → Settings → MCP**.
 3. Click **Add new MCP server** and paste the JSON.
 4. **Reload** MCP. The server appears with its tools listed.
+5. In chat, **mention the server by name** so Cursor selects the right tools.
+
+## Verification
+
+Ask in Cursor chat:
+
+```text
+Using the stripe docs MCP, list available documentation tools, then search for PaymentIntent.
+```
+
+You should see tool calls and answers that cite real doc URLs — not invented endpoints.
 
 ## Example prompts
 

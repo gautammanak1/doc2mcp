@@ -3,7 +3,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
-import { MessageContent, MessageResponse } from "../ai-elements/message";
+import { MessageContent } from "../ai-elements/message";
 import { Shimmer } from "../ai-elements/shimmer";
 import {
   Tool,
@@ -18,6 +18,7 @@ import { DocumentPreview } from "./document-preview";
 import { SparklesIcon } from "./icons";
 import { MessageActions } from "./message-actions";
 import { MessageReasoning } from "./message-reasoning";
+import { MessageWithMedia } from "./message-with-media";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
 
@@ -123,7 +124,7 @@ const PurePreviewMessage = ({
           data-testid="message-content"
           key={key}
         >
-          <MessageResponse>{sanitizeText(part.text)}</MessageResponse>
+          <MessageWithMedia text={sanitizeText(part.text)} />
         </MessageContent>
       );
     }

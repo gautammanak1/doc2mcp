@@ -2,7 +2,7 @@
 title: Quick start
 description: Generate your first MCP server from any docs URL in under five minutes.
 category: Getting Started
-order: 4
+order: 5
 ---
 
 ## Overview

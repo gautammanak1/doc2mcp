@@ -66,6 +66,8 @@ import {
 import { SuggestedActions } from "./suggested-actions";
 import type { VisibilityType } from "./visibility-selector";
 
+const GUEST_QUERY_LIMIT = 5;
+
 function setCookie(name: string, value: string) {
   const maxAge = 60 * 60 * 24 * 365;
   // biome-ignore lint/suspicious/noDocumentCookie: needed for client-side cookie setting
@@ -357,6 +359,19 @@ function PureMultimodalInput({
       return;
     }
 
+    if (isGuest) {
+      const guestUserMessages = messages.filter(
+        (m) => m.role === "user"
+      ).length;
+      if (guestUserMessages >= GUEST_QUERY_LIMIT) {
+        toast.error(
+          "You've used your 5 free messages — sign in to keep chatting."
+        );
+        router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
+        return;
+      }
+    }
+
     window.history.pushState(
       {},
       "",
@@ -405,6 +420,7 @@ function PureMultimodalInput({
     setDoc2mcpMode,
     runDoc2McpConversion,
     isGuest,
+    messages,
     router,
   ]);
 

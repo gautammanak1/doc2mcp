@@ -70,8 +70,8 @@ export function DocsSearch({ items }: { items: DocNavItem[] }) {
   };
 
   return (
-    <div className="relative w-full max-w-xs" ref={containerRef}>
-      <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-1.5">
+    <div className="relative w-full" ref={containerRef}>
+      <div className="flex h-9 items-center gap-2 rounded-md border border-border/60 bg-muted/30 px-3 transition-colors focus-within:border-border focus-within:bg-background">
         <Search className="size-3.5 text-muted-foreground" />
         <input
           aria-label="Search documentation"

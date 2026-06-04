@@ -2,7 +2,7 @@
 title: First MCP in 5 minutes
 description: A guided walkthrough from a pasted URL to a working server in Cursor.
 category: Getting Started
-order: 5
+order: 6
 ---
 
 ## Overview
