@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
 
 function getSignUpErrorMessage(error: unknown) {
@@ -42,9 +43,14 @@ export function SignUpForm({ className }: { className?: string }) {
 
   const handleSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
+
+    if (!isSupabasePublicConfigured()) {
+      setError("Authentication is not configured for this deployment.");
+      setIsLoading(false);
+      return;
+    }
 
     if (password !== repeatPassword) {
       setError("Passwords do not match");
@@ -59,6 +65,7 @@ export function SignUpForm({ className }: { className?: string }) {
     }
 
     try {
+      const supabase = createClient();
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,

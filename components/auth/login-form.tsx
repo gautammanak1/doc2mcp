@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
 
 export function LoginForm({
@@ -29,11 +30,16 @@ export function LoginForm({
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
+      if (!isSupabasePublicConfigured()) {
+        setError("Authentication is not configured for this deployment.");
+        return;
+      }
+
+      const supabase = createClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,

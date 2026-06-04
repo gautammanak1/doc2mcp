@@ -102,8 +102,11 @@ export function SignOutButton() {
     setSigningOut(true);
     try {
       const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      const { isSupabasePublicConfigured } = await import("@/lib/supabase/env");
+      if (isSupabasePublicConfigured()) {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+      }
     } finally {
       window.location.href = "/login";
     }

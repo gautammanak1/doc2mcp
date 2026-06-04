@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import type { PlatformProject } from "@/lib/db/schema";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 
 async function fetchProject(id: string): Promise<PlatformProject | null> {
   const res = await fetch(`/api/projects/${id}`);
@@ -45,6 +46,10 @@ export function useRealtimeProject(initial: PlatformProject) {
   }, [polled]);
 
   useEffect(() => {
+    if (!isSupabasePublicConfigured()) {
+      return;
+    }
+
     const supabase = createClient();
     const channel = supabase
       .channel(`project:${initial.id}`)
