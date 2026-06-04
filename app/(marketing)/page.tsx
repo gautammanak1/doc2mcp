@@ -4,6 +4,7 @@ import { FaqSection } from "@/components/landing/faq-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { FooterSection } from "@/components/landing/footer-section";
 import { HeroSection } from "@/components/landing/hero-section";
+import { ProblemSection } from "@/components/landing/problem-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
 import { LandingNavigation } from "@/components/landing/navigation";
 import { LandingNavigationServer } from "@/components/landing/navigation-server";
@@ -17,6 +18,7 @@ export default function Page() {
       </Suspense>
       
       <HeroSection />
+      <ProblemSection />
       <HowItWorksSection />
       <FeaturesSection />
       <PricingSection />
