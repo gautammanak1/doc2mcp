@@ -1,95 +1,49 @@
 ---
-title: Workflow
-description: End-to-end flow from pasted URL to a live MCP server in Cursor.
+title: Architecture & workflow
+description: End-to-end system flow, request sequence, and conversion lifecycle.
+category: Reference
+order: 1
 ---
 
-# Workflow
+## Overview
+
+This page is the system-level reference: how data flows during conversion, how an
+agent query is served, and how a project transitions through its lifecycle.
 
 ## High-level flow
 
-```mermaid
-flowchart LR
-  user[User]
-  chat[doc2mcp chat]
-  api["POST /api/convert"]
-  bg[Background pipeline]
-  db[(Supabase Postgres)]
-  mcp["GET/POST /api/mcp/projectId/mcp"]
-  cursor[Cursor / Claude / Windsurf]
+The conversion (write) path and the agent-query (read) path share one database.
 
-  user -->|paste docs URL| chat
-  chat -->|doc2mcp toggle ON| api
-  api -->|create project + token| db
-  api -.->|after| bg
-  bg -->|crawl, chunk, index| db
-  user -->|copy URL + Bearer| cursor
-  cursor -->|JSON-RPC tools/call| mcp
-  mcp -->|read pages + chunks| db
-  mcp -->|JSON-RPC reply| cursor
-```
+![doc2mcp system architecture](/diagrams/architecture.svg)
 
-## Pipeline stages
+- The app calls `POST /api/convert`, which creates a project + token and kicks off
+  a background pipeline (crawl → chunk → analyze) writing to Postgres.
+- Agents call `GET/POST /api/mcp/{projectId}/mcp` with the Bearer token; the
+  endpoint reads only that project's data.
 
-```mermaid
-flowchart TD
-  start([Paste URL])
-  norm[Normalize URL: docs.* fallback]
-  manifest{llms.txt available?}
-  llms[Read llms.txt manifest]
-  websearch[Tavily / Brave web search]
-  fetch[Fetch each page: .md, .mdx, then HTML, then Jina Reader]
-  block{Marketing path?}
-  drop[Drop page]
-  chunk[Heading-aware chunking]
-  ai[ASI1 analyze + compress]
-  build[Mint project token + write artifacts]
-  ready([Ready in Cursor])
+## Request sequence
 
-  start --> norm --> manifest
-  manifest -- yes --> llms --> fetch
-  manifest -- no --> websearch --> fetch
-  fetch --> block
-  block -- yes --> drop
-  block -- no --> chunk --> ai --> build --> ready
-```
+A single `tools/call` from an agent flows through the MCP endpoint and retrieval
+layer and back as a cited result.
+
+![Agent query sequence](/diagrams/sequence.svg)
+
+## Conversion lifecycle
+
+The `status` field drives the convert page UI and is persisted on every
+transition, so polling or resuming just reads the row.
+
+![Conversion lifecycle](/diagrams/lifecycle.svg)
 
 ## CI / CD
 
-```mermaid
-flowchart LR
-  push[git push]
-  lint["Lint workflow (.github/workflows/lint.yml)"]
-  e2e["Playwright workflow (.github/workflows/playwright.yml)"]
-  vercel[Vercel preview]
-  promo[Promote to production]
-
-  push --> lint
-  push --> e2e
-  push --> vercel
-  lint -->|all green| promo
-  e2e -->|all green| promo
-  vercel -->|approved| promo
-```
-
-| Job | What runs | Failures block merge? |
-|-----|-----------|-----------------------|
-| `lint` | `tsc --noEmit` + `pnpm check` (Biome/Ultracite) | Yes |
-| `e2e` | Playwright against built app | Yes |
+| Job | What runs | Blocks merge? |
+|-----|-----------|---------------|
+| `lint` | `tsc --noEmit` + Biome/Ultracite | Yes |
+| `e2e` | Playwright against the built app | Yes |
 | Vercel preview | `next build` + deploy | Yes |
 
-## Conversion phases (status field)
+## Next
 
-```mermaid
-stateDiagram-v2
-  [*] --> pending
-  pending --> crawling: start
-  crawling --> analyzing: pages fetched
-  analyzing --> generating: ASI1 returns
-  generating --> ready: artifacts written
-  generating --> error: ASI1 or crawler error
-  crawling --> error: 0 pages
-  ready --> [*]
-  error --> [*]
-```
-
-The status drives the convert page UI (`/convert/<id>`). Each transition is written to Postgres so resuming or polling just reads the row.
+- [How it works](/docs/how-it-works)
+- [Security](/docs/security)

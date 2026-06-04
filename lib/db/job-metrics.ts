@@ -8,11 +8,8 @@
 import "server-only";
 
 import { and, desc, eq, gte, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { getPostgresClient } from "./client";
+import { db } from "./client";
 import { jobMetric } from "./schema";
-
-const db = drizzle(getPostgresClient());
 
 export type JobType = "pipeline" | "crawl" | "extract" | "validate";
 export type JobStatus =

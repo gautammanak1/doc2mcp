@@ -1,6 +1,8 @@
 ---
 title: Terms of Service
 description: The terms you agree to when you use doc2mcp.
+category: Legal
+order: 1
 ---
 
 # Terms of Service

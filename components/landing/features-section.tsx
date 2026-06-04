@@ -199,17 +199,18 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
   }
   if (visual === "mcp") {
     return (
-      <div className="relative h-full min-h-[110px] w-full overflow-hidden rounded-xl border border-border/40 bg-secondary/10 p-3 font-mono text-[9px] text-muted-foreground">
-        <p className="text-[#4285f4]">$ doc2mcp pipeline --init</p>
-        <p className="mt-1">→ parsing sitemaps ... [ok]</p>
-        <p>→ creating embeddings ... [ok]</p>
-        <p className="text-[#4285f4] dark:text-[#8ab4f8]">✓ server online at doc2mcp.site/api/mcp/st_92k</p>
+      <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-xl border border-border/40 bg-secondary/10 p-3 font-mono text-[9px] text-muted-foreground">
+        <p className="text-[#4285f4]">$ doc2mcp generate ./stripe-docs</p>
+        <p className="mt-1">→ crawled 1,284 pages ... [ok]</p>
+        <p>→ structured 4,182 chunks ... [ok]</p>
+        <p>→ tools: 23 · workflows: 6 ... [ok]</p>
+        <p className="text-[#4285f4] dark:text-[#8ab4f8]">✓ mcp ready · hosted</p>
       </div>
     );
   }
   if (visual === "retrieval") {
     return (
-      <div className="relative flex h-full min-h-[110px] w-full flex-col justify-center gap-1">
+      <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-1.5">
         {[
           { label: "checkoutSession", score: "96%" },
           { label: "createCustomer", score: "89%" },
@@ -233,7 +234,7 @@ function CardVisual({ visual }: { visual: Feature["visual"] }) {
   }
   if (visual === "sync") {
     return (
-      <div className="relative flex h-full min-h-[110px] w-full items-center justify-center">
+      <div className="relative flex h-full min-h-[120px] w-full items-center justify-center">
         <span className="relative inline-flex size-14 items-center justify-center rounded-full border border-border/60 bg-secondary/20">
           <RefreshCw
             className="size-5 animate-spin text-[#4285f4] dark:text-[#8ab4f8]"

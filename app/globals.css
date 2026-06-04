@@ -111,9 +111,14 @@
 }
 
 @utility glass-card {
-  background: var(--card);
+  background: oklch(0.99 0.005 280 / 0.55);
   backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  border: 1px solid oklch(0.2 0.02 280 / 0.08);
+}
+
+.dark .glass-card {
+  background: oklch(0.14 0.02 280 / 0.55);
+  border-color: oklch(1 0 0 / 0.06);
 }
 
 @utility transition-gemini {
@@ -208,6 +213,76 @@
   }
   50% {
     filter: drop-shadow(0 0 14px rgba(66, 133, 244, 0.3));
+  }
+}
+
+@keyframes bg-drift-a {
+  0%,
+  100% {
+    transform: translate(-50%, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50%, 48px) scale(1.1);
+  }
+}
+
+@keyframes bg-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-46px, 34px) scale(1.14);
+  }
+}
+
+@keyframes bg-drift-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(38px, -34px) scale(1.12);
+  }
+}
+
+@keyframes grid-pan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 48px 48px;
+  }
+}
+
+@keyframes beam-sweep {
+  0% {
+    transform: translateY(-10vh);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh);
+    opacity: 0;
+  }
+}
+
+@keyframes flow-pulse {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
   }
 }
 

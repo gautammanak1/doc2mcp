@@ -1,6 +1,11 @@
 {
   "framework": "nextjs",
   "regions": ["bom1"],
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
   "functions": {
     "app/api/convert/route.ts": { "maxDuration": 60 },
     "app/api/internal/pipeline-worker/route.ts": { "maxDuration": 60 },

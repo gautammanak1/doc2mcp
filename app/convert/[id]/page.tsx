@@ -2,6 +2,8 @@ import { Loader2 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
+import { FooterSection } from "@/components/landing/footer-section";
+import { LandingNavigationServer } from "@/components/landing/navigation-server";
 import { ConvertExperience } from "@/features/doc2mcp/convert-experience";
 import { getPlatformProjectById } from "@/lib/db/queries";
 
@@ -27,14 +29,20 @@ async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
-  return <ConvertExperience initialProject={project} />;
+  return (
+    <div className="relative min-h-dvh bg-background text-foreground">
+      <LandingNavigationServer />
+      <ConvertExperience initialProject={project} />
+      <FooterSection />
+    </div>
+  );
 }
 
 function ConvertFallback() {
   return (
-    <div className="flex min-h-dvh items-center justify-center">
+    <div className="flex min-h-dvh items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center gap-3 text-muted-foreground">
-        <Loader2 className="size-5 animate-spin" />
+        <Loader2 className="size-5 animate-spin text-violet-400" />
         <p className="font-mono text-xs">loading conversion…</p>
       </div>
     </div>

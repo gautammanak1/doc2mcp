@@ -1,6 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 function buildErrorUrl(params: {
@@ -37,6 +38,17 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
   const next = safeNext(searchParams.get("next"));
+
+  if (!isSupabasePublicConfigured()) {
+    redirect(
+      buildErrorUrl({
+        error: "Authentication is not configured",
+        errorCode: "auth_not_configured",
+        errorDescription:
+          "Supabase environment variables are missing for this deployment.",
+      })
+    );
+  }
 
   // Newer Supabase PKCE flow sends ?code=... instead of token_hash.
   if (code) {

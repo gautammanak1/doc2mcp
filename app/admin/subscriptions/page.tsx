@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { SkeletonTable } from "@/components/ui/page-skeleton";
 import { getAllSubscriptionsWithUser } from "@/lib/db/queries";
@@ -19,6 +20,7 @@ export default function AdminSubscriptionsPage() {
 }
 
 async function SubscriptionsRows() {
+  await connection();
   const rows = await getAllSubscriptionsWithUser(200);
 
   return (

@@ -1,11 +1,8 @@
 import "server-only";
 
 import { eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import { getPostgresClient } from "./client";
+import { db } from "./client";
 import { contactMessage } from "./schema";
-
-const db = drizzle(getPostgresClient());
 
 export type ContactDeliveryStatus = "sent" | "failed" | "not_configured";
 

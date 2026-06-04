@@ -119,7 +119,6 @@ async function MarketplaceContent() {
           </div>
         )}
       </section>
-
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { McpsTable } from "@/components/admin/mcps-table";
 import { SkeletonTable } from "@/components/ui/page-skeleton";
@@ -20,6 +21,7 @@ export default function AdminMcpsPage() {
 }
 
 async function McpsRows() {
+  await connection();
   const rows = await getAllProjectsWithUser(200);
 
   return (

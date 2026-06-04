@@ -1,12 +1,19 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
-import { getSupabasePublicEnv } from "@/lib/supabase/env";
+import {
+  getSupabasePublicEnv,
+  isSupabasePublicConfigured,
+} from "@/lib/supabase/env";
 import { getSafeUser } from "@/lib/supabase/safe-session";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  if (!isSupabasePublicConfigured()) {
+    return { supabaseResponse, user: null };
+  }
 
   const { url, anonKey } = getSupabasePublicEnv();
 

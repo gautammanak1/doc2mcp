@@ -1,6 +1,9 @@
 ---
 title: MCP setup in Cursor
+nav_title: Cursor setup (detailed)
 description: Three-step setup. Paste, reload, ask.
+category: Reference
+order: 3
 ---
 
 # MCP setup in Cursor

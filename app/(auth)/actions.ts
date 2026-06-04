@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getDoc2McpBaseUrl } from "@/lib/doc2mcp/app-url";
+import { getConfirmRedirectUrl } from "@/lib/auth/redirect-url";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 const authFormSchema = z.object({
@@ -19,6 +20,10 @@ export const login = async (
   formData: FormData
 ): Promise<LoginActionState> => {
   try {
+    if (!isSupabasePublicConfigured()) {
+      return { status: "failed" };
+    }
+
     const validatedData = authFormSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
@@ -63,19 +68,23 @@ export const register = async (
   formData: FormData
 ): Promise<RegisterActionState> => {
   try {
+    if (!isSupabasePublicConfigured()) {
+      return { status: "failed" };
+    }
+
     const validatedData = authFormSchema.parse({
       email: formData.get("email"),
       password: formData.get("password"),
     });
 
     const supabase = await createClient();
-    const baseUrl = getDoc2McpBaseUrl();
+    const emailRedirectTo = await getConfirmRedirectUrl("/chat");
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email: validatedData.email,
       password: validatedData.password,
       options: {
-        emailRedirectTo: `${baseUrl}/auth/confirm?next=${encodeURIComponent("/chat")}`,
+        emailRedirectTo,
       },
     });
 

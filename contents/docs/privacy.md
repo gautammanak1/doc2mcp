@@ -1,6 +1,8 @@
 ---
 title: Privacy Policy
 description: What doc2mcp collects, why, and how to control it.
+category: Legal
+order: 2
 ---
 
 # Privacy Policy

@@ -193,7 +193,7 @@ export function ApiGraph({
   }));
 
   return (
-    <div className="h-full w-full bg-black/45 relative flex flex-col">
+    <div className="h-full w-full bg-[#0a0a14] relative flex flex-col">
       {/* Dynamic Tab Switcher */}
       <div className="absolute top-3 left-3 z-20 flex gap-1 rounded-xl border border-white/5 bg-black/60 p-1 backdrop-blur-xl">
         {(["topology", "auth", "workflows"] as const).map((tab) => {

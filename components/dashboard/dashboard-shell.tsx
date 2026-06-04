@@ -18,6 +18,7 @@ import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -56,8 +57,10 @@ export function DashboardShell({
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
-      const supabase = createClient();
-      await supabase.auth.signOut();
+      if (isSupabasePublicConfigured()) {
+        const supabase = createClient();
+        await supabase.auth.signOut();
+      }
     } finally {
       router.replace("/login");
       router.refresh();
