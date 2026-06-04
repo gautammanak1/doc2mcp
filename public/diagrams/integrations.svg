@@ -11,7 +11,7 @@
   <rect x="60" y="116" width="220" height="96" rx="14" fill="#120f1d" stroke="url(#i-a)"/>
   <text x="170" y="152" fill="#f3f4f6" font-size="14" font-weight="700" text-anchor="middle">MCP endpoint</text>
   <text x="170" y="174" fill="#9ca3af" font-size="11" text-anchor="middle">/api/mcp/{projectId}/mcp</text>
-  <text x="170" y="192" fill="#9ca3af" font-size="11" text-anchor="middle">JSON-RPC 2.0 · Bearer</text>
+  <text x="170" y="192" fill="#9ca3af" font-size="11" text-anchor="middle">JSON-RPC 2.0 Â· Bearer</text>
 
   <!-- clients -->
   <g font-size="13" font-weight="600" text-anchor="middle">

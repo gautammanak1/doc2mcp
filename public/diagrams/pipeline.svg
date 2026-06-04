@@ -10,7 +10,7 @@
   </defs>
   <rect x="0.5" y="0.5" width="1279" height="259" rx="18" fill="#0a0a0f" stroke="#1d1d28"/>
   <text x="32" y="40" fill="#e5e7eb" font-size="16" font-weight="600">The doc2mcp pipeline</text>
-  <text x="32" y="60" fill="#8b8b9a" font-size="12">Documentation infrastructure for AI agents  not just an MCP generator</text>
+  <text x="32" y="60" fill="#8b8b9a" font-size="12">Documentation infrastructure for AI agents — not just an MCP generator</text>
 
   <g>
     <!-- nodes -->
@@ -50,7 +50,7 @@
       <rect width="170" height="104" rx="14" fill="#13131b" stroke="#2a2a38"/>
       <circle cx="28" cy="34" r="13" fill="#1c1c28" stroke="url(#accent)"/>
       <text x="85" y="55" fill="#f3f4f6" font-size="14" font-weight="600" text-anchor="middle">AI Agents</text>
-      <text x="85" y="76" fill="#8b8b9a" font-size="11" text-anchor="middle">Cursor � Claude</text>
+      <text x="85" y="76" fill="#8b8b9a" font-size="11" text-anchor="middle">Cursor · Claude</text>
     </g>
 
     <!-- arrows -->
