@@ -16,13 +16,16 @@ export function DocsSidebar({
 
   return (
     <div className="w-full">
-      <nav className="flex flex-col gap-6">
+      <p className="mb-3 px-2 font-semibold text-foreground text-sm">
+        Sections
+      </p>
+      <nav className="flex flex-col gap-5">
         {groups.map((group) => (
           <div key={group.category}>
-            <p className="mb-2 px-3 font-mono text-[11px] text-muted-foreground/70 uppercase tracking-wider">
+            <p className="mb-1.5 px-2 font-medium text-muted-foreground/70 text-xs">
               {group.category}
             </p>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-px">
               {group.items.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -31,18 +34,15 @@ export function DocsSidebar({
                 return (
                   <Link
                     className={cn(
-                      "relative rounded-lg px-3 py-1.5 text-sm transition-colors",
+                      "rounded-md px-2 py-1.5 text-[13px] transition-colors",
                       isActive
                         ? "bg-accent font-medium text-accent-foreground"
-                        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground"
+                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                     )}
                     href={item.href}
                     key={item.href}
                     onClick={onNavigate}
                   >
-                    {isActive ? (
-                      <span className="absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full bg-primary" />
-                    ) : null}
                     {item.title}
                   </Link>
                 );
