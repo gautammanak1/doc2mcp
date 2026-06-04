@@ -49,6 +49,11 @@ type McpToolResponse = {
   parsed: Record<string, unknown> | null;
 };
 
+type StreamAskHandlers = {
+  onSources: (sources: Source[]) => void;
+  onDelta: (delta: string) => void;
+};
+
 async function callMcpTool(
   projectId: string,
   token: string,
@@ -88,6 +93,74 @@ async function callMcpTool(
   return { isError: Boolean(json.result?.isError), text, parsed };
 }
 
+async function streamAskDocumentation(
+  projectId: string,
+  token: string,
+  question: string,
+  handlers: StreamAskHandlers
+): Promise<void> {
+  const res = await fetch(`/api/mcp/${projectId}/ask`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Doc2MCP-Token": token,
+    },
+    body: JSON.stringify({ question, stream: true }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || `Streaming failed (${res.status})`);
+  }
+
+  const reader = res.body?.getReader();
+  if (!reader) {
+    throw new Error("Streaming response did not include a body.");
+  }
+
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    buffer += decoder.decode(value, { stream: true });
+    const frames = buffer.split("\n\n");
+    buffer = frames.pop() ?? "";
+
+    for (const frame of frames) {
+      const line = frame
+        .split("\n")
+        .find((entry) => entry.trim().startsWith("data:"));
+      if (!line) {
+        continue;
+      }
+
+      const payload = line.slice(line.indexOf("data:") + 5).trim();
+      if (!payload) {
+        continue;
+      }
+
+      const data = JSON.parse(payload) as
+        | { type: "sources"; sources: Source[] }
+        | { type: "delta"; delta: string }
+        | { type: "done" }
+        | { type: "error"; message: string };
+
+      if (data.type === "sources") {
+        handlers.onSources(data.sources);
+      } else if (data.type === "delta") {
+        handlers.onDelta(data.delta);
+      } else if (data.type === "error") {
+        throw new Error(data.message);
+      }
+    }
+  }
+}
+
 export function McpChat({
   projectId,
   token,
@@ -122,6 +195,7 @@ export function McpChat({
     }
 
     const assistantId = crypto.randomUUID();
+    const listStepId = crypto.randomUUID();
     const searchStepId = crypto.randomUUID();
     const askStepId = crypto.randomUUID();
 
@@ -134,6 +208,12 @@ export function McpChat({
         text: "",
         pending: true,
         steps: [
+          {
+            id: listStepId,
+            tool: "list_documentation_pages",
+            args: {},
+            status: "running",
+          },
           {
             id: searchStepId,
             tool: "search_documentation",
@@ -148,7 +228,32 @@ export function McpChat({
     scrollToBottom();
 
     try {
-      // Step 1 — real MCP tool call: semantic search over crawled docs.
+      // Step 1 — real MCP tool call: discover the indexed docs first.
+      const pages = await callMcpTool(
+        projectId,
+        token,
+        "list_documentation_pages",
+        {}
+      );
+      const total =
+        typeof pages.parsed?.total === "number" ? pages.parsed.total : null;
+      patchTurn(assistantId, (turn) => ({
+        ...turn,
+        steps: turn.steps.map((step) =>
+          step.id === listStepId
+            ? {
+                ...step,
+                status: pages.isError ? "error" : "done",
+                summary:
+                  total === null ? "index loaded" : `${total} pages indexed`,
+                raw: pages.text.slice(0, 4000),
+              }
+            : step
+        ),
+      }));
+      scrollToBottom();
+
+      // Step 2 — real MCP tool call: semantic search over crawled docs.
       const search = await callMcpTool(
         projectId,
         token,
@@ -178,7 +283,9 @@ export function McpChat({
       }));
       scrollToBottom();
 
-      // Step 2 — real MCP tool call: grounded natural-language answer.
+      // Step 3 — streaming grounded answer. The UI keeps this as an
+      // ask_documentation tool step so users see the same flow as Cursor:
+      // tool call starts, tokens stream, then the tool completes.
       patchTurn(assistantId, (turn) => ({
         ...turn,
         steps: [
@@ -193,26 +300,25 @@ export function McpChat({
       }));
       scrollToBottom();
 
-      const answer = await callMcpTool(projectId, token, "ask_documentation", {
-        question: trimmed,
+      await streamAskDocumentation(projectId, token, trimmed, {
+        onSources: (sources) => {
+          patchTurn(assistantId, (turn) => ({ ...turn, sources }));
+        },
+        onDelta: (delta) => {
+          patchTurn(assistantId, (turn) => ({
+            ...turn,
+            text: `${turn.text}${delta}`,
+          }));
+          scrollToBottom();
+        },
       });
-      if (answer.isError || !answer.parsed) {
-        throw new Error(answer.text || "The MCP could not answer.");
-      }
-      const sources = Array.isArray(answer.parsed.sources)
-        ? (answer.parsed.sources as Source[])
-        : [];
+
       patchTurn(assistantId, (turn) => ({
         ...turn,
         pending: false,
-        text:
-          typeof answer.parsed?.answer === "string"
-            ? answer.parsed.answer
-            : "I couldn't find an answer in the docs.",
-        sources,
         steps: turn.steps.map((step) =>
           step.id === askStepId
-            ? { ...step, status: "done", summary: "answer ready" }
+            ? { ...step, status: "done", summary: "stream complete" }
             : step
         ),
       }));
@@ -274,8 +380,9 @@ export function McpChat({
             <div className="max-w-sm">
               <p className="font-medium">Chat with your documentation</p>
               <p className="mt-1 text-muted-foreground text-sm">
-                Every question runs real MCP tool calls (search_documentation →
-                ask_documentation) and answers with cited sources — just like
+                Every question runs real MCP tool calls
+                (list_documentation_pages → search_documentation →
+                ask_documentation) and streams a cited answer — just like
                 Cursor.
               </p>
             </div>
