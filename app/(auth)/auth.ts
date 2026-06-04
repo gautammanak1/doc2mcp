@@ -8,6 +8,7 @@ export { createClient as getSupabaseClient } from "@/lib/supabase/server";
 import { cache } from "react";
 import { guestRegex } from "@/lib/constants";
 import { ensureAppUserFromSupabase } from "@/lib/db/queries";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { getSafeUser } from "@/lib/supabase/safe-session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,6 +20,10 @@ import { createClient } from "@/lib/supabase/server";
  * round trip + DB sync instead of duplicating them.
  */
 export const auth = cache(async () => {
+  if (!isSupabasePublicConfigured()) {
+    return null;
+  }
+
   const supabase = await createClient();
   const user = await getSafeUser(supabase);
 

@@ -1,6 +1,11 @@
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 export async function getSession() {
+  if (!isSupabasePublicConfigured()) {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { session },
@@ -9,6 +14,10 @@ export async function getSession() {
 }
 
 export async function getUser() {
+  if (!isSupabasePublicConfigured()) {
+    return null;
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,6 +26,10 @@ export async function getUser() {
 }
 
 export async function signOut() {
+  if (!isSupabasePublicConfigured()) {
+    return;
+  }
+
   const supabase = await createClient();
   await supabase.auth.signOut();
 }

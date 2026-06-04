@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -7,6 +8,10 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
+    if (!isSupabasePublicConfigured()) {
+      return NextResponse.redirect(`${origin}/auth/error`);
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 

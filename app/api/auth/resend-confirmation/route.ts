@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getConfirmRedirectUrl } from "@/lib/auth/redirect-url";
 import { getRatelimiter } from "@/lib/redis/upstash";
+import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
 const bodySchema = z.object({
@@ -47,6 +48,10 @@ export async function POST(request: Request) {
 
   if (await isRateLimited(email)) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
+  if (!isSupabasePublicConfigured()) {
+    return NextResponse.json({ error: "auth_not_configured" }, { status: 503 });
   }
 
   const supabase = await createClient();
