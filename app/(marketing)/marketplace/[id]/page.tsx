@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  BadgeCheck,
   Boxes,
   ExternalLink,
   FileText,
@@ -167,6 +168,20 @@ async function MarketplaceDetailContent({
         {mcp.toolCount === 1 ? "" : "s"} · published by {mcp.ownerName} on
         doc2mcp.
       </p>
+
+      {mcp.registryUrl ? (
+        <a
+          className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3.5 py-1.5 font-mono text-violet-700 text-xs transition-colors hover:bg-violet-500/15 dark:text-violet-200"
+          href={mcp.registryUrl}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <BadgeCheck className="size-3.5" />
+          Listed on the MCP Registry
+          {mcp.registryName ? ` · ${mcp.registryName}` : ""}
+          <ExternalLink className="size-3" />
+        </a>
+      ) : null}
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatTile

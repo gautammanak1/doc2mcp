@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BadgeCheck,
   Check,
   ExternalLink,
   Github,
@@ -254,6 +255,65 @@ const COMPETITOR_PROFILES: CompetitorProfile[] = [
 
 const EVALUATED_AT = "May 2026";
 
+type TrustListing = {
+  id: string;
+  label: string;
+  detail: string;
+  url: string;
+};
+
+const TRUST_LISTINGS: TrustListing[] = [
+  {
+    id: "mcp-registry",
+    label: "Official MCP Registry",
+    detail: "io.github.doc2mcp",
+    url: "https://registry.modelcontextprotocol.io/?search=doc2mcp",
+  },
+  {
+    id: "claude-marketplaces",
+    label: "Claude Code Marketplaces",
+    detail: "claudemarketplaces.com",
+    url: "https://claudemarketplaces.com/mcp/doc2mcp/doc2mcp",
+  },
+  {
+    id: "pulsemcp",
+    label: "PulseMCP",
+    detail: "pulsemcp.com",
+    url: "https://www.pulsemcp.com/servers/doc2mcp/serverjson",
+  },
+];
+
+function TrustStrip({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "mx-auto flex flex-wrap items-center justify-center gap-2.5",
+        compact ? "mt-6" : "mt-8"
+      )}
+    >
+      <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
+        Listed &amp; verified on
+      </span>
+      {TRUST_LISTINGS.map((listing) => (
+        <a
+          className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-xs backdrop-blur-xl transition-colors hover:border-violet-500/40 hover:bg-violet-500/5"
+          href={listing.url}
+          key={listing.id}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          <BadgeCheck className="size-3.5 text-violet-600 dark:text-violet-300" />
+          <span className="font-medium text-foreground">{listing.label}</span>
+          <span className="hidden font-mono text-[10px] text-muted-foreground sm:inline">
+            {listing.detail}
+          </span>
+          <ExternalLink className="size-3 text-muted-foreground transition-colors group-hover:text-foreground" />
+        </a>
+      ))}
+    </div>
+  );
+}
+
 const CELL_STYLE: Record<
   Cell,
   { icon: typeof Check; cls: string; label: string }
@@ -339,6 +399,7 @@ export function ComparisonSection() {
           <h3 className="mt-4 font-display text-2xl tracking-tight sm:text-3xl">
             And how we compare to other MCP tooling
           </h3>
+          <TrustStrip />
         </div>
 
         <div
@@ -461,6 +522,7 @@ export function ComparisonSection() {
               {EVALUATED_AT}. No marketing fluff — just scope, strengths, and
               honest gaps.
             </p>
+            <TrustStrip compact />
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">

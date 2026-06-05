@@ -1,59 +1,81 @@
-# `mcp-registry/` — Staging for `github.com/doc2mcp/doc2mcp`
+![doc2mcp — Documentation to MCP Registry, automatically](./assets/banner.png)
 
-This folder is **NOT used by the deployed application**. It contains the
-exact files that need to live in the separate
-[`doc2mcp/doc2mcp`](https://github.com/doc2mcp/doc2mcp) GitHub-organization
-repo, which exists only to publish the doc2mcp remote MCP server to the
-official [MCP Registry](https://registry.modelcontextprotocol.io).
+# doc2mcp — MCP Registry publishing
 
-## Why two repos?
+doc2mcp publishes MCP servers to the official
+[MCP Registry](https://registry.modelcontextprotocol.io) under the
+platform-owned namespace **`io.github.doc2mcp/*`**. There are two layers:
 
-| Repo                     | Purpose                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `gautammanak1/doc2mcp`   | The Next.js code base. Vercel deploys this to https://doc2mcp.site.                              |
-| `doc2mcp/doc2mcp`        | A tiny repo with just `server.json` + the publish workflow. Owns the `io.github.doc2mcp/*` MCP Registry namespace via GitHub OIDC. |
+| Layer                         | What it publishes                                                                 | How                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Gateway entry**             | `io.github.doc2mcp/doc2mcp` — the canonical "doc2mcp platform" record              | This folder's `server.json` + `publish-mcp.yml`, on a `v*` git tag     |
+| **Per-project auto-publish**  | `io.github.doc2mcp/<slug>` — one entry per user-generated MCP (e.g. `…/langchain`) | Server-side from the app pipeline via the registry HTTP API           |
 
-The split is required by the MCP Registry's GitHub OIDC auth: the OIDC
-token issued to a workflow claims the repo owner, and the registry only
-allows publishing under `io.github.<owner>/*`. To own the
-`io.github.doc2mcp/doc2mcp` name, the publishing workflow MUST run from a
-repo inside the `doc2mcp` GitHub org.
+## Automatic per-project publishing
 
-## What to do with this folder
+When a project finishes processing (`status: ready`), the pipeline calls
+`lib/mcp-registry/publish.ts`, which:
 
-1. Create the `doc2mcp` org on GitHub (if it doesn't exist) and add an
-   empty `doc2mcp/doc2mcp` repo inside it.
+1. Exchanges a GitHub access token for a short-lived registry JWT
+   (`POST /v0.1/auth/github-at`).
+2. Publishes a generated `server.json` for that project
+   (`POST /v0.1/publish`) as `io.github.doc2mcp/<slug>`.
 
-2. Copy the contents of THIS folder (not the folder itself) into the new
-   repo:
+The remote endpoint in each manifest points at
+`https://doc2mcp.site/api/mcp/{project_id}/mcp` with a per-project Bearer
+token (kept out of the public registry — clients supply their own).
 
-   ```bash
-   git clone git@github.com:doc2mcp/doc2mcp.git ../doc2mcp-registry
-   cp -R mcp-registry/. ../doc2mcp-registry/
-   cd ../doc2mcp-registry
-   rm README.md                  # this file is for the code-base author
-   git add server.json .github
-   git commit -m "chore: bootstrap MCP Registry publish workflow"
-   git push origin main
-   ```
+**Versions auto-increment per docs:** the version's patch component is
+derived from the project's last-sync timestamp, so every re-crawl publishes
+a fresh registry version with no manual bumps.
 
-3. Cut the first release by pushing a tag:
+The marketplace surfaces a **"Listed on the MCP Registry"** link on every
+published project so users can verify and share the listing.
 
-   ```bash
-   git tag v1.0.0
-   git push origin v1.0.0
-   ```
+### Required configuration
 
-   The workflow runs `mcp-publisher login github-oidc` and
-   `mcp-publisher publish`, which registers the server at
-   `io.github.doc2mcp/doc2mcp` and points clients at
-   `https://doc2mcp.site/api/mcp/{project_id}/mcp`.
+Set these on the deployed app (Vercel → Environment Variables):
 
-## Keeping the two repos in sync
+| Variable                     | Required | Description                                                                                  |
+| ---------------------------- | :------: | -------------------------------------------------------------------------------------------- |
+| `MCP_REGISTRY_GITHUB_TOKEN`  |   yes    | GitHub access token for a **member of the `doc2mcp` org** — proves ownership of `io.github.doc2mcp/*`. Without it, publishing is a graceful no-op. |
+| `MCP_REGISTRY_AUTOPUBLISH`   |    no    | Set to `false` to disable auto-publishing.                                                    |
+| `MCP_REGISTRY_BASE_URL`      |    no    | Override the registry base URL (defaults to the official registry).                           |
+| `MCP_REGISTRY_NAMESPACE`     |    no    | Override the namespace (defaults to `io.github.doc2mcp`).                                      |
+| `MCP_REGISTRY_SOURCE_REPO`   |    no    | Repo URL recorded in each manifest (defaults to `https://github.com/doc2mcp/doc2mcp`).        |
 
-The `server.json` here is the source of truth for whatever the **live
-deployment** exposes (URL template, headers, remote type). When the
-endpoint contract changes, update `mcp-registry/server.json` in this
-code base, then copy the diff over to the registry repo and tag a new
-release. Versions in `server.json` are auto-set from the git tag inside
-the workflow, so you only need to bump version numbers via tags.
+> The namespace `io.github.doc2mcp/*` requires the GitHub token to belong to
+> a member of the `doc2mcp` GitHub organization. A token from any other
+> account will be rejected by the registry's permission check.
+
+## Gateway entry (this folder)
+
+The files here mirror the separate
+[`doc2mcp/doc2mcp`](https://github.com/doc2mcp/doc2mcp) GitHub-org repo,
+which owns the namespace via GitHub OIDC and publishes the canonical
+`io.github.doc2mcp/doc2mcp` gateway record. To cut a new gateway version,
+push a `v*` tag in that repo — the workflow syncs `server.json`'s version
+from the tag and runs `mcp-publisher publish`.
+
+## Verified listings
+
+doc2mcp is discoverable across the MCP ecosystem:
+
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=doc2mcp)
+- [Claude Code Marketplaces](https://claudemarketplaces.com/mcp/doc2mcp/doc2mcp)
+- [PulseMCP](https://www.pulsemcp.com/servers/doc2mcp/serverjson)
+
+## What clients connect to
+
+Point any MCP host (Cursor, Claude Desktop, VS Code, Windsurf, OpenAI
+Agents SDK) at the remote URL:
+
+```json
+{
+  "type": "streamable-http",
+  "url": "https://doc2mcp.site/api/mcp/{project_id}/mcp",
+  "headers": { "Authorization": "Bearer <your project MCP token>" }
+}
+```
+
+Get your `project_id` and token from the project's **Connect** tab.

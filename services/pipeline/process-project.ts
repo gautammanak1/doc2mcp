@@ -2,6 +2,7 @@ import { recordJobFinish, recordJobStart } from "@/lib/db/job-metrics";
 import { createMcpServerRecord, updatePlatformProject } from "@/lib/db/queries";
 import { DOC_MCP_TOOL_NAMES } from "@/lib/doc2mcp/doc-tools-registry";
 import { createMcpProjectToken, hashMcpToken } from "@/lib/doc2mcp/mcp-access";
+import { publishProjectToRegistry } from "@/lib/mcp-registry/publish";
 import { createLogger } from "@/lib/observability/logger";
 import {
   addSpanAttributes,
@@ -306,6 +307,39 @@ async function runPipeline({
       config: mcpConfig,
       tools: mcpConfig.tools,
     });
+
+    addLog("Publishing to the MCP Registry...", "info", "registry");
+    const registry = await withSpan(
+      "pipeline.registry_publish",
+      { attributes: { "doc2mcp.project_id": projectId } },
+      () =>
+        publishProjectToRegistry({
+          projectId,
+          projectName,
+          sourceUrl,
+          versionSeed: Date.now(),
+        })
+    );
+    artifacts.registry = registry;
+    if (registry.status === "published") {
+      addLog(
+        `Listed on the MCP Registry as ${registry.name}`,
+        "success",
+        "registry"
+      );
+    } else if (registry.status === "skipped") {
+      addLog(
+        `Registry publish skipped: ${registry.message}`,
+        "info",
+        "registry"
+      );
+    } else {
+      addLog(
+        `Registry publish failed: ${registry.message}`,
+        "warn",
+        "registry"
+      );
+    }
 
     addLog(
       `Ready — ${crawlResults.length} pages, ${keptCompressed.length} validated tools (${analysis.extractionMode} extraction).`,

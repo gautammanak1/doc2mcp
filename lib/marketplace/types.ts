@@ -15,6 +15,10 @@ export type MarketplaceMcp = {
   pageCount: number;
   /** 0..100 MCP correctness score, when available. */
   mcpScore: number | null;
+  /** Official MCP Registry listing URL, when the server is published. */
+  registryUrl: string | null;
+  /** Fully-qualified registry name, e.g. io.github.doc2mcp/stripe. */
+  registryName: string | null;
   createdAt: string;
   updatedAt: string;
 };
