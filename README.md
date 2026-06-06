@@ -8,7 +8,7 @@
 
 No install. No local clone. No API keys to hand over.
 
-![doc2mcp social preview](./public/og-image.png)
+![doc2mcp — documentation infrastructure for AI agents](./mcp-registry/assets/banner.png)
 
 [**Live**](https://doc2mcp.site) · [Docs](https://doc2mcp.site/docs) · [Pricing](https://doc2mcp.site/pricing) · [Comparison](https://doc2mcp.site/comparison)
 

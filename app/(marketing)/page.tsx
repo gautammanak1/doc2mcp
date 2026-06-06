@@ -4,7 +4,6 @@ import { ComparisonSection } from "@/components/landing/comparison-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { EnterpriseSection } from "@/components/landing/enterprise-section";
 import { FaqSection } from "@/components/landing/faq-section";
-import { PlatformSection } from "@/components/platform-section";
 import { FooterSection } from "@/components/landing/footer-section";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
@@ -18,6 +17,7 @@ import { ToolsStripSection } from "@/components/landing/tools-strip-section";
 import { UseCasesSection } from "@/components/landing/use-cases-section";
 import { WhyNowSection } from "@/components/landing/why-now-section";
 import { WhyTeamsSection } from "@/components/landing/why-teams-section";
+import { PlatformSection } from "@/components/platform-section";
 
 export default function Page() {
   return (
