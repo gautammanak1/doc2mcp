@@ -4,7 +4,7 @@ import { ComparisonSection } from "@/components/landing/comparison-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { EnterpriseSection } from "@/components/landing/enterprise-section";
 import { FaqSection } from "@/components/landing/faq-section";
-import { FeaturesSection } from "@/components/landing/features-section";
+import { PlatformSection } from "@/components/platform-section";
 import { FooterSection } from "@/components/landing/footer-section";
 import { HeroSection } from "@/components/landing/hero-section";
 import { HowItWorksSection } from "@/components/landing/how-it-works-section";
@@ -30,7 +30,7 @@ export default function Page() {
       <ProblemSectionClient />
       <RealExampleSection />
       <HowItWorksSection />
-      <FeaturesSection />
+      <PlatformSection />
       <WhyTeamsSection />
       <UseCasesSection />
       <ComparisonSection />

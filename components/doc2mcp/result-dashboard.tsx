@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { InstallButtons } from "@/components/doc2mcp/install-buttons";
 import { McpChat } from "@/components/doc2mcp/mcp-chat";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
+import { RegistryStatusCard } from "@/components/doc2mcp/registry-status-card";
 import { Button } from "@/components/ui/button";
 import type { PlatformProject } from "@/lib/db/schema";
 import { buildInstallTargets } from "@/lib/marketplace/install";
@@ -503,6 +504,8 @@ export function ResultDashboard({
             <InstallButtons targets={installTargets} />
           </div>
         ) : null}
+
+        <RegistryStatusCard className="mb-px" registry={artifacts.registry} />
 
         <Framed className="grid grid-cols-1 lg:grid-cols-2">
           {endpoint ? (

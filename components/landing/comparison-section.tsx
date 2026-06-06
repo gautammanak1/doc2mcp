@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  BadgeCheck,
   Check,
   ExternalLink,
   Github,
   Layers,
   Minus,
   Network,
+  ShieldCheck,
   Sparkles,
   Workflow,
   X,
@@ -254,6 +256,76 @@ const COMPETITOR_PROFILES: CompetitorProfile[] = [
 
 const EVALUATED_AT = "May 2026";
 
+type TrustListing = {
+  id: string;
+  label: string;
+  detail: string;
+  url: string;
+};
+
+const TRUST_LISTINGS: TrustListing[] = [
+  {
+    id: "mcp-registry",
+    label: "Official MCP Registry",
+    detail: "io.github.doc2mcp",
+    url: "https://registry.modelcontextprotocol.io/?search=doc2mcp",
+  },
+  {
+    id: "claude-marketplaces",
+    label: "Claude Code Marketplaces",
+    detail: "claudemarketplaces.com",
+    url: "https://claudemarketplaces.com/mcp/doc2mcp/doc2mcp",
+  },
+  {
+    id: "pulsemcp",
+    label: "PulseMCP",
+    detail: "pulsemcp.com",
+    url: "https://www.pulsemcp.com/servers/doc2mcp/serverjson",
+  },
+];
+
+function TrustStrip({ compact = false }: { compact?: boolean }) {
+  return (
+    <div
+      className={cn(
+        "mx-auto w-full max-w-3xl overflow-hidden rounded-2xl border border-border/60 bg-card/40 backdrop-blur-xl",
+        compact ? "mt-6" : "mt-8"
+      )}
+    >
+      <div className="flex items-center justify-center gap-2 border-border/40 border-b bg-muted/20 px-4 py-2">
+        <ShieldCheck className="size-3.5 text-violet-600 dark:text-violet-300" />
+        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+          Listed &amp; verified on
+        </span>
+      </div>
+      <div className="grid grid-cols-1 divide-y divide-border/40 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {TRUST_LISTINGS.map((listing) => (
+          <a
+            className="group flex items-center gap-2.5 px-4 py-3 transition-colors hover:bg-violet-500/5"
+            href={listing.url}
+            key={listing.id}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 ring-1 ring-violet-500/20 dark:text-violet-300">
+              <BadgeCheck className="size-4" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-medium text-foreground text-sm">
+                {listing.label}
+              </span>
+              <span className="block truncate font-mono text-[10px] text-muted-foreground">
+                {listing.detail}
+              </span>
+            </span>
+            <ExternalLink className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const CELL_STYLE: Record<
   Cell,
   { icon: typeof Check; cls: string; label: string }
@@ -330,15 +402,58 @@ export function ComparisonSection() {
         </div>
 
         <ManualVsDoc2McpTable />
-        <div className="mt-16 mb-10 text-center">
+
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <TrustStrip />
+          <Link
+            className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 font-medium text-sm text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-200"
+            href="/comparison"
+          >
+            <Network className="size-4" />
+            See the full market comparison
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function MarketMatrixSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section
+      className="relative py-16 sm:py-24"
+      id="market-matrix"
+      ref={sectionRef}
+    >
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
+        <div className="mb-10 text-center">
           <span className="inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
             <span className="h-px w-8 bg-foreground/30" />
             Market matrix
             <span className="h-px w-8 bg-foreground/30" />
           </span>
-          <h3 className="mt-4 font-display text-2xl tracking-tight sm:text-3xl">
+          <h2 className="mt-4 font-display text-2xl tracking-tight sm:text-4xl">
             And how we compare to other MCP tooling
-          </h3>
+          </h2>
+          <TrustStrip />
         </div>
 
         <div
@@ -461,6 +576,7 @@ export function ComparisonSection() {
               {EVALUATED_AT}. No marketing fluff — just scope, strengths, and
               honest gaps.
             </p>
+            <TrustStrip compact />
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">

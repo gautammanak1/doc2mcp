@@ -131,9 +131,9 @@ export function ConvertExperience({
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-7xl">
+      <div className="flex min-h-dvh">
         {/* Sidebar */}
-        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-border/60 border-r px-4 py-5 md:flex">
+        <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-border/60 border-r bg-muted/20 px-4 py-5 md:flex">
           <Link className="flex items-center gap-2 px-2" href="/">
             <span className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-[11px] text-white">
               d2
@@ -202,87 +202,94 @@ export function ConvertExperience({
 
         {/* Main */}
         <main className="min-w-0 flex-1 px-5 py-8 lg:px-10 lg:py-12">
-          {/* Mobile header */}
-          <div className="mb-6 flex items-center justify-between gap-3 md:hidden">
-            <Link className="flex items-center gap-2" href="/">
-              <span className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-[11px] text-white">
-                d2
-              </span>
-              <span className="font-display font-semibold text-sm">
-                doc2mcp
-              </span>
-            </Link>
-            <div className="flex items-center gap-1.5">
-              <Button onClick={share} size="sm" type="button" variant="outline">
-                <Share2 className="mr-1 size-3.5" />
-                Share
-              </Button>
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/chat">
-                  <ArrowLeft className="mr-1 size-3.5" />
-                  New
-                </Link>
-              </Button>
-            </div>
-          </div>
-
-          {isProcessing ? (
-            <div className="space-y-10">
-              <section>
-                <p className="font-mono text-muted-foreground text-xs">
-                  source
-                </p>
-                <p className="mt-1 truncate font-mono text-sm">
-                  {project.sourceUrl}
-                </p>
-                <div className="mt-6">
-                  <PipelineProgress
-                    currentStep={currentStep}
-                    status={project.status}
-                    steps={PIPELINE_STEPS}
-                  />
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-border/60 bg-muted/30 p-5">
-                <p className="mb-3 font-mono text-muted-foreground text-xs">
-                  terminal
-                </p>
-                {logs.length > 0 ? (
-                  <TerminalLog
-                    lines={logs.map((l) => `[${l.level}] ${l.message}`)}
-                    streaming={isProcessing}
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                    <Loader2 className="size-4 animate-spin" />
-                    Starting pipeline...
-                  </div>
-                )}
-              </section>
-            </div>
-          ) : null}
-
-          <AnimatePresence>
-            {isReady && artifacts ? (
-              <ResultDashboard artifacts={artifacts} project={project} />
-            ) : null}
-
-            {project.status === "error" ? (
-              <motion.div
-                animate={{ opacity: 1 }}
-                className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center"
-                initial={{ opacity: 0 }}
-              >
-                <p className="text-red-500 dark:text-red-300">
-                  Conversion failed. Try another URL.
-                </p>
-                <Button asChild className="mt-4" variant="outline">
-                  <Link href="/">Start over</Link>
+          <div className="mx-auto w-full max-w-5xl">
+            {/* Mobile header */}
+            <div className="mb-6 flex items-center justify-between gap-3 md:hidden">
+              <Link className="flex items-center gap-2" href="/">
+                <span className="flex size-6 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-fuchsia-500 font-bold text-[11px] text-white">
+                  d2
+                </span>
+                <span className="font-display font-semibold text-sm">
+                  doc2mcp
+                </span>
+              </Link>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  onClick={share}
+                  size="sm"
+                  type="button"
+                  variant="outline"
+                >
+                  <Share2 className="mr-1 size-3.5" />
+                  Share
                 </Button>
-              </motion.div>
+                <Button asChild size="sm" variant="ghost">
+                  <Link href="/chat">
+                    <ArrowLeft className="mr-1 size-3.5" />
+                    New
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {isProcessing ? (
+              <div className="space-y-10">
+                <section>
+                  <p className="font-mono text-muted-foreground text-xs">
+                    source
+                  </p>
+                  <p className="mt-1 truncate font-mono text-sm">
+                    {project.sourceUrl}
+                  </p>
+                  <div className="mt-6">
+                    <PipelineProgress
+                      currentStep={currentStep}
+                      status={project.status}
+                      steps={PIPELINE_STEPS}
+                    />
+                  </div>
+                </section>
+
+                <section className="rounded-2xl border border-border/60 bg-muted/30 p-5">
+                  <p className="mb-3 font-mono text-muted-foreground text-xs">
+                    terminal
+                  </p>
+                  {logs.length > 0 ? (
+                    <TerminalLog
+                      lines={logs.map((l) => `[${l.level}] ${l.message}`)}
+                      streaming={isProcessing}
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <Loader2 className="size-4 animate-spin" />
+                      Starting pipeline...
+                    </div>
+                  )}
+                </section>
+              </div>
             ) : null}
-          </AnimatePresence>
+
+            <AnimatePresence>
+              {isReady && artifacts ? (
+                <ResultDashboard artifacts={artifacts} project={project} />
+              ) : null}
+
+              {project.status === "error" ? (
+                <motion.div
+                  animate={{ opacity: 1 }}
+                  className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center"
+                  initial={{ opacity: 0 }}
+                >
+                  <p className="text-red-500 dark:text-red-300">
+                    Conversion failed. Try another URL.
+                  </p>
+                  <Button asChild className="mt-4" variant="outline">
+                    <Link href="/">Start over</Link>
+                  </Button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
         </main>
       </div>
     </div>

@@ -2,6 +2,7 @@
 
 import {
   ArrowUpRight,
+  BadgeCheck,
   Boxes,
   FileText,
   Search,
@@ -103,6 +104,12 @@ function McpCard({ mcp }: { mcp: MarketplaceMcp }) {
           <span className="inline-flex items-center gap-1">
             <FileText className="size-3" />
             {mcp.pageCount} page{mcp.pageCount === 1 ? "" : "s"}
+          </span>
+        ) : null}
+        {mcp.registryUrl ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-violet-700 dark:text-violet-300">
+            <BadgeCheck className="size-3" />
+            Registry
           </span>
         ) : null}
       </div>

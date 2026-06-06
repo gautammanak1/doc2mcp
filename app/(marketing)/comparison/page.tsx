@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MarketMatrixSection } from "@/components/landing/comparison-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { FooterSection } from "@/components/landing/footer-section";
 import { LandingNavigation } from "@/components/landing/navigation";
@@ -99,6 +100,7 @@ export default function ComparisonPage() {
       <LandingNavigation />
       <div className="h-20" />
       <CompareUILib data={comparisonData} />
+      <MarketMatrixSection />
       <CtaSection />
       <FooterSection />
     </main>

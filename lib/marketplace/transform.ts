@@ -69,6 +69,8 @@ function cleanSummaryText(raw: string): string {
 
 export function toMarketplaceMcp(project: ProjectRow): MarketplaceMcp {
   const artifacts = readArtifacts(project.artifacts);
+  const registry = artifacts?.registry;
+  const isListed = registry?.status === "published";
   return {
     id: project.id,
     name: project.name,
@@ -78,6 +80,8 @@ export function toMarketplaceMcp(project: ProjectRow): MarketplaceMcp {
     toolCount: toolCountOf(artifacts),
     pageCount: artifacts?.docsPageCount ?? 0,
     mcpScore: artifacts?.qualityScore?.mcpScore ?? null,
+    registryUrl: isListed ? (registry?.url ?? null) : null,
+    registryName: isListed ? (registry?.name ?? null) : null,
     createdAt: iso(project.createdAt),
     updatedAt: iso(project.updatedAt),
   };
