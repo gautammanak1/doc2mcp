@@ -1,5 +1,7 @@
 "use client";
 
+import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import {
   ArrowUp,
   Check,
@@ -10,31 +12,11 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { MessageResponse } from "@/components/ai-elements/message";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type Source = { title: string; url: string };
-
-type ToolStep = {
-  id: string;
-  tool: string;
-  args: Record<string, unknown>;
-  status: "running" | "done" | "error";
-  summary?: string;
-  raw?: string;
-};
-
-type ChatTurn = {
-  id: string;
-  role: "user" | "assistant";
-  text: string;
-  steps: ToolStep[];
-  sources?: Source[];
-  pending?: boolean;
-  failed?: boolean;
-};
 
 const SUGGESTIONS = [
   "Summarize what this documentation covers",
@@ -43,122 +25,92 @@ const SUGGESTIONS = [
   "What endpoints are available?",
 ];
 
-type McpToolResponse = {
-  isError: boolean;
-  text: string;
-  parsed: Record<string, unknown> | null;
+type AnyPart = {
+  type: string;
+  text?: string;
+  toolCallId?: string;
+  state?: string;
+  input?: Record<string, unknown>;
+  output?: unknown;
+  errorText?: string;
 };
 
-type StreamAskHandlers = {
-  onSources: (sources: Source[]) => void;
-  onDelta: (delta: string) => void;
-};
-
-async function callMcpTool(
-  projectId: string,
-  token: string,
-  name: string,
-  args: Record<string, unknown>
-): Promise<McpToolResponse> {
-  const res = await fetch(`/api/mcp/${projectId}/mcp`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Doc2MCP-Token": token,
-    },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: name,
-      method: "tools/call",
-      params: { name, arguments: args },
-    }),
-  });
-  const json = (await res.json()) as {
-    result?: {
-      content?: Array<{ text?: string }>;
-      isError?: boolean;
-    };
-    error?: { message?: string };
-  };
-  if (json.error) {
-    throw new Error(json.error.message ?? "Tool call failed");
+function toolStatus(state: string | undefined): "running" | "done" | "error" {
+  if (state === "output-available") {
+    return "done";
   }
-  const text = json.result?.content?.[0]?.text ?? "";
-  let parsed: Record<string, unknown> | null = null;
-  try {
-    parsed = JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    parsed = null;
+  if (state === "output-error") {
+    return "error";
   }
-  return { isError: Boolean(json.result?.isError), text, parsed };
+  return "running";
 }
 
-async function streamAskDocumentation(
-  projectId: string,
-  token: string,
-  question: string,
-  handlers: StreamAskHandlers
-): Promise<void> {
-  const res = await fetch(`/api/mcp/${projectId}/ask`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Doc2MCP-Token": token,
-    },
-    body: JSON.stringify({ question, stream: true }),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Streaming failed (${res.status})`);
+function parseOutput(output: unknown): Record<string, unknown> | null {
+  if (output && typeof output === "object") {
+    return output as Record<string, unknown>;
   }
-
-  const reader = res.body?.getReader();
-  if (!reader) {
-    throw new Error("Streaming response did not include a body.");
-  }
-
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-
-    buffer += decoder.decode(value, { stream: true });
-    const frames = buffer.split("\n\n");
-    buffer = frames.pop() ?? "";
-
-    for (const frame of frames) {
-      const line = frame
-        .split("\n")
-        .find((entry) => entry.trim().startsWith("data:"));
-      if (!line) {
-        continue;
-      }
-
-      const payload = line.slice(line.indexOf("data:") + 5).trim();
-      if (!payload) {
-        continue;
-      }
-
-      const data = JSON.parse(payload) as
-        | { type: "sources"; sources: Source[] }
-        | { type: "delta"; delta: string }
-        | { type: "done" }
-        | { type: "error"; message: string };
-
-      if (data.type === "sources") {
-        handlers.onSources(data.sources);
-      } else if (data.type === "delta") {
-        handlers.onDelta(data.delta);
-      } else if (data.type === "error") {
-        throw new Error(data.message);
-      }
+  if (typeof output === "string") {
+    try {
+      return JSON.parse(output) as Record<string, unknown>;
+    } catch {
+      return null;
     }
   }
+  return null;
+}
+
+function toolSummary(name: string, output: unknown): string | undefined {
+  const parsed = parseOutput(output);
+  if (!parsed) {
+    return output ? "done" : undefined;
+  }
+  if (name === "list_documentation_pages" && typeof parsed.total === "number") {
+    return `${parsed.total} pages indexed`;
+  }
+  if (name === "search_documentation" && Array.isArray(parsed.results)) {
+    return `${parsed.results.length} sections matched`;
+  }
+  if (name === "get_documentation_page" && typeof parsed.title === "string") {
+    return `read: ${parsed.title}`;
+  }
+  if (name === "read_full_documentation") {
+    return "full docs read";
+  }
+  return "done";
+}
+
+function rawOutput(output: unknown): string {
+  const text =
+    typeof output === "string" ? output : JSON.stringify(output, null, 2);
+  return text.slice(0, 4000);
+}
+
+function collectSources(parts: AnyPart[]): Source[] {
+  const seen = new Set<string>();
+  const sources: Source[] = [];
+  const add = (title: unknown, url: unknown) => {
+    if (typeof url !== "string" || !url || seen.has(url)) {
+      return;
+    }
+    seen.add(url);
+    sources.push({ title: typeof title === "string" ? title : url, url });
+  };
+  for (const part of parts) {
+    if (!part.type.startsWith("tool-")) {
+      continue;
+    }
+    const parsed = parseOutput(part.output);
+    if (!parsed) {
+      continue;
+    }
+    if (Array.isArray(parsed.results)) {
+      for (const row of parsed.results as Record<string, unknown>[]) {
+        add(row.title, row.url);
+      }
+    }
+    add(parsed.title, parsed.url);
+  }
+  return sources;
 }
 
 export function McpChat({
@@ -170,10 +122,19 @@ export function McpChat({
   token: string;
   pageCount?: number;
 }) {
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/mcp/${projectId}/agent`,
+        headers: { "X-Doc2MCP-Token": token },
+      }),
+    [projectId, token]
+  );
+
+  const { messages, sendMessage, status, error } = useChat({ transport });
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const busy = status === "submitted" || status === "streaming";
 
   const scrollToBottom = () => {
     requestAnimationFrame(() => {
@@ -184,166 +145,20 @@ export function McpChat({
     });
   };
 
-  const patchTurn = (id: string, fn: (turn: ChatTurn) => ChatTurn) => {
-    setTurns((prev) => prev.map((turn) => (turn.id === id ? fn(turn) : turn)));
-  };
-
-  const ask = async (question: string) => {
-    const trimmed = question.trim();
+  const send = (text: string) => {
+    const trimmed = text.trim();
     if (!trimmed || busy) {
       return;
     }
-
-    const assistantId = crypto.randomUUID();
-    const listStepId = crypto.randomUUID();
-    const searchStepId = crypto.randomUUID();
-    const askStepId = crypto.randomUUID();
-
-    setTurns((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), role: "user", text: trimmed, steps: [] },
-      {
-        id: assistantId,
-        role: "assistant",
-        text: "",
-        pending: true,
-        steps: [
-          {
-            id: listStepId,
-            tool: "list_documentation_pages",
-            args: {},
-            status: "running",
-          },
-          {
-            id: searchStepId,
-            tool: "search_documentation",
-            args: { query: trimmed, limit: 6 },
-            status: "running",
-          },
-        ],
-      },
-    ]);
+    sendMessage({ text: trimmed });
     setInput("");
-    setBusy(true);
     scrollToBottom();
-
-    try {
-      // Step 1 — real MCP tool call: discover the indexed docs first.
-      const pages = await callMcpTool(
-        projectId,
-        token,
-        "list_documentation_pages",
-        {}
-      );
-      const total =
-        typeof pages.parsed?.total === "number" ? pages.parsed.total : null;
-      patchTurn(assistantId, (turn) => ({
-        ...turn,
-        steps: turn.steps.map((step) =>
-          step.id === listStepId
-            ? {
-                ...step,
-                status: pages.isError ? "error" : "done",
-                summary:
-                  total === null ? "index loaded" : `${total} pages indexed`,
-                raw: pages.text.slice(0, 4000),
-              }
-            : step
-        ),
-      }));
-      scrollToBottom();
-
-      // Step 2 — real MCP tool call: semantic search over crawled docs.
-      const search = await callMcpTool(
-        projectId,
-        token,
-        "search_documentation",
-        {
-          query: trimmed,
-          limit: 6,
-        }
-      );
-      const results = Array.isArray(search.parsed?.results)
-        ? (search.parsed?.results as unknown[])
-        : [];
-      patchTurn(assistantId, (turn) => ({
-        ...turn,
-        steps: turn.steps.map((step) =>
-          step.id === searchStepId
-            ? {
-                ...step,
-                status: search.isError ? "error" : "done",
-                summary: search.isError
-                  ? "search failed"
-                  : `${results.length} sections matched`,
-                raw: search.text.slice(0, 4000),
-              }
-            : step
-        ),
-      }));
-      scrollToBottom();
-
-      // Step 3 — streaming grounded answer. The UI keeps this as an
-      // ask_documentation tool step so users see the same flow as Cursor:
-      // tool call starts, tokens stream, then the tool completes.
-      patchTurn(assistantId, (turn) => ({
-        ...turn,
-        steps: [
-          ...turn.steps,
-          {
-            id: askStepId,
-            tool: "ask_documentation",
-            args: { question: trimmed },
-            status: "running",
-          },
-        ],
-      }));
-      scrollToBottom();
-
-      await streamAskDocumentation(projectId, token, trimmed, {
-        onSources: (sources) => {
-          patchTurn(assistantId, (turn) => ({ ...turn, sources }));
-        },
-        onDelta: (delta) => {
-          patchTurn(assistantId, (turn) => ({
-            ...turn,
-            text: `${turn.text}${delta}`,
-          }));
-          scrollToBottom();
-        },
-      });
-
-      patchTurn(assistantId, (turn) => ({
-        ...turn,
-        pending: false,
-        steps: turn.steps.map((step) =>
-          step.id === askStepId
-            ? { ...step, status: "done", summary: "stream complete" }
-            : step
-        ),
-      }));
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Something went wrong.";
-      patchTurn(assistantId, (turn) => ({
-        ...turn,
-        pending: false,
-        failed: true,
-        text: `The MCP returned an error: ${message}`,
-        steps: turn.steps.map((step) =>
-          step.status === "running" ? { ...step, status: "error" } : step
-        ),
-      }));
-    } finally {
-      setBusy(false);
-      scrollToBottom();
-    }
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      ask(input);
+      send(input);
     }
   };
 
@@ -357,7 +172,7 @@ export function McpChat({
           <div className="leading-tight">
             <p className="font-medium text-sm">MCP assistant</p>
             <p className="font-mono text-[10px] text-muted-foreground">
-              live · calls your MCP tools
+              agentic · calls your MCP tools
               {typeof pageCount === "number" ? ` · ${pageCount} pages` : ""}
             </p>
           </div>
@@ -372,7 +187,7 @@ export function McpChat({
         className="flex-1 space-y-5 overflow-y-auto px-4 py-5"
         ref={scrollRef}
       >
-        {turns.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-5 text-center">
             <span className="flex size-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 text-violet-500 ring-1 ring-violet-500/20 dark:text-violet-300">
               <Sparkles className="size-6" />
@@ -380,10 +195,9 @@ export function McpChat({
             <div className="max-w-sm">
               <p className="font-medium">Chat with your documentation</p>
               <p className="mt-1 text-muted-foreground text-sm">
-                Every question runs real MCP tool calls
-                (list_documentation_pages → search_documentation →
-                ask_documentation) and streams a cited answer — just like
-                Cursor.
+                The assistant calls your MCP tools in a loop — searching, then
+                opening the exact page it needs — and streams a cited answer,
+                just like Cursor.
               </p>
             </div>
             <div className="flex w-full max-w-md flex-col gap-2">
@@ -391,7 +205,7 @@ export function McpChat({
                 <button
                   className="flex items-center gap-2 rounded-xl border border-border bg-background px-3.5 py-2.5 text-left text-sm transition-colors hover:border-violet-500/40 hover:bg-accent"
                   key={s}
-                  onClick={() => ask(s)}
+                  onClick={() => send(s)}
                   type="button"
                 >
                   <FileSearch className="size-4 shrink-0 text-muted-foreground" />
@@ -401,8 +215,20 @@ export function McpChat({
             </div>
           </div>
         ) : (
-          turns.map((turn) => <ChatBubble key={turn.id} turn={turn} />)
+          messages.map((message) => (
+            <ChatBubble
+              key={message.id}
+              parts={message.parts as AnyPart[]}
+              role={message.role}
+            />
+          ))
         )}
+
+        {error ? (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3 text-red-600 text-sm dark:text-red-300">
+            Something went wrong talking to the MCP. Please try again.
+          </div>
+        ) : null}
       </div>
 
       <div className="border-border/70 border-t bg-background/40 p-3">
@@ -419,7 +245,7 @@ export function McpChat({
           <Button
             className="size-8 shrink-0 rounded-lg p-0"
             disabled={busy || !input.trim()}
-            onClick={() => ask(input)}
+            onClick={() => send(input)}
             size="sm"
             type="button"
           >
@@ -434,55 +260,71 @@ export function McpChat({
   );
 }
 
-function ToolStepRow({ step }: { step: ToolStep }) {
-  const argSummary = Object.entries(step.args)
+function ToolStepRow({ part }: { part: AnyPart }) {
+  const name = part.type.slice(5);
+  const status = toolStatus(part.state);
+  const argSummary = Object.entries(part.input ?? {})
     .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
     .join(", ");
+  const summary =
+    status === "error"
+      ? (part.errorText ?? "error")
+      : toolSummary(name, part.output);
 
   return (
     <details className="group rounded-lg border border-border bg-background/70">
       <summary className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs">
         <span className="shrink-0">
-          {step.status === "running" ? (
+          {status === "running" ? (
             <Loader2 className="size-3.5 animate-spin text-violet-500" />
-          ) : step.status === "error" ? (
+          ) : status === "error" ? (
             <X className="size-3.5 text-red-500" />
           ) : (
             <Check className="size-3.5 text-emerald-500" />
           )}
         </span>
-        <span className="font-mono text-foreground">{step.tool}</span>
-        <span className="truncate font-mono text-muted-foreground">
-          ({argSummary})
-        </span>
-        {step.summary ? (
+        <span className="font-mono text-foreground">{name}</span>
+        {argSummary ? (
+          <span className="truncate font-mono text-muted-foreground">
+            ({argSummary})
+          </span>
+        ) : null}
+        {summary ? (
           <span className="ml-auto shrink-0 font-mono text-[10px] text-muted-foreground">
-            {step.summary}
+            {summary}
           </span>
         ) : null}
         <ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
       </summary>
-      {step.raw ? (
+      {part.output ? (
         <pre className="max-h-44 overflow-auto border-border/60 border-t p-3 font-mono text-[10px] leading-relaxed text-muted-foreground">
-          {step.raw}
+          {rawOutput(part.output)}
         </pre>
       ) : null}
     </details>
   );
 }
 
-function ChatBubble({ turn }: { turn: ChatTurn }) {
-  if (turn.role === "user") {
+function ChatBubble({ role, parts }: { role: string; parts: AnyPart[] }) {
+  const text = parts
+    .filter((p) => p.type === "text")
+    .map((p) => p.text ?? "")
+    .join("");
+
+  if (role === "user") {
     return (
       <div className="flex justify-end">
         <div className="max-w-[82%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-primary-foreground text-sm">
           <p className="whitespace-pre-wrap break-words leading-relaxed">
-            {turn.text}
+            {text}
           </p>
         </div>
       </div>
     );
   }
+
+  const toolParts = parts.filter((p) => p.type.startsWith("tool-"));
+  const sources = collectSources(toolParts);
 
   return (
     <div className="flex gap-3">
@@ -490,33 +332,29 @@ function ChatBubble({ turn }: { turn: ChatTurn }) {
         <Sparkles className="size-3.5" />
       </span>
       <div className="min-w-0 flex-1 space-y-2">
-        {turn.steps.length > 0 ? (
+        {toolParts.length > 0 ? (
           <div className="space-y-1.5">
-            {turn.steps.map((step) => (
-              <ToolStepRow key={step.id} step={step} />
+            {toolParts.map((part) => (
+              <ToolStepRow
+                key={part.toolCallId ?? `${part.type}-${part.state}`}
+                part={part}
+              />
             ))}
           </div>
         ) : null}
 
-        {turn.pending && !turn.text ? null : (
-          <div
-            className={cn(
-              "rounded-2xl rounded-tl-md border px-4 py-3",
-              turn.failed
-                ? "border-red-500/30 bg-red-500/5 text-red-600 dark:text-red-300"
-                : "border-border bg-muted/40"
-            )}
-          >
+        {text ? (
+          <div className="rounded-2xl rounded-tl-md border border-border bg-muted/40 px-4 py-3">
             <div className="prose-sm max-w-none text-sm leading-relaxed">
-              <MessageResponse>{turn.text}</MessageResponse>
+              <MessageResponse>{text}</MessageResponse>
             </div>
-            {turn.sources && turn.sources.length > 0 ? (
+            {sources.length > 0 ? (
               <div className="mt-3 border-border/60 border-t pt-2.5">
                 <p className="mb-1.5 font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
                   Sources
                 </p>
                 <div className="flex flex-wrap gap-1.5">
-                  {turn.sources.map((source) => (
+                  {sources.map((source) => (
                     <a
                       className="inline-flex max-w-[220px] items-center gap-1 truncate rounded-full border border-border bg-background px-2.5 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
                       href={source.url}
@@ -532,7 +370,7 @@ function ChatBubble({ turn }: { turn: ChatTurn }) {
               </div>
             ) : null}
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
