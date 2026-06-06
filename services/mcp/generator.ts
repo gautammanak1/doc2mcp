@@ -74,7 +74,7 @@ function buildToolList(compressed: CompressedTool[]): McpToolDefinition[] {
     add({
       name: tool.name,
       description: tool.description,
-      inputSchema: tool.parameters as Record<string, unknown> | undefined,
+      inputSchema: normalizeToolSchema(tool.parameters),
     });
     if (seen.size > before) {
       added += 1;

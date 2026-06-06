@@ -32,7 +32,7 @@ import {
   Target,
   Workflow,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const HEADING_WORDS = [
@@ -700,7 +700,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
 /* ----------------------------- Background ------------------------------ */
 
 function useMouseParallax(enabled: boolean): {
-  ref: React.RefObject<HTMLElement | null>;
+  ref: React.RefCallback<HTMLElement>;
   x: MotionValue<number>;
   y: MotionValue<number>;
 } {
@@ -724,7 +724,11 @@ function useMouseParallax(enabled: boolean): {
     return () => el.removeEventListener("mousemove", handle);
   }, [enabled, rawX, rawY]);
 
-  return { ref, x, y };
+  const setRef = useCallback((node: HTMLElement | null) => {
+    ref.current = node;
+  }, []);
+
+  return { ref: setRef, x, y };
 }
 
 /* ------------------------------ Section -------------------------------- */
