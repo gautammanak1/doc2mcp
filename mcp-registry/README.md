@@ -48,6 +48,33 @@ Set these on the deployed app (Vercel → Environment Variables):
 > a member of the `doc2mcp` GitHub organization. A token from any other
 > account will be rejected by the registry's permission check.
 
+### Setting `MCP_REGISTRY_GITHUB_TOKEN` (read this first)
+
+The token is a **secret**. It lives only in the deploy environment — never in
+this repo, `server.json`, `.env` files committed to git, or any README.
+
+1. Create a fine-grained / classic GitHub PAT on an account that is a member
+   of the [`doc2mcp`](https://github.com/doc2mcp) org. Minimum scope:
+   `read:org` (classic) so the registry can verify org membership.
+2. Add it to the app deployment — **Vercel → Project → Settings →
+   Environment Variables** — for the `Production` (and optionally `Preview`)
+   environments:
+
+   ```bash
+   # via the Vercel CLI, if you prefer
+   vercel env add MCP_REGISTRY_GITHUB_TOKEN production
+   # then paste the token value when prompted
+   ```
+
+3. Redeploy. New conversions will auto-publish; existing ones publish on
+   their next re-sync.
+
+> **If a token ever leaks** (pasted in chat, a log, a screenshot, a commit),
+> treat it as compromised: revoke it immediately at
+> <https://github.com/settings/tokens>, then generate a fresh one and update
+> the environment variable. GitHub also auto-revokes tokens it detects in
+> public commits.
+
 ## Gateway entry (this folder)
 
 The files here mirror the separate

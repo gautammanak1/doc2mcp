@@ -2,26 +2,47 @@
 
 # doc2mcp
 
-**Paste any docs URL. Get a Cursor-ready MCP server in seconds.**
+### Documentation infrastructure for AI agents
 
-No install, no API keys to share, no local clone. Powered by ASI1.
+**Paste any docs URL → get a hosted, Cursor-ready MCP server in under 60 seconds.**
+
+No install. No local clone. No API keys to hand over. Powered by ASI1.
 
 ![doc2mcp social preview](./public/og-image.png)
 
-[Live](https://doc2mcp.site) · [Docs](https://doc2mcp.site/docs) · [Pricing](https://doc2mcp.site/pricing)
+[**Live**](https://doc2mcp.site) · [Docs](https://doc2mcp.site/docs) · [Pricing](https://doc2mcp.site/pricing) · [Comparison](https://doc2mcp.site/comparison)
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org)
+[![MCP](https://img.shields.io/badge/Model_Context_Protocol-SDK-7c3aed)](https://modelcontextprotocol.io)
+[![Registry](https://img.shields.io/badge/MCP_Registry-io.github.doc2mcp-2563eb)](https://registry.modelcontextprotocol.io/?search=doc2mcp)
+[![License](https://img.shields.io/badge/License-Apache_2.0-green)](#license)
 
 </div>
 
 ---
 
-## What it does
+## Why doc2mcp
 
-doc2mcp turns any documentation site into a hosted **Model Context Protocol (MCP)** server that AI clients like Cursor, Claude Desktop, and Windsurf can read in real time.
+LLMs hallucinate APIs because docs are written for humans, not agents. doc2mcp
+turns documentation into the **runtime your AI editor actually calls** — a
+hosted Model Context Protocol server with typed tools, semantic retrieval, and
+live sync. Not a docs website. Not a copy-paste snippet. Real infrastructure.
 
-1. Paste a docs URL — LangChain, Stripe, your own — in the chat with the **doc2mcp** toggle on.
-2. The server crawls the site (Mintlify, Docusaurus, OpenAPI JSON/YAML, GitHub repos, plain HTML), preserving code blocks and chunking by heading.
-3. You get a remote MCP URL + Bearer token. Paste it into Cursor's `mcp.json` and reload.
-4. Ask Cursor anything about those docs.
+```
+ Documentation → Crawling → Knowledge processing → Retrieval → MCP generation → AI agents
+```
+
+## How it works
+
+1. Paste a docs URL — LangChain, Stripe, your own — in the chat with the
+   **doc2mcp** toggle on.
+2. The pipeline crawls the site (Mintlify, Docusaurus, OpenAPI JSON/YAML,
+   GitHub repos, GitBook, plain HTML), preserving code blocks and chunking by
+   heading.
+3. You get a remote MCP URL + Bearer token. Paste it into Cursor's `mcp.json`
+   and reload.
+4. Every generated MCP is **auto-published to the official MCP Registry** under
+   `io.github.doc2mcp/<slug>` and listed in the marketplace.
 
 ```json
 {
@@ -57,12 +78,32 @@ doc2mcp turns any documentation site into a hosted **Model Context Protocol (MCP
 - **Raw `.md` / `.mdx`** URLs
 - **Plain HTML** — with Jina Reader fallback for SPA-rendered docs
 
+## Auto-publishing to the MCP Registry
+
+Every project that finishes processing is published to the
+[official MCP Registry](https://registry.modelcontextprotocol.io) under the
+platform-owned namespace `io.github.doc2mcp/*`. Versions auto-increment from
+the project's last-sync timestamp — re-crawl your docs and a fresh registry
+version ships with zero manual bumps.
+
+This is opt-in by configuration and degrades gracefully: if
+`MCP_REGISTRY_GITHUB_TOKEN` is not set, publishing is a no-op and the pipeline
+still succeeds. See [`mcp-registry/README.md`](./mcp-registry/README.md) for
+the full flow and security notes.
+
+### Listed & verified on
+
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/?search=doc2mcp)
+- [Claude Code Marketplaces](https://claudemarketplaces.com/mcp/doc2mcp/doc2mcp)
+- [PulseMCP](https://www.pulsemcp.com/servers/doc2mcp/serverjson)
+
 ## Architecture
 
 - **Next.js 16** App Router + Cache Components + Turbopack
 - **ASI1** for crawling analysis, tool compression, and `ask_documentation`
 - **Supabase Postgres** for project storage, sessions, chunks
-- **Streamable HTTP MCP** (JSON-RPC 2.0) at `/api/mcp/<projectId>/mcp` — no stdio
+- **Streamable HTTP MCP** (JSON-RPC 2.0) at `/api/mcp/<projectId>/mcp` — no stdio required
+- **`@modelcontextprotocol/sdk`** powers the generated self-hosted server export
 - **Heading-aware chunker** + BM25-like search
 - **Web search providers** (optional) — Tavily / Brave / Exa to enrich thin SPA pages
 - **Jina Reader** (free) — fallback for JavaScript-rendered docs
@@ -81,9 +122,10 @@ pnpm dev
 
 Open <http://localhost:3000>.
 
-### Required env vars
+### Environment variables
 
 ```env
+# Core
 AUTH_SECRET=...                 # openssl rand -base64 32
 ASI_ONE_API_KEY=...             # https://api.asi1.ai
 
@@ -93,6 +135,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 POSTGRES_URL=...                # Supabase pooler URI
 
+# MCP Registry auto-publish (optional — no-op if unset)
+MCP_REGISTRY_GITHUB_TOKEN=...   # token for a member of the doc2mcp GitHub org
+
 # Optional — improves crawl quality for SPA / sparse docs
 TAVILY_API_KEY=
 BRAVE_SEARCH_API_KEY=
@@ -101,6 +146,9 @@ JINA_API_KEY=
 FIRECRAWL_API_KEY=
 ```
 
+> **Never commit secrets.** `MCP_REGISTRY_GITHUB_TOKEN` and all keys above
+> belong in `.env.local` (gitignored) or your host's environment settings.
+
 ## Deploy to Vercel
 
 1. Fork / clone this repo, push to your GitHub.
@@ -108,29 +156,34 @@ FIRECRAWL_API_KEY=
 3. Add the env vars above in **Settings → Environment Variables**.
 4. Deploy. doc2mcp runs on Vercel Functions out of the box.
 
-Set `NEXT_PUBLIC_APP_URL` to your deployed domain so generated MCP configs point at the right host.
+Set `NEXT_PUBLIC_APP_URL` to your deployed domain so generated MCP configs
+point at the right host. Leave it **unset on Preview** so per-branch preview
+URLs resolve correctly for auth.
 
 ## Stack
 
 | | |
 |---|---|
 | Framework | Next.js 16, React 19, Turbopack |
-| AI | ASI1 (`asi1` by default) |
+| AI | ASI1 (`asi1` by default) · Fetch.ai |
 | Database | Supabase Postgres |
 | Auth | NextAuth 5 (credentials + guest) |
 | UI | Tailwind v4, shadcn/ui, Framer Motion, Streamdown |
 | Lint | Ultracite (Biome) |
-| MCP SDK | `@modelcontextprotocol/sdk` |
+| MCP | `@modelcontextprotocol/sdk` + official MCP Registry |
 
-## CI
+## CI / CD
 
-Single GitHub Actions workflow ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every push and PR:
+A single GitHub Actions workflow ([.github/workflows/ci.yml](.github/workflows/ci.yml))
+runs on every push and PR:
 
 - TypeScript type-check (`tsc --noEmit --skipLibCheck`)
 - Ultracite / Biome lint (`pnpm check`)
 - Next.js production build (`pnpm exec next build`)
 
-Hosting is on Vercel — preview deploys per branch, production on `main`.
+Branching: feature branches cut from `staging` → PR → `staging` preview for QA
+→ `main` → tagged release to production. Preview deploys are created per branch
+and support full login.
 
 ## License
 

@@ -390,15 +390,57 @@ export function ComparisonSection() {
         </div>
 
         <ManualVsDoc2McpTable />
-        <div className="mt-16 mb-10 text-center">
+
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <TrustStrip />
+          <Link
+            className="inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-2 font-medium text-sm text-violet-700 transition-colors hover:bg-violet-500/20 dark:text-violet-200"
+            href="/comparison"
+          >
+            <Network className="size-4" />
+            See the full market comparison
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function MarketMatrixSection() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <section
+      className="relative py-16 sm:py-24"
+      id="market-matrix"
+      ref={sectionRef}
+    >
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
+        <div className="mb-10 text-center">
           <span className="inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
             <span className="h-px w-8 bg-foreground/30" />
             Market matrix
             <span className="h-px w-8 bg-foreground/30" />
           </span>
-          <h3 className="mt-4 font-display text-2xl tracking-tight sm:text-3xl">
+          <h2 className="mt-4 font-display text-2xl tracking-tight sm:text-4xl">
             And how we compare to other MCP tooling
-          </h3>
+          </h2>
           <TrustStrip />
         </div>
 
