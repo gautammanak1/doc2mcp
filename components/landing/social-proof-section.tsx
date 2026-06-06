@@ -43,32 +43,10 @@ const TRUST: Trust[] = [
     icon: GitBranch,
   },
   {
-    id: "asi1",
-    metric: "ASI1",
-    label: "AI engine under the hood",
+    id: "speed",
+    metric: "< 60s",
+    label: "Docs to a live MCP",
     icon: Sparkles,
-  },
-];
-
-type PoweredBy = {
-  id: string;
-  name: string;
-  detail: string;
-  url: string;
-};
-
-const POWERED_BY: PoweredBy[] = [
-  {
-    id: "asi1",
-    name: "ASI1",
-    detail: "LLM for crawling, compression & answers",
-    url: "https://asi1.ai",
-  },
-  {
-    id: "fetchai",
-    name: "Fetch.ai",
-    detail: "Agentic AI infrastructure",
-    url: "https://fetch.ai",
   },
 ];
 
@@ -155,34 +133,6 @@ export function SocialProofSection() {
             );
           })}
         </ul>
-
-        <div className="mt-10 flex flex-col items-center gap-3">
-          <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
-            Powered by
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-2.5">
-            {POWERED_BY.map((p) => (
-              <a
-                className="group inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 backdrop-blur-xl transition-all hover:border-violet-500/40 hover:bg-violet-500/5"
-                href={p.url}
-                key={p.id}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <Sparkles
-                  aria-hidden="true"
-                  className="size-3.5 text-violet-500 dark:text-violet-300"
-                />
-                <span className="font-display font-semibold text-foreground text-sm">
-                  {p.name}
-                </span>
-                <span className="hidden text-muted-foreground text-xs sm:inline">
-                  {p.detail}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );

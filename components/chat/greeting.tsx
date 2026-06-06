@@ -18,7 +18,6 @@ export const Greeting = () => {
         transition={{ delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
         Ask anything — or toggle doc2mcp and paste a docs URL to build an MCP.
-        Powered by ASI1.
       </motion.div>
     </div>
   );

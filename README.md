@@ -6,7 +6,7 @@
 
 **Paste any docs URL → get a hosted, Cursor-ready MCP server in under 60 seconds.**
 
-No install. No local clone. No API keys to hand over. Powered by ASI1.
+No install. No local clone. No API keys to hand over.
 
 ![doc2mcp social preview](./public/og-image.png)
 
@@ -165,7 +165,7 @@ URLs resolve correctly for auth.
 | | |
 |---|---|
 | Framework | Next.js 16, React 19, Turbopack |
-| AI | ASI1 (`asi1` by default) · Fetch.ai |
+| AI | ASI1 (`asi1` by default) |
 | Database | Supabase Postgres |
 | Auth | NextAuth 5 (credentials + guest) |
 | UI | Tailwind v4, shadcn/ui, Framer Motion, Streamdown |
