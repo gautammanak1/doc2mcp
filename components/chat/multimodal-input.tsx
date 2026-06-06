@@ -144,7 +144,12 @@ function PureMultimodalInput({
   const setDoc2mcpMode = setPersistedDoc2mcpMode;
   const [doc2mcpLoading, setDoc2mcpLoading] = useState(false);
   const { user } = useSupabaseAuth();
-  const isGuest = guestRegex.test(user?.email ?? "");
+  // Anonymous Supabase users have no email on the client, so the synthesized
+  // `guest-…` address only exists server-side. Detect the anonymous flag too,
+  // otherwise guests are mis-read as regular users and skip the chat-only /
+  // 5-query guardrails (and would be allowed to attempt MCP generation).
+  const isGuest =
+    !user || user.is_anonymous === true || guestRegex.test(user.email ?? "");
 
   useEffect(() => {
     if (textareaRef.current) {

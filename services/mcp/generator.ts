@@ -1,7 +1,88 @@
 import { getDoc2McpBaseUrl } from "@/lib/doc2mcp/app-url";
 import { deriveMcpServerSlug } from "@/lib/doc2mcp/naming";
-import type { CompressedTool, McpServerConfig } from "@/types/platform";
+import type {
+  CompressedTool,
+  McpServerConfig,
+  McpToolDefinition,
+} from "@/types/platform";
 import { DOC_MCP_TOOLS } from "./doc-tools";
+
+/** Max docs-relative custom tools to surface on top of the base nav tools. */
+const MAX_CUSTOM_TOOLS = 10;
+
+/**
+ * Coerce any AI-extracted parameter shape into a valid JSON-Schema object.
+ *
+ * The crawler/LLM sometimes emits `required` as a sibling of `inputSchema`
+ * (instead of inside it) or omits `properties` entirely — both produce
+ * malformed tool definitions that confuse MCP hosts. This normalizes every
+ * tool to `{ type: "object", properties: {...}, required?: [...] }`.
+ */
+function normalizeToolSchema(schema: unknown): Record<string, unknown> {
+  if (!schema || typeof schema !== "object") {
+    return { type: "object", properties: {} };
+  }
+  const source = schema as Record<string, unknown>;
+  const properties =
+    source.properties && typeof source.properties === "object"
+      ? (source.properties as Record<string, unknown>)
+      : {};
+  const out: Record<string, unknown> = { type: "object", properties };
+  if (Array.isArray(source.required)) {
+    const required = source.required.filter(
+      (key): key is string => typeof key === "string"
+    );
+    if (required.length > 0) {
+      out.required = required;
+    }
+  }
+  return out;
+}
+
+/**
+ * Build the final tool list for a project: the standard documentation
+ * navigation tools plus the docs-relative tools doc2mcp inferred from the
+ * crawl — deduped by name so the same tool never appears twice.
+ */
+function buildToolList(compressed: CompressedTool[]): McpToolDefinition[] {
+  const seen = new Set<string>();
+  const tools: McpToolDefinition[] = [];
+
+  const add = (tool: McpToolDefinition) => {
+    const name = (tool.name ?? "").trim();
+    if (!name || seen.has(name)) {
+      return;
+    }
+    seen.add(name);
+    tools.push({
+      name,
+      description: tool.description ?? "",
+      inputSchema: normalizeToolSchema(tool.inputSchema),
+    });
+  };
+
+  for (const tool of DOC_MCP_TOOLS) {
+    add(tool);
+  }
+
+  let added = 0;
+  for (const tool of compressed) {
+    if (added >= MAX_CUSTOM_TOOLS) {
+      break;
+    }
+    const before = seen.size;
+    add({
+      name: tool.name,
+      description: tool.description,
+      inputSchema: tool.parameters as Record<string, unknown> | undefined,
+    });
+    if (seen.size > before) {
+      added += 1;
+    }
+  }
+
+  return tools;
+}
 
 export type McpGeneratorOptions = {
   projectId: string;
@@ -41,16 +122,7 @@ export function generateMcpConfig(
   const serverSlug = resolveServerSlug(options) || "docs";
   const serverEntry = buildMcpServerEntry(options);
 
-  const customTools = (options.compressedTools ?? []).map((t) => ({
-    name: t.name,
-    description: t.description,
-    inputSchema: (t.parameters as Record<string, unknown>) ?? {
-      type: "object",
-      properties: {},
-    },
-  }));
-
-  const tools = [...DOC_MCP_TOOLS, ...customTools];
+  const tools = buildToolList(options.compressedTools ?? []);
 
   return {
     name: serverSlug,
