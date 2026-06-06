@@ -8,6 +8,7 @@ import {
   Layers,
   Minus,
   Network,
+  ShieldCheck,
   Sparkles,
   Workflow,
   X,
@@ -287,29 +288,40 @@ function TrustStrip({ compact = false }: { compact?: boolean }) {
   return (
     <div
       className={cn(
-        "mx-auto flex flex-wrap items-center justify-center gap-2.5",
+        "mx-auto w-full max-w-3xl overflow-hidden rounded-2xl border border-border/60 bg-card/40 backdrop-blur-xl",
         compact ? "mt-6" : "mt-8"
       )}
     >
-      <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em]">
-        Listed &amp; verified on
-      </span>
-      {TRUST_LISTINGS.map((listing) => (
-        <a
-          className="group inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-card/50 px-3 py-1.5 text-xs backdrop-blur-xl transition-colors hover:border-violet-500/40 hover:bg-violet-500/5"
-          href={listing.url}
-          key={listing.id}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          <BadgeCheck className="size-3.5 text-violet-600 dark:text-violet-300" />
-          <span className="font-medium text-foreground">{listing.label}</span>
-          <span className="hidden font-mono text-[10px] text-muted-foreground sm:inline">
-            {listing.detail}
-          </span>
-          <ExternalLink className="size-3 text-muted-foreground transition-colors group-hover:text-foreground" />
-        </a>
-      ))}
+      <div className="flex items-center justify-center gap-2 border-border/40 border-b bg-muted/20 px-4 py-2">
+        <ShieldCheck className="size-3.5 text-violet-600 dark:text-violet-300" />
+        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+          Listed &amp; verified on
+        </span>
+      </div>
+      <div className="grid grid-cols-1 divide-y divide-border/40 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        {TRUST_LISTINGS.map((listing) => (
+          <a
+            className="group flex items-center gap-2.5 px-4 py-3 transition-colors hover:bg-violet-500/5"
+            href={listing.url}
+            key={listing.id}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 ring-1 ring-violet-500/20 dark:text-violet-300">
+              <BadgeCheck className="size-4" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-medium text-foreground text-sm">
+                {listing.label}
+              </span>
+              <span className="block truncate font-mono text-[10px] text-muted-foreground">
+                {listing.detail}
+              </span>
+            </span>
+            <ExternalLink className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

@@ -36,6 +36,20 @@
       "when": 1780353600000,
       "tag": "0006_contact_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780500000000,
+      "tag": "0007_teams",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1780501000000,
+      "tag": "0008_platform_runtime",
+      "breakpoints": true
     }
   ]
 }

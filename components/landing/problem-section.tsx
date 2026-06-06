@@ -6,10 +6,13 @@ import {
   Bot,
   ClipboardX,
   Clock,
+  Code2,
+  FileWarning,
   Ghost,
+  GitBranch,
+  Link2Off,
   Sparkles,
 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const PAIN_POINTS = [
@@ -36,6 +39,37 @@ const PAIN_POINTS = [
     title: "Manual MCP work",
     body: "Hand-coding MCP tools per product is slow, brittle, and falls behind every changelog. Engineering hours, not infra.",
     accent: "from-rose-500/30 to-orange-500/30",
+  },
+];
+
+const ISSUE_CARDS = [
+  {
+    icon: FileWarning,
+    code: "404",
+    label: "Page not found",
+    tone: "border-rose-500/30 bg-rose-500/[0.06] text-rose-200",
+    iconTone: "text-rose-300",
+  },
+  {
+    icon: Link2Off,
+    code: "DEAD LINK",
+    label: "Broken reference",
+    tone: "border-amber-500/30 bg-amber-500/[0.06] text-amber-200",
+    iconTone: "text-amber-300",
+  },
+  {
+    icon: GitBranch,
+    code: "v1 ≠ v2",
+    label: "Version mismatch",
+    tone: "border-violet-500/30 bg-violet-500/[0.06] text-violet-200",
+    iconTone: "text-violet-300",
+  },
+  {
+    icon: Code2,
+    code: "NO EXAMPLE",
+    label: "Missing snippet",
+    tone: "border-cyan-500/30 bg-cyan-500/[0.06] text-cyan-200",
+    iconTone: "text-cyan-300",
   },
 ];
 
@@ -115,53 +149,90 @@ export function ProblemSection() {
         </motion.div>
 
         <div className="mt-12 grid grid-cols-1 items-start gap-10 sm:mt-16 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
-          {/* Visual: the chaos image with floating glitch chips */}
+          {/* Visual: a crafted "AI working with broken docs" terminal panel */}
           <motion.div
-            className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl border border-border/60 bg-black"
+            className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c16] via-[#08080f] to-[#05050a] p-4 shadow-2xl ring-1 ring-white/5 sm:p-5"
             initial={{ opacity: 0, scale: 0.96, y: 20 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
             viewport={{ once: true, amount: 0.3 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
           >
-            <Image
-              alt="Glass cards labelled 404 Page Not Found, Deprecated, Version Mismatch, Needle in Haystack and Missing Examples orbiting a glowing orb representing an exhausted developer"
-              className="size-full object-cover"
-              fill={true}
-              sizes="(min-width: 1024px) 640px, 90vw"
-              src="/landing/problem-docs-v2.png"
-            />
-
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-black/40 via-transparent to-violet-500/10"
+              className="-top-24 -right-16 pointer-events-none absolute size-56 rounded-full bg-rose-500/15 blur-3xl"
             />
 
-            {/* Floating glitch chips overlayed on the image */}
-            <FloatingChip className="top-6 left-6" delay={0.4} tone="rose">
-              404 doc not found
-            </FloatingChip>
-            <FloatingChip className="top-12 right-8" delay={0.7} tone="amber">
-              deprecated in v2.4
-            </FloatingChip>
-            <FloatingChip
-              className="bottom-20 left-10"
-              delay={1.0}
-              tone="violet"
+            {/* Window chrome */}
+            <div className="relative flex items-center gap-2 border-white/10 border-b pb-3">
+              <span className="size-2.5 rounded-full bg-rose-400/80" />
+              <span className="size-2.5 rounded-full bg-amber-400/80" />
+              <span className="size-2.5 rounded-full bg-emerald-400/80" />
+              <span className="ml-2 inline-flex items-center gap-1.5 font-mono text-[10px] text-white/40 uppercase tracking-wider">
+                <Bot className="size-3" />
+                ai-assistant · context: none
+              </span>
+            </div>
+
+            {/* Faux conversation: a confident wrong answer */}
+            <div className="relative space-y-3 pt-4">
+              <div className="ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-white/[0.08] px-3.5 py-2 text-[12px] text-white/80 leading-relaxed">
+                How do I create a user with the SDK?
+              </div>
+              <div className="max-w-[90%] rounded-2xl rounded-bl-sm border border-rose-500/30 bg-rose-500/[0.07] px-3.5 py-2.5">
+                <p className="font-mono text-[12px] text-rose-100/90 leading-relaxed">
+                  Sure — call{" "}
+                  <span className="rounded bg-rose-500/20 px-1 py-0.5">
+                    client.users.create(...)
+                  </span>
+                </p>
+                <p className="mt-1.5 inline-flex items-center gap-1.5 font-mono text-[10px] text-rose-300/80 uppercase tracking-wider">
+                  <AlertTriangle className="size-3" />
+                  method removed in v2.4
+                </p>
+              </div>
+            </div>
+
+            {/* Issue cards grid */}
+            <motion.div
+              className="relative mt-4 grid grid-cols-2 gap-2.5"
+              initial="hidden"
+              transition={{ staggerChildren: 0.1, delayChildren: 0.2 }}
+              viewport={{ once: true, amount: 0.4 }}
+              whileInView="visible"
             >
-              missing example
-            </FloatingChip>
-            <FloatingChip className="bottom-8 right-10" delay={1.3} tone="cyan">
-              needle in a haystack
-            </FloatingChip>
+              {ISSUE_CARDS.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <motion.div
+                    className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 backdrop-blur-md ${card.tone}`}
+                    key={card.code}
+                    variants={{
+                      hidden: { opacity: 0, y: 10 },
+                      visible: { opacity: 1, y: 0 },
+                    }}
+                  >
+                    <Icon className={`size-4 shrink-0 ${card.iconTone}`} />
+                    <div className="min-w-0">
+                      <p className="font-mono text-[11px] uppercase tracking-wider">
+                        {card.code}
+                      </p>
+                      <p className="truncate text-[11px] text-white/50">
+                        {card.label}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
 
             {/* Scanline */}
             {!reduce && (
               <motion.div
-                animate={{ y: ["-10%", "110%"] }}
+                animate={{ y: ["-20%", "120%"] }}
                 aria-hidden="true"
-                className="pointer-events-none absolute right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-violet-400/40 to-transparent"
+                className="pointer-events-none absolute right-0 left-0 h-px bg-gradient-to-r from-transparent via-rose-400/40 to-transparent"
                 transition={{
-                  duration: 6,
+                  duration: 5,
                   repeat: Number.POSITIVE_INFINITY,
                   ease: "linear",
                 }}
@@ -169,7 +240,7 @@ export function ProblemSection() {
             )}
 
             {/* Live "wrong AI output" ticker */}
-            <div className="absolute right-4 bottom-4 left-4 rounded-xl border border-rose-500/30 bg-black/80 p-3 backdrop-blur-md">
+            <div className="relative mt-4 rounded-xl border border-rose-500/30 bg-black/40 p-3">
               <div className="flex items-center gap-2">
                 <Bot className="size-3.5 text-rose-400" />
                 <p className="font-mono text-[10px] text-rose-300/90 uppercase tracking-wider">
@@ -252,48 +323,6 @@ export function ProblemSection() {
         </motion.div>
       </div>
     </section>
-  );
-}
-
-function FloatingChip({
-  children,
-  className,
-  delay,
-  tone,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay: number;
-  tone: "rose" | "amber" | "violet" | "cyan";
-}) {
-  const reduce = useReducedMotion();
-  const toneClass = {
-    rose: "border-rose-500/40 bg-rose-500/15 text-rose-100",
-    amber: "border-amber-500/40 bg-amber-500/15 text-amber-100",
-    violet: "border-violet-500/40 bg-violet-500/15 text-violet-100",
-    cyan: "border-cyan-500/40 bg-cyan-500/15 text-cyan-100",
-  }[tone];
-
-  return (
-    <motion.span
-      animate={
-        reduce
-          ? { opacity: 1, y: 0 }
-          : { opacity: [0, 1, 1, 0.85], y: [-4, 0, 0, -2] }
-      }
-      className={`absolute inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-md ${toneClass} ${className ?? ""}`}
-      initial={{ opacity: 0, y: -8 }}
-      transition={{
-        duration: 4.5,
-        delay,
-        repeat: reduce ? 0 : Number.POSITIVE_INFINITY,
-        repeatType: "reverse",
-        ease: "easeInOut",
-      }}
-    >
-      <span className="size-1 rounded-full bg-current opacity-60" />
-      {children}
-    </motion.span>
   );
 }
 
