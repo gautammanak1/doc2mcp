@@ -14,6 +14,14 @@ export type InstallPayload = {
   serverName: string;
 };
 
+function unwrapConfig(value: Record<string, unknown>): Record<string, unknown> {
+  const nested = value.config;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+    return nested as Record<string, unknown>;
+  }
+  return value;
+}
+
 export async function installToClient(
   client: CliClient,
   configPath: string,
@@ -21,28 +29,28 @@ export async function installToClient(
 ): Promise<void> {
   if (client === "cursor") {
     const existing = await readJsonFile(configPath);
-    const merged = mergeMcpServers(existing, payload.cursor);
+    const merged = mergeMcpServers(existing, unwrapConfig(payload.cursor));
     await writeJsonFile(configPath, merged);
     return;
   }
 
   if (client === "vscode") {
     const existing = await readJsonFile(configPath);
-    const merged = mergeVscodeMcp(existing, payload.vscode);
+    const merged = mergeVscodeMcp(existing, unwrapConfig(payload.vscode));
     await writeJsonFile(configPath, merged);
     return;
   }
 
   if (client === "windsurf") {
     const existing = await readJsonFile(configPath);
-    const merged = mergeMcpServers(existing, payload.windsurf);
+    const merged = mergeMcpServers(existing, unwrapConfig(payload.windsurf));
     await writeJsonFile(configPath, merged);
     return;
   }
 
   if (client === "claude") {
     const existing = await readJsonFile(configPath);
-    const merged = mergeMcpServers(existing, payload.claude);
+    const merged = mergeMcpServers(existing, unwrapConfig(payload.claude));
     await writeJsonFile(configPath, merged);
   }
 }

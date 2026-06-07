@@ -6,22 +6,10 @@ export type CliInstallBundle = {
   serverName: string;
   endpointUrl: string;
   mcpToken: string;
-  cursor: {
-    pathHint: "~/.cursor/mcp.json or ./.cursor/mcp.json";
-    config: Record<string, unknown>;
-  };
-  vscode: {
-    pathHint: "./.vscode/mcp.json";
-    config: Record<string, unknown>;
-  };
-  windsurf: {
-    pathHint: "~/.codeium/windsurf/mcp_config.json";
-    config: Record<string, unknown>;
-  };
-  claude: {
-    pathHint: "Claude Desktop config (platform-specific)";
-    config: Record<string, unknown>;
-  };
+  cursor: Record<string, unknown>;
+  vscode: Record<string, unknown>;
+  windsurf: Record<string, unknown>;
+  claude: Record<string, unknown>;
 };
 
 function readArtifacts(value: unknown): ProjectArtifacts | null {
@@ -71,25 +59,13 @@ export function buildCliInstallBundle(
     serverName: installTargets.serverName,
     endpointUrl: installTargets.endpointUrl,
     mcpToken,
-    cursor: {
-      pathHint: "~/.cursor/mcp.json or ./.cursor/mcp.json",
-      config: cursorConfig,
-    },
-    vscode: {
-      pathHint: "./.vscode/mcp.json",
-      config: vscodeConfig,
-    },
-    windsurf: {
-      pathHint: "~/.codeium/windsurf/mcp_config.json",
-      config: windsurfArtifact
-        ? (JSON.parse(windsurfArtifact.content) as Record<string, unknown>)
-        : {},
-    },
-    claude: {
-      pathHint: "Claude Desktop config (platform-specific)",
-      config: claudeArtifact
-        ? (JSON.parse(claudeArtifact.content) as Record<string, unknown>)
-        : {},
-    },
+    cursor: cursorConfig,
+    vscode: vscodeConfig,
+    windsurf: windsurfArtifact
+      ? (JSON.parse(windsurfArtifact.content) as Record<string, unknown>)
+      : {},
+    claude: claudeArtifact
+      ? (JSON.parse(claudeArtifact.content) as Record<string, unknown>)
+      : {},
   };
 }
