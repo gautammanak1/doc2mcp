@@ -12,6 +12,7 @@
   "files": {
     "includes": [
       "**/*",
+      "!cli",
       "!components/ai-elements",
       "!components/elements",
       "!components/ui",

@@ -3,7 +3,7 @@ name: PR
 on:
   pull_request:
     types: [opened, edited, reopened, synchronize]
-    branches: [main, master]
+    branches: [main, master, staging]
 
 # Only the latest push per PR needs checking.
 concurrency:

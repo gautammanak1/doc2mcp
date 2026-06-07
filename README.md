@@ -57,6 +57,20 @@ live sync. Not a docs website. Not a copy-paste snippet. Real infrastructure.
 }
 ```
 
+## CLI
+
+Install the terminal client and run the same conversion pipeline from your shell:
+
+```bash
+npm install -g doc2mcp
+doc2mcp login
+doc2mcp https://docs.example.com
+```
+
+The CLI uses browser-based device auth, shares your web account limits, auto-lists
+ready MCPs in the marketplace, and can write configs to Cursor, VS Code, Claude
+Desktop, and Windsurf. See [`cli/README.md`](./cli/README.md) for full usage.
+
 ## MCP tools
 
 | Tool | What it does |

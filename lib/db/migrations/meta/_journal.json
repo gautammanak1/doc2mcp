@@ -50,6 +50,13 @@
       "when": 1780501000000,
       "tag": "0008_platform_runtime",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1780600000000,
+      "tag": "0009_cli",
+      "breakpoints": true
     }
   ]
 }

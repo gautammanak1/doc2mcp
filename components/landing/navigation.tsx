@@ -38,6 +38,7 @@ import { useSupabaseAuth } from "@/lib/supabase/auth";
 
 const NAV_LINKS = [
   { name: "Features", href: "/#features" },
+  { name: "Playground", href: "/playground" },
   { name: "Marketplace", href: "/marketplace" },
   { name: "Compare", href: "/comparison" },
   { name: "Pricing", href: "/pricing" },

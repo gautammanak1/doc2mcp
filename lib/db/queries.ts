@@ -25,6 +25,8 @@ import {
   aiWorkflow,
   type Chat,
   chat,
+  cliAuthRequest,
+  cliToken,
   type DBMessage,
   document,
   mcpServer,
@@ -769,11 +771,13 @@ export async function createPlatformProject({
   name,
   sourceUrl,
   sourceType,
+  source = "web",
 }: {
   userId: string;
   name: string;
   sourceUrl?: string;
   sourceType: PlatformProject["sourceType"];
+  source?: PlatformProject["source"];
 }) {
   const [project] = await db
     .insert(platformProject)
@@ -782,6 +786,7 @@ export async function createPlatformProject({
       name,
       sourceUrl,
       sourceType,
+      source,
       status: "pending",
       logs: [],
     })
@@ -1396,4 +1401,141 @@ export async function getSubscriptionByRazorpayOrderId(orderId: string) {
     .where(eq(subscription.razorpayOrderId, orderId))
     .limit(1);
   return rows[0] ?? null;
+}
+
+export async function createCliAuthRequest({
+  deviceCodeHash,
+  userCode,
+  expiresAt,
+}: {
+  deviceCodeHash: string;
+  userCode: string;
+  expiresAt: Date;
+}) {
+  const [row] = await db
+    .insert(cliAuthRequest)
+    .values({
+      deviceCodeHash,
+      userCode,
+      status: "pending",
+      expiresAt,
+    })
+    .returning();
+  return row;
+}
+
+export async function getCliAuthRequestByDeviceCodeHash({
+  deviceCodeHash,
+}: {
+  deviceCodeHash: string;
+}) {
+  const [row] = await db
+    .select()
+    .from(cliAuthRequest)
+    .where(eq(cliAuthRequest.deviceCodeHash, deviceCodeHash))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function getCliAuthRequestByUserCode({
+  userCode,
+}: {
+  userCode: string;
+}) {
+  const [row] = await db
+    .select()
+    .from(cliAuthRequest)
+    .where(eq(cliAuthRequest.userCode, userCode.toUpperCase()))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function approveCliAuthRequest({
+  id,
+  userId,
+  cliTokenId,
+  issuedTokenPlaintext,
+}: {
+  id: string;
+  userId: string;
+  cliTokenId: string;
+  issuedTokenPlaintext: string;
+}) {
+  const [row] = await db
+    .update(cliAuthRequest)
+    .set({
+      status: "approved",
+      userId,
+      cliTokenId,
+      issuedTokenPlaintext,
+    })
+    .where(eq(cliAuthRequest.id, id))
+    .returning();
+  return row ?? null;
+}
+
+export async function consumeCliAuthIssuedToken({ id }: { id: string }) {
+  const [row] = await db
+    .update(cliAuthRequest)
+    .set({ issuedTokenPlaintext: null })
+    .where(eq(cliAuthRequest.id, id))
+    .returning();
+  return row ?? null;
+}
+
+export async function expireStaleCliAuthRequests() {
+  await db
+    .update(cliAuthRequest)
+    .set({ status: "expired" })
+    .where(
+      and(
+        eq(cliAuthRequest.status, "pending"),
+        lt(cliAuthRequest.expiresAt, new Date())
+      )
+    );
+}
+
+export async function createCliToken({
+  userId,
+  tokenHash,
+  name = "CLI",
+}: {
+  userId: string;
+  tokenHash: string;
+  name?: string;
+}) {
+  const [row] = await db
+    .insert(cliToken)
+    .values({
+      userId,
+      tokenHash,
+      name,
+    })
+    .returning();
+  return row;
+}
+
+export async function getCliTokenByHash({ tokenHash }: { tokenHash: string }) {
+  const [row] = await db
+    .select()
+    .from(cliToken)
+    .where(eq(cliToken.tokenHash, tokenHash))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function touchCliTokenLastUsed({ id }: { id: string }) {
+  await db
+    .update(cliToken)
+    .set({ lastUsedAt: new Date() })
+    .where(eq(cliToken.id, id));
+}
+
+export async function revokeCliTokensForUser({ userId }: { userId: string }) {
+  await db
+    .update(cliToken)
+    .set({ revokedAt: new Date() })
+    .where(
+      and(eq(cliToken.userId, userId), sql`${cliToken.revokedAt} IS NULL`)
+    );
 }

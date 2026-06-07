@@ -166,6 +166,9 @@ export const platformProject = pgTable("PlatformProject", {
   crawlData: json("crawlData"),
   logs: json("logs"),
   tokenUsage: json("tokenUsage"),
+  source: varchar("source", { enum: ["web", "cli"] })
+    .notNull()
+    .default("web"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
@@ -480,3 +483,38 @@ export const creditLedger = pgTable("CreditLedger", {
 });
 
 export type CreditLedger = InferSelectModel<typeof creditLedger>;
+
+/** CliAuthRequest — device authorization flow for the doc2mcp CLI. */
+export const cliAuthRequest = pgTable("CliAuthRequest", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  deviceCodeHash: varchar("deviceCodeHash", { length: 128 }).notNull().unique(),
+  userCode: varchar("userCode", { length: 16 }).notNull().unique(),
+  status: varchar("status", {
+    enum: ["pending", "approved", "denied", "expired"],
+  })
+    .notNull()
+    .default("pending"),
+  userId: uuid("userId").references(() => user.id),
+  cliTokenId: uuid("cliTokenId"),
+  /** Cleared after the CLI polls and receives the PAT once. */
+  issuedTokenPlaintext: text("issuedTokenPlaintext"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  expiresAt: timestamp("expiresAt").notNull(),
+});
+
+export type CliAuthRequest = InferSelectModel<typeof cliAuthRequest>;
+
+/** CliToken — personal access token for doc2mcp CLI (PAT). */
+export const cliToken = pgTable("CliToken", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  tokenHash: varchar("tokenHash", { length: 128 }).notNull().unique(),
+  name: varchar("name", { length: 120 }).notNull().default("CLI"),
+  lastUsedAt: timestamp("lastUsedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  revokedAt: timestamp("revokedAt"),
+});
+
+export type CliToken = InferSelectModel<typeof cliToken>;

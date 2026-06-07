@@ -20,12 +20,12 @@ const SCRIPT: Line[] = [
   { text: "npm install -g doc2mcp", kind: "input" },
   { text: "doc2mcp login", kind: "input" },
   { text: "✓ Authenticated as you@dev", kind: "success" },
-  { text: "doc2mcp convert https://stripe.com/docs", kind: "input" },
+  { text: "doc2mcp https://stripe.com/docs", kind: "input" },
   { text: "→ crawling 142 pages", kind: "output" },
   { text: "→ generating MCP · 11 tools", kind: "output" },
   { text: "✓ MCP ready in 47s", kind: "success" },
-  { text: "doc2mcp connect cursor", kind: "input" },
-  { text: "✓ Added doc2mcp to Cursor — restart to use", kind: "success" },
+  { text: "→ Install into Cursor? Yes", kind: "output" },
+  { text: "✓ Added to ~/.cursor/mcp.json", kind: "success" },
 ];
 
 const TYPE_MS = 38;
@@ -93,7 +93,7 @@ export function CliSection() {
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 font-mono text-[10px] text-violet-700 uppercase tracking-[0.16em] dark:text-violet-300">
               <span className="size-1.5 animate-pulse rounded-full bg-violet-500" />
-              CLI · coming soon
+              CLI · available now
             </span>
             <h2 className="mt-5 font-display font-semibold text-3xl text-foreground tracking-tight sm:text-5xl">
               The whole pipeline,
@@ -101,9 +101,9 @@ export function CliSection() {
               <span className="text-muted-foreground">from your terminal.</span>
             </h2>
             <p className="mt-5 max-w-md text-base text-muted-foreground leading-relaxed">
-              Coming soon: a first-class command line for doc2mcp. Convert docs,
-              regenerate MCPs, and wire them into Cursor, Claude, and Windsurf —
-              all scriptable, all in CI.
+              Install the doc2mcp CLI to convert docs, generate MCPs, and wire
+              them into Cursor, VS Code, Claude, and Windsurf — all from your
+              terminal with the same limits as the web app.
             </p>
             <ul className="mt-7 space-y-3 text-sm">
               {[
@@ -120,16 +120,11 @@ export function CliSection() {
               ))}
             </ul>
             <div className="mt-7 flex flex-wrap items-center gap-3">
-              <a
-                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-violet-500/40 bg-violet-500/10 px-3.5 font-medium text-violet-700 text-xs transition-colors hover:bg-violet-500/15 dark:text-violet-200"
-                href="https://calendly.com/doc2mcp/30min"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Get early access →
-              </a>
+              <code className="inline-flex h-9 items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-3.5 font-mono text-violet-700 text-xs dark:text-violet-200">
+                npm i -g doc2mcp
+              </code>
               <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-                npm i -g doc2mcp · soon
+                doc2mcp login · doc2mcp &lt;docs-url&gt;
               </p>
             </div>
           </div>
