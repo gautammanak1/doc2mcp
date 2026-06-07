@@ -29,6 +29,20 @@ npm install -g doc2mcp
 > Install with **`-g`** (global). The `doc2mcp` command only lands on your `PATH` when installed globally.
 > If you ran `npm i doc2mcp` (without `-g`) and see `command not found: doc2mcp`, either reinstall with `-g`
 > or run it through your package runner: `npx doc2mcp <docs-url>`.
+>
+> If `npm install -g doc2mcp` succeeds but `doc2mcp` is still `command not found`, your npm global bin folder is
+> not on PATH. Run:
+>
+> ```bash
+> echo 'export PATH="'$(npm prefix -g)'/bin:$PATH"' >> ~/.zshrc
+> source ~/.zshrc
+> ```
+>
+> Quick no-setup option:
+>
+> ```bash
+> npx doc2mcp login
+> ```
 
 Other package managers:
 
@@ -54,6 +68,9 @@ doc2mcp https://docs.stripe.com
 
 # 4. Chat with your docs without leaving the terminal
 doc2mcp chat
+
+# Or paste a docs URL directly into chat mode
+doc2mcp chat https://uagents.fetch.ai/docs
 ```
 
 That's it. The same hosted pipeline powers the [website](https://doc2mcp.site), so a project you
@@ -69,7 +86,7 @@ create in the CLI shows up in your dashboard and marketplace too.
 | [`doc2mcp whoami`](#doc2mcp-whoami) | Show the account you're signed in as |
 | [`doc2mcp list`](#doc2mcp-list) | List the MCP projects on your account |
 | [`doc2mcp install <projectId>`](#doc2mcp-install-projectid) | Install an existing MCP into your editors |
-| [`doc2mcp chat [projectId]`](#doc2mcp-chat-projectid) | Chat with your docs in the terminal (AI answers from your MCP) |
+| [`doc2mcp chat [target]`](#doc2mcp-chat-target) | Chat with your docs in the terminal; target can be a project ID or docs URL |
 | `doc2mcp --version` | Print the installed CLI version |
 | `doc2mcp --help` | Show usage and all commands |
 
@@ -166,15 +183,18 @@ Existing config is merged, not overwritten.
 
 ---
 
-### `doc2mcp chat [projectId]`
+### `doc2mcp chat [target]`
 
 Chat with your docs **right from the terminal**. doc2mcp answers natural-language questions from
 the crawled documentation — with cited sources — using the project's hosted MCP (the same
-`ask_documentation` tool your editor calls). This is the Playground experience, in your shell.
+`ask_documentation` tool your editor calls). This is the Playground experience, in a Claude Code-style shell loop.
 
 ```bash
-# Interactive: choose a project, then ask anything
+# Interactive: paste a docs URL, project ID, or choose an existing MCP
 doc2mcp chat
+
+# Paste a docs URL directly: doc2mcp converts it, then starts chat
+doc2mcp chat https://uagents.fetch.ai/docs
 
 # Skip the picker by passing a project ID
 doc2mcp chat prj_123abc
@@ -184,7 +204,7 @@ doc2mcp chat prj_123abc -m "How do I authenticate requests?"
 ```
 
 - With no arguments, you pick from your `ready` projects.
-- Type `/exit` (or press Esc) to leave an interactive session.
+- Type `/exit` to leave an interactive session.
 - Each answer lists the source pages it used so you can verify it.
 
 ## Configuration
@@ -198,7 +218,8 @@ doc2mcp chat prj_123abc -m "How do I authenticate requests?"
 
 | Symptom | Fix |
 | --- | --- |
-| `command not found: doc2mcp` | You installed locally or your shell cached PATH. Reinstall with `npm i -g doc2mcp`, then run `hash -r` or open a new terminal. You can also use `npx doc2mcp <url>`. |
+| `command not found: doc2mcp` | You installed locally or npm's global bin is not on PATH. Use `npx doc2mcp <url>`, or add `$(npm prefix -g)/bin` to PATH in `~/.zshrc`. |
+| `pnpm add -g doc2mcp` says `ERR_PNPM_NO_GLOBAL_BIN_DIR` | Run `pnpm setup`, then `source ~/.zshrc`, then retry `pnpm add -g doc2mcp`. |
 | Browser doesn't open on `login` | Copy the printed URL into your browser manually, then approve. |
 | `login` can't reach the server | Confirm you're online; for self-hosting set `DOC2MCP_API_URL` to your instance. |
 | "Limit reached" | You've hit your plan's monthly conversion limit (shared across CLI and web). |

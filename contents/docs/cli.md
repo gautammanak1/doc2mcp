@@ -29,6 +29,19 @@ npm install -g doc2mcp
 > install. If you run `npm i doc2mcp` (without `-g`) and get `command not found: doc2mcp`, either
 > reinstall with `-g` or run it through your package runner: `npx doc2mcp <docs-url>`.
 
+If global install succeeds but your shell still cannot find `doc2mcp`, add npm's global bin to zsh:
+
+```bash
+echo 'export PATH="'$(npm prefix -g)'/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+No PATH setup needed:
+
+```bash
+npx doc2mcp login
+```
+
 Works with any package manager (`pnpm add -g`, `yarn global add`, `bun add -g`) and requires
 **Node.js 18+**.
 
@@ -45,6 +58,9 @@ doc2mcp https://docs.stripe.com
 
 # 4. Chat with your docs right in the terminal
 doc2mcp chat
+
+# Or paste a docs URL directly into chat mode
+doc2mcp chat https://uagents.fetch.ai/docs
 ```
 
 ## Command reference
@@ -117,15 +133,19 @@ You choose which detected clients to write to:
 
 Existing config is merged, never overwritten.
 
-### `doc2mcp chat [projectId]`
+### `doc2mcp chat [target]`
 
 Chat with your docs **without leaving the terminal**. doc2mcp answers natural‑language
 questions from the crawled documentation (with cited sources) using the project's hosted MCP —
-the same `ask_documentation` tool your editor calls.
+the same `ask_documentation` tool your editor calls. The prompt is a Claude Code-style terminal
+loop: paste a docs URL, choose an existing project, then ask questions.
 
 ```bash
-# Interactive: pick a project, then ask away
+# Interactive: paste a docs URL, project ID, or choose an existing MCP
 doc2mcp chat
+
+# Paste a docs URL directly: doc2mcp converts it, then starts chat
+doc2mcp chat https://uagents.fetch.ai/docs
 
 # Target a specific project
 doc2mcp chat prj_123abc
@@ -134,8 +154,8 @@ doc2mcp chat prj_123abc
 doc2mcp chat prj_123abc -m "How do I authenticate requests?"
 ```
 
-- Run `doc2mcp chat` with no arguments to choose from your `ready` projects.
-- Type `/exit` (or press Esc) to leave an interactive session.
+- Run `doc2mcp chat` with no arguments to paste a docs URL or choose from your `ready` projects.
+- Type `/exit` to leave an interactive session.
 - Answers include source page titles and URLs so you can verify them.
 
 ## Configuration
@@ -149,7 +169,8 @@ doc2mcp chat prj_123abc -m "How do I authenticate requests?"
 
 | Symptom | Fix |
 | --- | --- |
-| `command not found: doc2mcp` | Installed locally or the shell cached PATH — use `npm i -g doc2mcp`, then run `hash -r` or open a new terminal. `npx doc2mcp <url>` also works |
+| `command not found: doc2mcp` | Installed locally or npm's global bin is not on PATH. Use `npx doc2mcp <url>`, or add `$(npm prefix -g)/bin` to PATH in `~/.zshrc` |
+| `pnpm add -g doc2mcp` says `ERR_PNPM_NO_GLOBAL_BIN_DIR` | Run `pnpm setup`, then `source ~/.zshrc`, then retry `pnpm add -g doc2mcp` |
 | Browser won't open on `login` | Copy the printed URL into your browser and approve manually |
 | `login` can't reach the server | Check connectivity; for self-hosting set `DOC2MCP_API_URL` |
 | "Limit reached" | Monthly conversion limit hit (shared across CLI and web) |

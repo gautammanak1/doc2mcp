@@ -27,6 +27,10 @@ type ProjectDetail = {
   } | null;
 };
 
+type ConvertOptions = {
+  offerInstall: boolean;
+};
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -40,65 +44,76 @@ function printStatus(detail: ProjectDetail): void {
   );
 }
 
-export async function runConvert(sourceUrl: string): Promise<void> {
-  try {
-    await ensureLoggedIn();
+export async function convertUrlToProject(
+  sourceUrl: string,
+  options: ConvertOptions = { offerInstall: true }
+): Promise<ProjectDetail | null> {
+  await ensureLoggedIn();
 
-    process.stdout.write(`${pc.bold("Converting")} ${sourceUrl}\n`);
+  process.stdout.write(`${pc.bold("Converting")} ${sourceUrl}\n`);
 
-    const created = await apiFetch<ConvertResponse>("/api/cli/convert", {
-      method: "POST",
-      body: JSON.stringify({ sourceUrl }),
-    });
+  const created = await apiFetch<ConvertResponse>("/api/cli/convert", {
+    method: "POST",
+    body: JSON.stringify({ sourceUrl }),
+  });
 
-    process.stdout.write(`${pc.dim("Project:")} ${created.id}\n`);
+  process.stdout.write(`${pc.dim("Project:")} ${created.id}\n`);
 
-    let delayMs = 2000;
-    const terminal = new Set(["ready", "error"]);
+  let delayMs = 2000;
+  const terminal = new Set(["ready", "error"]);
 
-    while (true) {
-      const detail = await apiFetch<ProjectDetail>(
-        `/api/cli/projects/${created.id}`
-      );
-      printStatus(detail);
-
-      if (terminal.has(detail.project.status)) {
-        process.stdout.write("\n");
-        break;
-      }
-
-      await sleep(delayMs);
-      delayMs = Math.min(delayMs + 1000, 10_000);
-    }
-
-    const finalDetail = await apiFetch<ProjectDetail>(
+  while (true) {
+    const detail = await apiFetch<ProjectDetail>(
       `/api/cli/projects/${created.id}`
     );
+    printStatus(detail);
 
-    if (finalDetail.project.status === "error") {
-      const lastLog = finalDetail.project.logs.at(-1);
-      process.stderr.write(
-        `${pc.red("Conversion failed.")}${lastLog ? ` ${lastLog.message}` : ""}\n`
-      );
-      process.exitCode = 1;
-      return;
+    if (terminal.has(detail.project.status)) {
+      process.stdout.write("\n");
+      break;
     }
 
-    if (!finalDetail.mcp || !finalDetail.install) {
-      process.stderr.write(`${pc.red("MCP ready but missing install bundle.")}\n`);
-      process.exitCode = 1;
-      return;
-    }
+    await sleep(delayMs);
+    delayMs = Math.min(delayMs + 1000, 10_000);
+  }
 
-    process.stdout.write(`\n${pc.green("MCP ready")}\n`);
-    process.stdout.write(`${pc.bold("Server:")} ${finalDetail.mcp.serverName}\n`);
-    process.stdout.write(`${pc.bold("URL:")} ${finalDetail.mcp.url}\n`);
-    process.stdout.write(`${pc.bold("Token:")} ${finalDetail.mcp.token}\n`);
-    process.stdout.write(
-      `${pc.dim("Also listed in the doc2mcp marketplace when ready.")}\n`
+  const finalDetail = await apiFetch<ProjectDetail>(
+    `/api/cli/projects/${created.id}`
+  );
+
+  if (finalDetail.project.status === "error") {
+    const lastLog = finalDetail.project.logs.at(-1);
+    process.stderr.write(
+      `${pc.red("Conversion failed.")}${lastLog ? ` ${lastLog.message}` : ""}\n`
     );
+    process.exitCode = 1;
+    return null;
+  }
 
+  if (!finalDetail.mcp || !finalDetail.install) {
+    process.stderr.write(`${pc.red("MCP ready but missing install bundle.")}\n`);
+    process.exitCode = 1;
+    return null;
+  }
+
+  process.stdout.write(`\n${pc.green("MCP ready")}\n`);
+  process.stdout.write(`${pc.bold("Server:")} ${finalDetail.mcp.serverName}\n`);
+  process.stdout.write(`${pc.bold("URL:")} ${finalDetail.mcp.url}\n`);
+  process.stdout.write(`${pc.bold("Token:")} ${finalDetail.mcp.token}\n`);
+  process.stdout.write(
+    `${pc.dim("Also listed in the doc2mcp marketplace when ready.")}\n`
+  );
+
+  if (options.offerInstall) {
     await promptInstall(finalDetail.install);
+  }
+
+  return finalDetail;
+}
+
+export async function runConvert(sourceUrl: string): Promise<void> {
+  try {
+    await convertUrlToProject(sourceUrl, { offerInstall: true });
   } catch (error) {
     printError(error);
     process.exitCode = 1;

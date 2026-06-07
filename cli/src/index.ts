@@ -54,11 +54,11 @@ program
   });
 
 program
-  .command("chat [projectId]")
-  .description("Chat with your docs in the terminal (AI answers from your MCP)")
+  .command("chat [target]")
+  .description("Chat with docs in the terminal; target can be a project id or docs URL")
   .option("-m, --message <text>", "Ask a single question and exit")
-  .action(async (projectId: string | undefined, options: { message?: string }) => {
-    await runChat(projectId, options);
+  .action(async (target: string | undefined, options: { message?: string }) => {
+    await runChat(target, options);
   });
 
 program

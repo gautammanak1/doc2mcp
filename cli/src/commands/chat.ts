@@ -1,7 +1,9 @@
-import { cancel, intro, isCancel, outro, select, text } from "@clack/prompts";
+import { createInterface } from "node:readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 import ora from "ora";
 import pc from "picocolors";
 import { ApiError, apiFetch, printError } from "../api.js";
+import { convertUrlToProject } from "./convert.js";
 import { ensureLoggedIn } from "./login.js";
 
 type ProjectSummary = {
@@ -30,38 +32,98 @@ type McpToolResult = {
   error?: { message?: string };
 };
 
-async function pickProject(explicitId?: string): Promise<ProjectDetail | null> {
-  if (explicitId) {
-    return await apiFetch<ProjectDetail>(`/api/cli/projects/${explicitId}`);
+function isDocsUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
   }
+}
 
+function createPrompt() {
+  return createInterface({ input, output });
+}
+
+async function readLine(prompt: string): Promise<string | null> {
+  const rl = createPrompt();
+  try {
+    const answer = await rl.question(prompt);
+    return answer.trim();
+  } catch {
+    return null;
+  } finally {
+    rl.close();
+  }
+}
+
+async function listReadyProjects(): Promise<ProjectSummary[]> {
   const data = await apiFetch<{ projects: ProjectSummary[] }>(
     "/api/cli/projects"
   );
-  const ready = data.projects.filter((p) => p.status === "ready");
+  return data.projects.filter((p) => p.status === "ready");
+}
+
+async function pickExistingProject(): Promise<ProjectDetail | null> {
+  const ready = await listReadyProjects();
 
   if (ready.length === 0) {
     process.stdout.write(
-      `${pc.yellow("No ready MCP projects yet.")} Create one: ${pc.bold("doc2mcp <docs-url>")}\n`
+      `${pc.yellow("No ready MCP projects yet.")} Paste a docs URL to create one.\n`
     );
     return null;
   }
 
-  const choice = await select({
-    message: "Which docs do you want to chat with?",
-    options: ready.map((p) => ({
-      value: p.id,
-      label: p.name,
-      hint: p.sourceUrl ?? undefined,
-    })),
+  process.stdout.write(`${pc.dim("Ready MCPs")}\n`);
+  ready.forEach((p, index) => {
+    process.stdout.write(
+      `  ${pc.cyan(String(index + 1).padStart(2, " "))}. ${pc.bold(p.name)} ${pc.dim(p.sourceUrl ?? p.id)}\n`
+    );
   });
 
-  if (isCancel(choice)) {
-    cancel("Cancelled.");
+  const choice = await readLine(
+    `${pc.bold(">")} choose number, paste URL, or paste project id: `
+  );
+  if (!choice) {
     return null;
   }
 
+  if (isDocsUrl(choice)) {
+    return await convertUrlToProject(choice, { offerInstall: false });
+  }
+
+  const chosenIndex = Number(choice);
+  if (Number.isInteger(chosenIndex) && chosenIndex > 0) {
+    const project = ready.at(chosenIndex - 1);
+    if (project) {
+      return await apiFetch<ProjectDetail>(`/api/cli/projects/${project.id}`);
+    }
+  }
+
   return await apiFetch<ProjectDetail>(`/api/cli/projects/${choice}`);
+}
+
+async function resolveProject(target?: string): Promise<ProjectDetail | null> {
+  if (target) {
+    if (isDocsUrl(target)) {
+      return await convertUrlToProject(target, { offerInstall: false });
+    }
+    return await apiFetch<ProjectDetail>(`/api/cli/projects/${target}`);
+  }
+
+  process.stdout.write(`${pc.bold("doc2mcp chat")}\n`);
+  process.stdout.write(
+    `${pc.dim("Paste a docs URL to create a new MCP, paste a project id, or press Enter to choose existing.")}\n\n`
+  );
+
+  const first = await readLine(`${pc.bold(">")} docs url or project id: `);
+  if (!first) {
+    return await pickExistingProject();
+  }
+  if (isDocsUrl(first)) {
+    return await convertUrlToProject(first, { offerInstall: false });
+  }
+  return await apiFetch<ProjectDetail>(`/api/cli/projects/${first}`);
 }
 
 async function askDocs(
@@ -100,14 +162,19 @@ async function askDocs(
 }
 
 function renderAnswer(answer: AskAnswer): void {
-  process.stdout.write(`\n${pc.cyan("◆")} ${answer.answer.trim()}\n`);
+  process.stdout.write(`\n${pc.cyan("╭─ doc2mcp")}\n`);
+  for (const line of answer.answer.trim().split("\n")) {
+    process.stdout.write(`${pc.cyan("│")} ${line}\n`);
+  }
   if (answer.sources && answer.sources.length > 0) {
-    process.stdout.write(`\n${pc.dim("Sources:")}\n`);
+    process.stdout.write(`${pc.cyan("│")}\n${pc.cyan("│")} ${pc.dim("Sources:")}\n`);
     for (const source of answer.sources.slice(0, 6)) {
-      process.stdout.write(`  ${pc.dim("•")} ${source.title} ${pc.dim(source.url)}\n`);
+      process.stdout.write(
+        `${pc.cyan("│")} ${pc.dim("•")} ${source.title} ${pc.dim(source.url)}\n`
+      );
     }
   }
-  process.stdout.write("\n");
+  process.stdout.write(`${pc.cyan("╰")}\n\n`);
 }
 
 async function answerOnce(
@@ -126,13 +193,13 @@ async function answerOnce(
 }
 
 export async function runChat(
-  projectId?: string,
+  target?: string,
   options: { message?: string } = {}
 ): Promise<void> {
   try {
     await ensureLoggedIn();
 
-    const detail = await pickProject(projectId);
+    const detail = await resolveProject(target);
     if (!detail) {
       return;
     }
@@ -152,26 +219,23 @@ export async function runChat(
       return;
     }
 
-    intro(
-      `${pc.bold(`Chatting with ${detail.project.name}`)} ${pc.dim("— ask anything about these docs")}`
+    process.stdout.write(
+      `\n${pc.cyan("╭─")} ${pc.bold(`Chatting with ${detail.project.name}`)}\n`
     );
     process.stdout.write(
-      `${pc.dim("Type your question. Use /exit to leave.")}\n`
+      `${pc.cyan("│")} ${pc.dim("Ask anything about these docs. Type /exit to leave.")}\n`
     );
+    process.stdout.write(`${pc.cyan("╰")}\n\n`);
 
     let active = true;
     while (active) {
-      const question = await text({
-        message: "You",
-        placeholder: "How do I authenticate requests?",
-      });
-
-      if (isCancel(question)) {
+      const question = await readLine(`${pc.bold(">")} `);
+      if (question === null) {
         active = false;
         break;
       }
 
-      const trimmed = String(question).trim();
+      const trimmed = question.trim();
       if (!trimmed) {
         continue;
       }
@@ -183,7 +247,7 @@ export async function runChat(
       await answerOnce(mcp, trimmed);
     }
 
-    outro(pc.dim("Bye — your docs MCP stays live for your editor."));
+    process.stdout.write(`${pc.dim("Bye — your docs MCP stays live for your editor.")}\n`);
   } catch (error) {
     printError(error);
     process.exitCode = 1;

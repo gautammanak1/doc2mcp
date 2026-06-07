@@ -82,9 +82,9 @@ const COMMANDS = [
   },
   {
     id: "chat",
-    command: "doc2mcp chat",
+    command: "doc2mcp chat https://uagents.fetch.ai/docs",
     title: "Chat in terminal",
-    desc: "Ask questions and get cited answers without leaving your shell.",
+    desc: "Paste a docs URL, convert it, then ask questions in the same shell.",
   },
 ] as const;
 
@@ -251,17 +251,20 @@ export function CliChat() {
               </span>
             </h2>
             <p className="mt-5 max-w-md text-base text-muted-foreground leading-relaxed">
+              Paste a docs URL into{" "}
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground">
                 doc2mcp chat
               </code>{" "}
-              answers natural-language questions from your crawled docs — with
-              cited sources — using the same hosted MCP your editor calls.
+              and it converts the site, opens a Claude Code-style loop, and
+              answers from your crawled docs with cited sources.
             </p>
             <div className="mt-7 max-w-sm">
               <CommandPill
-                command="doc2mcp chat"
+                command="doc2mcp chat https://uagents.fetch.ai/docs"
                 copied={copiedKey === "chat"}
-                onCopy={() => copy("doc2mcp chat", "chat")}
+                onCopy={() =>
+                  copy("doc2mcp chat https://uagents.fetch.ai/docs", "chat")
+                }
               />
             </div>
           </div>
@@ -279,8 +282,10 @@ export function CliChat() {
             <div className="space-y-2 p-5 font-mono text-[12.5px] leading-relaxed">
               <p className="text-zinc-100">
                 <span className="text-violet-400">$</span> doc2mcp chat
+                https://uagents.fetch.ai/docs
               </p>
-              <p className="text-sky-300/90">◆ Chatting with Stripe docs…</p>
+              <p className="text-sky-300/90">→ Converting docs into an MCP…</p>
+              <p className="text-emerald-400">✓ Chatting with uagents docs…</p>
               <p className="text-zinc-100">
                 <span className="text-emerald-400">you</span> how do I create a
                 PaymentIntent?
