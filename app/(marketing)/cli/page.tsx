@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { CliLanding } from "@/components/cli/cli-landing";
+import {
+  CliChat,
+  CliCommands,
+  CliEditors,
+  CliHero,
+} from "@/components/cli/cli-landing";
+import { CliSection } from "@/components/landing/cli-section";
+import { CtaSection } from "@/components/landing/cta-section";
+import { FooterSection } from "@/components/landing/footer-section";
+import { LandingNavigation } from "@/components/landing/navigation";
 
 export const metadata: Metadata = {
   title: "doc2mcp CLI — Turn Docs Into MCP From Your Terminal",
@@ -8,5 +17,16 @@ export const metadata: Metadata = {
 };
 
 export default function CliPage() {
-  return <CliLanding />;
+  return (
+    <main className="landing-page relative min-h-screen overflow-x-hidden noise-overlay">
+      <LandingNavigation />
+      <CliHero />
+      <CliSection />
+      <CliCommands />
+      <CliEditors />
+      <CliChat />
+      <CtaSection />
+      <FooterSection />
+    </main>
+  );
 }

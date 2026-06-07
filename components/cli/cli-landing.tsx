@@ -1,476 +1,303 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
+import {
+  ArrowUpRight,
+  Check,
+  Copy,
+  MessageSquare,
+  Package,
+  Terminal,
+} from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
+const NPM_PACKAGE_URL = "https://www.npmjs.com/package/doc2mcp";
 const INSTALL_COMMAND = "npm install -g doc2mcp";
 
-const HERO_ASCII = `██████╗  ██████╗  ██████╗██████╗ ███╗   ███╗ ██████╗██████╗
-██╔══██╗██╔═══██╗██╔════╝╚════██╗████╗ ████║██╔════╝██╔══██╗
-██║  ██║██║   ██║██║      █████╔╝██╔████╔██║██║     ██████╔╝
-██║  ██║██║   ██║██║     ██╔═══╝ ██║╚██╔╝██║██║     ██╔═══╝
-██████╔╝╚██████╔╝╚██████╗███████╗██║ ╚═╝ ██║╚██████╗██║
-╚═════╝  ╚═════╝  ╚═════╝╚══════╝╚═╝     ╚═╝ ╚═════╝╚═╝`;
-
-type TerminalSequence = {
-  command: string;
-  outputs: string[];
-};
-
-const TERMINAL_SEQUENCES: TerminalSequence[] = [
-  {
-    command: "doc2mcp login",
-    outputs: [
-      "Opening your browser to authorize…",
-      "Approved as you@company.com",
-      "You're logged in.",
-    ],
-  },
-  {
-    command: "doc2mcp https://docs.stripe.com",
-    outputs: [
-      "Crawling docs.stripe.com…",
-      "Indexed 248 pages into a hosted MCP",
-      "MCP ready: https://doc2mcp.site/api/mcp/stripe",
-    ],
-  },
-  {
-    command: "doc2mcp install stripe",
-    outputs: [
-      "Select editors: Cursor, VS Code",
-      "Wrote MCP config to ~/.cursor/mcp.json",
-      "Installed — restart your editor to use it.",
-    ],
-  },
-  {
-    command: "doc2mcp chat",
-    outputs: [
-      "Chatting with Stripe docs…",
-      "you: how do I create a PaymentIntent?",
-      "doc2mcp: POST /v1/payment_intents with amount + currency.",
-    ],
-  },
-];
-
-const COMMANDS = TERMINAL_SEQUENCES.map((sequence) => sequence.command);
-
-const IDES = [
-  { name: "cursor", desc: "AI-powered editor" },
-  { name: "vscode", desc: "VS Code + Copilot" },
-  { name: "claude", desc: "Claude Desktop" },
-  { name: "windsurf", desc: "Codeium Windsurf" },
-  { name: "cline", desc: "Autonomous coding" },
-  { name: "any-mcp", desc: "Any MCP client" },
-] as const;
-
-const STEP_CARDS = [
-  {
-    id: "login",
-    step: "01",
-    title: "Authenticate",
-    desc: "Browser-based login — no API keys to copy around.",
-    command: "doc2mcp login",
-  },
-  {
-    id: "convert",
-    step: "02",
-    title: "Convert docs",
-    desc: "Point at any docs URL and get a hosted, token-secured MCP.",
-    command: "doc2mcp https://docs.stripe.com",
-  },
-  {
-    id: "chat",
-    step: "03",
-    title: "Chat in terminal",
-    desc: "Ask questions and get cited answers without leaving your shell.",
-    command: "doc2mcp chat",
-  },
-] as const;
-
-function useCopyState() {
-  const [copied, setCopied] = useState<Record<string, boolean>>({});
+function useCopy() {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const copy = useCallback((text: string, key: string) => {
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        setCopied((prev) => ({ ...prev, [key]: true }));
-        setTimeout(() => {
-          setCopied((prev) => ({ ...prev, [key]: false }));
-        }, 2000);
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey(null), 1600);
       })
       .catch(() => {
-        setCopied((prev) => ({ ...prev, [key]: false }));
+        setCopiedKey(null);
       });
   }, []);
-  return { copied, copy };
+  return { copiedKey, copy };
 }
 
-function CopyButton({
+function CommandPill({
   command,
   copied,
   onCopy,
-  label,
 }: {
   command: string;
   copied: boolean;
   onCopy: () => void;
-  label?: string;
 }) {
   return (
     <button
-      className="group relative w-full cursor-pointer text-left sm:w-auto"
+      aria-label={`Copy ${command}`}
+      className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border/60 bg-zinc-950/90 px-4 py-3 text-left transition-colors hover:border-violet-500/40"
       onClick={onCopy}
       type="button"
     >
-      <span className="absolute inset-0 border border-gray-600 bg-gray-900/20 transition-all duration-300 group-hover:border-white" />
-      <span className="relative flex translate-x-0.5 translate-y-0.5 items-center gap-2 border border-gray-400 bg-transparent px-6 py-3 font-medium text-white text-sm transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:border-white group-hover:bg-gray-900/30">
+      <span className="flex items-center gap-2.5 font-mono text-sm text-zinc-100">
+        <span className="text-violet-400">$</span>
+        {command}
+      </span>
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-white/5 text-zinc-400 transition-colors group-hover:text-zinc-100">
         {copied ? (
-          <Check className="h-4 w-4 text-green-400" />
+          <Check className="size-3.5 text-emerald-400" strokeWidth={3} />
         ) : (
-          <Copy className="h-4 w-4 text-gray-400" />
+          <Copy className="size-3.5" />
         )}
-        <span className="text-gray-500">$</span>
-        <span>{label ?? command}</span>
       </span>
     </button>
   );
 }
 
-function useTypingTerminal() {
-  const [currentCommand, setCurrentCommand] = useState(0);
-  const [typed, setTyped] = useState("");
-  const [lines, setLines] = useState<string[]>([]);
-  const [executing, setExecuting] = useState(false);
+const COMMANDS = [
+  {
+    id: "login",
+    command: "doc2mcp login",
+    title: "Authenticate",
+    desc: "Browser-based login — no API keys to copy around.",
+  },
+  {
+    id: "convert",
+    command: "doc2mcp https://docs.stripe.com",
+    title: "Convert docs",
+    desc: "Point at any docs URL and get a hosted, token-secured MCP.",
+  },
+  {
+    id: "install",
+    command: "doc2mcp install <id>",
+    title: "Install into editors",
+    desc: "Wire the MCP into Cursor, VS Code, Claude, or Windsurf.",
+  },
+  {
+    id: "chat",
+    command: "doc2mcp chat",
+    title: "Chat in terminal",
+    desc: "Ask questions and get cited answers without leaving your shell.",
+  },
+] as const;
 
-  useEffect(() => {
-    const sequence = TERMINAL_SEQUENCES[currentCommand];
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-    setLines([]);
-    setTyped("");
-    setExecuting(false);
+const EDITORS = [
+  { name: "Cursor", desc: "AI-powered editor" },
+  { name: "VS Code", desc: "VS Code + Copilot" },
+  { name: "Claude Desktop", desc: "Anthropic Claude" },
+  { name: "Windsurf", desc: "Codeium Windsurf" },
+  { name: "Cline", desc: "Autonomous coding" },
+  { name: "Any MCP client", desc: "Open MCP transport" },
+] as const;
 
-    const command = sequence.command;
-    for (let i = 0; i <= command.length; i++) {
-      timeouts.push(
-        setTimeout(() => {
-          setTyped(command.slice(0, i));
-        }, i * 55)
-      );
-    }
-
-    const afterTyping = command.length * 55 + 400;
-    timeouts.push(
-      setTimeout(() => {
-        setExecuting(true);
-        setTyped("");
-        setLines((prev) => [...prev, `you@dev:~$ ${command}`]);
-      }, afterTyping)
-    );
-
-    sequence.outputs.forEach((output, index) => {
-      timeouts.push(
-        setTimeout(
-          () => {
-            setLines((prev) => [...prev, output]);
-          },
-          afterTyping + 600 + index * 700
-        )
-      );
-    });
-
-    timeouts.push(
-      setTimeout(
-        () => {
-          setCurrentCommand((prev) => (prev + 1) % COMMANDS.length);
-        },
-        afterTyping + 600 + sequence.outputs.length * 700 + 1800
-      )
-    );
-
-    return () => {
-      for (const id of timeouts) {
-        clearTimeout(id);
-      }
-    };
-  }, [currentCommand]);
-
-  return { currentCommand, typed, lines, executing };
-}
-
-function HeroTerminal() {
-  const { typed, lines, executing } = useTypingTerminal();
+export function CliHero() {
+  const { copiedKey, copy } = useCopy();
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="border border-gray-700 bg-gray-950 shadow-2xl">
-        <div className="flex items-center justify-between border-gray-700 border-b bg-gray-900 px-5 py-3">
-          <div className="flex items-center gap-3">
-            <span className="flex gap-2">
-              <span className="h-3 w-3 bg-red-500" />
-              <span className="h-3 w-3 bg-yellow-500" />
-              <span className="h-3 w-3 bg-green-500" />
+    <section className="relative overflow-hidden pt-32 pb-16 sm:pt-40 sm:pb-20">
+      <div className="relative mx-auto max-w-[1280px] px-6 lg:px-12">
+        <div className="mx-auto max-w-3xl text-center">
+          <a
+            className="group inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 font-mono text-[10px] text-violet-700 uppercase tracking-[0.16em] transition-colors hover:bg-violet-500/15 dark:text-violet-300"
+            href={NPM_PACKAGE_URL}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <Package className="size-3" />
+            CLI · available on npm
+            <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
+          <h1 className="mt-6 font-display font-semibold text-4xl text-foreground tracking-tight sm:text-6xl">
+            Turn any docs into an MCP,
+            <br />
+            <span className="text-muted-foreground">
+              right from your terminal.
             </span>
-            <span className="text-gray-400 text-sm">doc2mcp — terminal</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-            <span className="text-gray-500 text-xs">LIVE</span>
-          </div>
-        </div>
-        <div className="min-h-[260px] bg-black p-5 font-mono text-sm">
-          <div className="space-y-2">
-            {lines.map((line) => (
-              <div
-                className={
-                  line.startsWith("you@dev") ? "text-white" : "text-gray-300"
-                }
-                key={line}
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-base text-muted-foreground leading-relaxed sm:text-lg">
+            Paste a documentation URL — Stripe, Anthropic, your own — and
+            doc2mcp crawls it into a hosted, token-secured MCP server your
+            editor can call. Then chat with it without leaving the shell.
+          </p>
+          <div className="mx-auto mt-8 flex max-w-md flex-col items-center gap-3">
+            <CommandPill
+              command={INSTALL_COMMAND}
+              copied={copiedKey === "hero"}
+              onCopy={() => copy(INSTALL_COMMAND, "hero")}
+            />
+            <div className="flex items-center gap-3">
+              <Link
+                className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2 font-medium text-background text-sm transition-opacity hover:opacity-90"
+                href="/docs/cli"
               >
-                {line}
-              </div>
-            ))}
-            {executing ? (
-              <div className="flex items-center gap-2 text-gray-400">
-                <span className="h-1 w-1 animate-bounce rounded-full bg-gray-400" />
-                <span className="text-xs">working…</span>
-              </div>
-            ) : (
-              <div className="text-white">
-                <span className="text-green-400">you@dev</span>
-                <span className="text-gray-500">:</span>
-                <span className="text-blue-400">~</span>
-                <span>$ </span>
-                <span>{typed}</span>
-                <span className="animate-pulse">█</span>
-              </div>
-            )}
+                Read the docs
+                <ArrowUpRight className="size-3.5" />
+              </Link>
+              <a
+                className="inline-flex items-center gap-2 rounded-full border border-border/60 px-5 py-2 font-medium text-foreground text-sm transition-colors hover:bg-muted/50"
+                href={NPM_PACKAGE_URL}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                View on npm
+              </a>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-export function CliLanding() {
-  const { copied, copy } = useCopyState();
-  const matrix = useMemo(() => {
-    const chars = "DOC2MCP01█▓▒░▄▀".split("");
-    return Array.from({ length: 90 }, (_, i) => ({
-      id: `m-${i}`,
-      char: chars[i % chars.length],
-    }));
-  }, []);
-
+export function CliCommands() {
+  const { copiedKey, copy } = useCopy();
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black font-mono text-white">
-      <div className="pointer-events-none fixed inset-0 opacity-10">
-        <div className="grid h-full grid-cols-12 gap-1">
-          {matrix.map((cell) => (
-            <div className="animate-pulse text-gray-500 text-xs" key={cell.id}>
-              {cell.char}
+    <section className="relative py-20 sm:py-28">
+      <div className="relative mx-auto max-w-[1280px] px-6 lg:px-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="font-display font-semibold text-3xl text-foreground tracking-tight sm:text-4xl">
+            A handful of commands
+          </h2>
+          <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+            Authenticate, convert any docs site, install into your editor, and
+            chat with the result — all from your terminal.
+          </p>
+        </div>
+        <div className="mx-auto mt-12 grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2">
+          {COMMANDS.map((cmd) => (
+            <div
+              className="rounded-2xl border border-border/60 bg-card/40 p-6 transition-colors hover:border-violet-500/30"
+              key={cmd.id}
+            >
+              <h3 className="font-display font-semibold text-foreground text-lg">
+                {cmd.title}
+              </h3>
+              <p className="mt-2 mb-4 text-muted-foreground text-sm leading-relaxed">
+                {cmd.desc}
+              </p>
+              <CommandPill
+                command={cmd.command}
+                copied={copiedKey === cmd.id}
+                onCopy={() => copy(cmd.command, cmd.id)}
+              />
             </div>
           ))}
         </div>
       </div>
+    </section>
+  );
+}
 
-      <nav className="sticky top-0 z-10 border-gray-800 border-b bg-gray-950/95 p-4 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex gap-2">
-              <span className="h-3 w-3 bg-red-500" />
-              <span className="h-3 w-3 bg-yellow-500" />
-              <span className="h-3 w-3 bg-green-500" />
-            </span>
-            <Link className="flex items-center gap-2" href="/">
-              <span className="font-bold text-lg text-white">doc2mcp</span>
-              <span className="text-gray-400 text-sm">CLI</span>
-            </Link>
-          </div>
-          <div className="hidden items-center gap-8 md:flex">
-            <a className="text-gray-400 text-sm hover:text-white" href="#ides">
-              Editors
-            </a>
-            <a
-              className="text-gray-400 text-sm hover:text-white"
-              href="#commands"
-            >
-              Commands
-            </a>
-            <Link
-              className="text-gray-400 text-sm hover:text-white"
-              href="/docs/cli"
-            >
-              Docs
-            </Link>
-            <a
-              className="text-gray-400 text-sm hover:text-white"
-              href="https://www.npmjs.com/package/doc2mcp"
-              rel="noopener"
-              target="_blank"
-            >
-              npm
-            </a>
-          </div>
-          <CopyButton
-            command={INSTALL_COMMAND}
-            copied={copied["nav-install"] ?? false}
-            label="Install"
-            onCopy={() => copy(INSTALL_COMMAND, "nav-install")}
-          />
-        </div>
-      </nav>
-
-      <section className="relative px-6 py-20 lg:px-12">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-14 text-center">
-            <pre className="mb-8 inline-block font-bold text-[10px] text-white leading-none sm:text-sm lg:text-base">
-              {HERO_ASCII}
-            </pre>
-            <h1 className="mb-6 font-bold text-4xl leading-tight lg:text-6xl">
-              Turn any docs into an MCP,
-              <br />
-              right from your{" "}
-              <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                terminal
-              </span>
-              .
-            </h1>
-            <p className="mx-auto mb-8 max-w-3xl text-gray-300 text-lg leading-relaxed">
-              Paste a documentation URL — Stripe, Anthropic, your own — and
-              doc2mcp crawls it into a hosted, token-secured MCP server your
-              editor can call. Then chat with it without leaving the shell.
-            </p>
-            <div className="flex flex-col items-center justify-center gap-6 sm:flex-row">
-              <CopyButton
-                command={INSTALL_COMMAND}
-                copied={copied["hero-install"] ?? false}
-                onCopy={() => copy(INSTALL_COMMAND, "hero-install")}
-              />
-              <Link
-                className="group relative w-full sm:w-auto"
-                href="/docs/cli"
-              >
-                <span className="absolute inset-0 border-2 border-gray-600 border-dashed bg-gray-900/20 transition-all duration-300 group-hover:border-white" />
-                <span className="relative flex translate-x-1 translate-y-1 items-center gap-3 border-2 border-gray-400 border-dashed bg-transparent px-8 py-3 font-bold text-white transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:border-white">
-                  <span className="text-gray-400">→</span>
-                  <span>Read the docs</span>
-                </span>
-              </Link>
-            </div>
-          </div>
-          <HeroTerminal />
-        </div>
-      </section>
-
-      <section
-        className="border-gray-800 border-t px-6 py-16 lg:px-12"
-        id="ides"
-      >
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-10 text-center">
-            <h2 className="mb-3 font-bold text-3xl lg:text-4xl">
-              Installs into your editor
-            </h2>
-            <p className="text-gray-400 text-lg">
-              One command wires the MCP into the tools you already use.
-            </p>
-          </div>
-          <div className="border border-gray-800 bg-gray-950 shadow-xl">
-            <div className="flex items-center gap-3 border-gray-700 border-b bg-gray-900 px-5 py-3">
-              <span className="flex gap-2">
-                <span className="h-3 w-3 bg-red-500" />
-                <span className="h-3 w-3 bg-yellow-500" />
-                <span className="h-3 w-3 bg-green-500" />
-              </span>
-              <span className="text-gray-400 text-sm">doc2mcp install</span>
-            </div>
-            <div className="bg-black p-6">
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                {IDES.map((ide) => (
-                  <div
-                    className="flex items-center justify-between border border-transparent px-3 py-2 transition-all hover:border-gray-700 hover:bg-gray-900"
-                    key={ide.name}
-                  >
-                    <span className="flex items-center gap-3">
-                      <span className="text-green-400">✓</span>
-                      <span className="text-white">{ide.name}</span>
-                    </span>
-                    <span className="hidden text-gray-500 text-xs sm:block">
-                      {ide.desc}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="border-gray-800 border-t bg-gray-950/30 px-6 py-20 lg:px-12"
-        id="commands"
-      >
-        <div className="mx-auto max-w-5xl text-center">
-          <h2 className="mb-4 font-bold text-3xl lg:text-4xl">
-            Three commands to ship
+export function CliEditors() {
+  return (
+    <section className="relative border-border/40 border-y bg-muted/20 py-20 sm:py-28">
+      <div className="relative mx-auto max-w-[1280px] px-6 lg:px-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="font-display font-semibold text-3xl text-foreground tracking-tight sm:text-4xl">
+            Installs into your editor
           </h2>
-          <p className="mx-auto mb-12 max-w-2xl text-gray-400 text-lg">
-            Authenticate, convert any docs site, and chat with the result — all
-            from your terminal.
+          <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+            One command wires the MCP into the tools you already use — existing
+            config is merged, never overwritten.
           </p>
-          <div className="mb-12 grid grid-cols-1 gap-6 md:grid-cols-3">
-            {STEP_CARDS.map((card) => (
-              <div className="group relative h-full" key={card.id}>
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 transition-transform duration-300 group-hover:rotate-1" />
-                <div className="relative flex h-full flex-col justify-between border border-gray-700 bg-black p-6 transition-all duration-300 group-hover:border-white">
-                  <div>
-                    <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center border border-gray-600 bg-gray-900 group-hover:border-white">
-                      <span className="font-mono text-lg text-white">
-                        {card.step}
-                      </span>
-                    </div>
-                    <h3 className="mb-3 font-bold text-lg text-white">
-                      {card.title}
-                    </h3>
-                    <p className="mb-4 text-gray-400 text-sm leading-relaxed">
-                      {card.desc}
-                    </p>
-                  </div>
-                  <button
-                    className="flex cursor-pointer items-center justify-between border border-gray-700 bg-gray-900 p-2.5 text-left font-mono text-xs transition-colors hover:border-gray-500"
-                    onClick={() => copy(card.command, card.id)}
-                    type="button"
-                  >
-                    <span className="flex items-center gap-2">
-                      <span className="text-gray-500">$</span>
-                      <span className="text-white">{card.command}</span>
-                    </span>
-                    {copied[card.id] ? (
-                      <Check className="h-3 w-3 text-green-400" />
-                    ) : (
-                      <Copy className="h-3 w-3 text-gray-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-center">
-            <CopyButton
-              command={INSTALL_COMMAND}
-              copied={copied["cta-install"] ?? false}
-              onCopy={() => copy(INSTALL_COMMAND, "cta-install")}
-            />
-          </div>
         </div>
-      </section>
+        <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-3">
+          {EDITORS.map((editor) => (
+            <div
+              className="flex items-center gap-3 rounded-xl border border-border/60 bg-card/40 px-4 py-3"
+              key={editor.name}
+            >
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400">
+                <Check className="size-3" strokeWidth={3} />
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate font-medium text-foreground text-sm">
+                  {editor.name}
+                </span>
+                <span className="block truncate text-muted-foreground text-xs">
+                  {editor.desc}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-      <footer className="border-gray-800 border-t bg-gray-950 px-6 py-10 lg:px-12">
-        <div className="mx-auto max-w-7xl text-center text-gray-600 text-sm">
-          <p>doc2mcp CLI — paste docs, get an MCP, chat from your terminal.</p>
-          <p className="mt-2 text-gray-700">© 2026 doc2mcp</p>
+export function CliChat() {
+  const { copiedKey, copy } = useCopy();
+  return (
+    <section className="relative py-20 sm:py-28">
+      <div className="relative mx-auto max-w-[1280px] px-6 lg:px-12">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 font-mono text-[10px] text-violet-700 uppercase tracking-[0.16em] dark:text-violet-300">
+              <MessageSquare className="size-3" />
+              Playground · in your terminal
+            </span>
+            <h2 className="mt-5 font-display font-semibold text-3xl text-foreground tracking-tight sm:text-4xl">
+              Chat with your docs,
+              <br />
+              <span className="text-muted-foreground">
+                without the browser.
+              </span>
+            </h2>
+            <p className="mt-5 max-w-md text-base text-muted-foreground leading-relaxed">
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground">
+                doc2mcp chat
+              </code>{" "}
+              answers natural-language questions from your crawled docs — with
+              cited sources — using the same hosted MCP your editor calls.
+            </p>
+            <div className="mt-7 max-w-sm">
+              <CommandPill
+                command="doc2mcp chat"
+                copied={copiedKey === "chat"}
+                onCopy={() => copy("doc2mcp chat", "chat")}
+              />
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-zinc-950/90 shadow-2xl">
+            <div className="flex items-center gap-2 border-white/10 border-b px-4 py-2.5">
+              <span className="size-2.5 rounded-full bg-rose-400/80" />
+              <span className="size-2.5 rounded-full bg-amber-400/80" />
+              <span className="size-2.5 rounded-full bg-emerald-400/80" />
+              <p className="ml-2 flex items-center gap-1.5 font-mono text-[10px] text-zinc-400 uppercase tracking-[0.18em]">
+                <Terminal className="size-3" />
+                doc2mcp chat
+              </p>
+            </div>
+            <div className="space-y-2 p-5 font-mono text-[12.5px] leading-relaxed">
+              <p className="text-zinc-100">
+                <span className="text-violet-400">$</span> doc2mcp chat
+              </p>
+              <p className="text-sky-300/90">◆ Chatting with Stripe docs…</p>
+              <p className="text-zinc-100">
+                <span className="text-emerald-400">you</span> how do I create a
+                PaymentIntent?
+              </p>
+              <p className="text-zinc-300">
+                ◆ POST{" "}
+                <span className="text-violet-300">/v1/payment_intents</span>{" "}
+                with an <span className="text-violet-300">amount</span> and{" "}
+                <span className="text-violet-300">currency</span>.
+              </p>
+              <p className="text-zinc-500">
+                Sources: Create a PaymentIntent · stripe.com/docs/api
+              </p>
+            </div>
+          </div>
         </div>
-      </footer>
-    </div>
+      </div>
+    </section>
   );
 }
