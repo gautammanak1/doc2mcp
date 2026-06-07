@@ -1,10 +1,19 @@
 {
   "name": "doc2mcp",
-  "version": "0.1.13",
-  "description": "Generate documentation MCP servers from your terminal",
+  "version": "0.1.14",
+  "description": "Turn any documentation site into a hosted MCP server from your terminal — for Cursor, Claude, VS Code, Windsurf, and OpenAI agents.",
   "type": "module",
   "bin": {
     "doc2mcp": "./dist/index.js"
+  },
+  "homepage": "https://doc2mcp.site",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gautammanak1/doc2mcp.git",
+    "directory": "cli"
+  },
+  "bugs": {
+    "url": "https://github.com/gautammanak1/doc2mcp/issues"
   },
   "files": [
     "dist",
@@ -20,10 +29,19 @@
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "documentation",
+    "docs",
     "cli",
     "cursor",
-    "model-context-protocol"
+    "claude",
+    "windsurf",
+    "vscode",
+    "openai",
+    "ai",
+    "agents",
+    "rag",
+    "llm"
   ],
   "license": "MIT",
   "dependencies": {

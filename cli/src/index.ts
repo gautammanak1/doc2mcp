@@ -7,12 +7,15 @@ import { runConvert, runList } from "./commands/convert.js";
 import { runInstallCommand } from "./commands/install.js";
 import { runLogin } from "./commands/login.js";
 
+// Injected at build time by tsup `define` from package.json.
+declare const __CLI_VERSION__: string;
+
 const program = new Command();
 
 program
   .name("doc2mcp")
   .description("Generate documentation MCP servers from your terminal")
-  .version("0.1.0");
+  .version(__CLI_VERSION__, "-v, --version", "Print the installed CLI version");
 
 program
   .command("login")

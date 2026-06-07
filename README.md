@@ -59,17 +59,25 @@ live sync. Not a docs website. Not a copy-paste snippet. Real infrastructure.
 
 ## CLI
 
+[![npm version](https://img.shields.io/npm/v/doc2mcp?color=8b5cf6&label=doc2mcp&logo=npm)](https://www.npmjs.com/package/doc2mcp)
+[![npm downloads](https://img.shields.io/npm/dm/doc2mcp?color=8b5cf6&logo=npm)](https://www.npmjs.com/package/doc2mcp)
+
 Install the terminal client and run the same conversion pipeline from your shell:
 
 ```bash
-npm install -g doc2mcp
-doc2mcp login
+npm install -g doc2mcp   # global install puts `doc2mcp` on your PATH
+doc2mcp login            # browser-based device auth
 doc2mcp https://docs.example.com
 ```
 
+> Use `-g`. A local `npm i doc2mcp` won't expose the `doc2mcp` command — use `npx doc2mcp <url>` instead.
+
 The CLI uses browser-based device auth, shares your web account limits, auto-lists
 ready MCPs in the marketplace, and can write configs to Cursor, VS Code, Claude
-Desktop, and Windsurf. See [`cli/README.md`](./cli/README.md) for full usage.
+Desktop, and Windsurf.
+
+- 📦 npm: https://www.npmjs.com/package/doc2mcp
+- 📖 Full command reference: [`cli/README.md`](./cli/README.md) · [docs/cli](https://doc2mcp.site/docs/cli)
 
 ## MCP tools
 
