@@ -468,9 +468,7 @@ export function CliLanding() {
       <footer className="border-gray-800 border-t bg-gray-950 px-6 py-10 lg:px-12">
         <div className="mx-auto max-w-7xl text-center text-gray-600 text-sm">
           <p>doc2mcp CLI — paste docs, get an MCP, chat from your terminal.</p>
-          <p className="mt-2 text-gray-700">
-            © {new Date().getFullYear()} doc2mcp
-          </p>
+          <p className="mt-2 text-gray-700">© 2026 doc2mcp</p>
         </div>
       </footer>
     </div>
