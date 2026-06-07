@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/gautammanak1/doc2mcp/main/public/doc2mcp-cli-banner.png" alt="doc2mcp — turn any docs site into a hosted MCP server from your terminal" width="100%" />
+<img src="./assets/doc2mcp-cli-banner.png" alt="doc2mcp — turn any docs site into a hosted MCP server from your terminal" width="100%" />
 
 # doc2mcp
 
@@ -172,7 +172,7 @@ Existing config is merged, not overwritten.
 
 | Symptom | Fix |
 | --- | --- |
-| `command not found: doc2mcp` | You installed locally. Reinstall with `npm i -g doc2mcp`, or use `npx doc2mcp <url>`. |
+| `command not found: doc2mcp` | You installed locally or your shell cached PATH. Reinstall with `npm i -g doc2mcp`, then run `hash -r` or open a new terminal. You can also use `npx doc2mcp <url>`. |
 | Browser doesn't open on `login` | Copy the printed URL into your browser manually, then approve. |
 | `login` can't reach the server | Confirm you're online; for self-hosting set `DOC2MCP_API_URL` to your instance. |
 | "Limit reached" | You've hit your plan's monthly conversion limit (shared across CLI, web, and Playground). |

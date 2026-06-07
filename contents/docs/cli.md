@@ -125,7 +125,7 @@ Existing config is merged, never overwritten.
 
 | Symptom | Fix |
 | --- | --- |
-| `command not found: doc2mcp` | Installed locally — use `npm i -g doc2mcp` or `npx doc2mcp <url>` |
+| `command not found: doc2mcp` | Installed locally or the shell cached PATH — use `npm i -g doc2mcp`, then run `hash -r` or open a new terminal. `npx doc2mcp <url>` also works |
 | Browser won't open on `login` | Copy the printed URL into your browser and approve manually |
 | `login` can't reach the server | Check connectivity; for self-hosting set `DOC2MCP_API_URL` |
 | "Limit reached" | Monthly conversion limit hit (shared across CLI, web, and Playground) |

@@ -1,6 +1,6 @@
 {
   "name": "doc2mcp",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Turn any documentation site into a hosted MCP server from your terminal — for Cursor, Claude, VS Code, Windsurf, and OpenAI agents.",
   "type": "module",
   "bin": {
@@ -16,6 +16,7 @@
     "url": "https://github.com/gautammanak1/doc2mcp/issues"
   },
   "files": [
+    "assets",
     "dist",
     "README.md"
   ],
