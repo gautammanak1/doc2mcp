@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 import ora from "ora";
 import pc from "picocolors";
 import { ApiError, apiFetch, printError } from "../api.js";
+import { printBanner } from "../banner.js";
 import { renderMarkdown } from "../markdown.js";
 import { convertUrlToProject } from "./convert.js";
 import { ensureLoggedIn } from "./login.js";
@@ -217,6 +218,7 @@ export async function runChat(
       return;
     }
 
+    printBanner();
     const title = ` doc2mcp chat · ${detail.project.name} `;
     const bar = "─".repeat(title.length);
     process.stdout.write(`\n${pc.cyan(`╭${bar}╮`)}\n`);
