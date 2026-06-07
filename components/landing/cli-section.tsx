@@ -1,7 +1,64 @@
 "use client";
 
-import { Check, Terminal } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ArrowUpRight, Check, Copy, Package, Terminal } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+const NPM_PACKAGE_URL = "https://www.npmjs.com/package/doc2mcp";
+const INSTALL_COMMAND = "npm i -g doc2mcp";
+
+function NpmInstallCard() {
+  const [copied, setCopied] = useState(false);
+
+  const onCopy = useCallback(() => {
+    navigator.clipboard
+      .writeText(INSTALL_COMMAND)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      })
+      .catch(() => {
+        // clipboard unavailable — no-op
+      });
+  }, []);
+
+  return (
+    <div className="mt-7 flex flex-col gap-3">
+      <a
+        className="group inline-flex w-fit items-center gap-2 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 font-mono text-[10px] text-rose-600 uppercase tracking-[0.16em] transition-colors hover:bg-rose-500/15 dark:text-rose-300"
+        href={NPM_PACKAGE_URL}
+        rel="noopener noreferrer"
+        target="_blank"
+      >
+        <Package className="size-3" />
+        Available on npm
+        <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+      </a>
+
+      <button
+        aria-label="Copy install command"
+        className="group flex w-full max-w-sm items-center justify-between gap-3 rounded-xl border border-border/60 bg-zinc-950/90 px-4 py-3 text-left transition-colors hover:border-violet-500/40"
+        onClick={onCopy}
+        type="button"
+      >
+        <span className="flex items-center gap-2.5 font-mono text-sm text-zinc-100">
+          <span className="text-violet-400">$</span>
+          {INSTALL_COMMAND}
+        </span>
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-white/5 text-zinc-400 transition-colors group-hover:text-zinc-100">
+          {copied ? (
+            <Check className="size-3.5 text-emerald-400" strokeWidth={3} />
+          ) : (
+            <Copy className="size-3.5" />
+          )}
+        </span>
+      </button>
+
+      <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+        doc2mcp login · doc2mcp &lt;docs-url&gt;
+      </p>
+    </div>
+  );
+}
 
 type Line = {
   text: string;
@@ -119,14 +176,7 @@ export function CliSection() {
                 </li>
               ))}
             </ul>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <code className="inline-flex h-9 items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-3.5 font-mono text-violet-700 text-xs dark:text-violet-200">
-                npm i -g doc2mcp
-              </code>
-              <p className="font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-                doc2mcp login · doc2mcp &lt;docs-url&gt;
-              </p>
-            </div>
+            <NpmInstallCard />
           </div>
 
           <div className="relative">
