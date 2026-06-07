@@ -3,6 +3,7 @@ import { stdin as input, stdout as output } from "node:process";
 import ora from "ora";
 import pc from "picocolors";
 import { ApiError, apiFetch, printError } from "../api.js";
+import { renderMarkdown } from "../markdown.js";
 import { convertUrlToProject } from "./convert.js";
 import { ensureLoggedIn } from "./login.js";
 
@@ -89,7 +90,7 @@ async function pickExistingProject(): Promise<ProjectDetail | null> {
   }
 
   if (isDocsUrl(choice)) {
-    return await convertUrlToProject(choice, { offerInstall: false });
+    return await convertUrlToProject(choice, { offerInstall: true });
   }
 
   const chosenIndex = Number(choice);
@@ -106,22 +107,21 @@ async function pickExistingProject(): Promise<ProjectDetail | null> {
 async function resolveProject(target?: string): Promise<ProjectDetail | null> {
   if (target) {
     if (isDocsUrl(target)) {
-      return await convertUrlToProject(target, { offerInstall: false });
+      return await convertUrlToProject(target, { offerInstall: true });
     }
     return await apiFetch<ProjectDetail>(`/api/cli/projects/${target}`);
   }
 
-  process.stdout.write(`${pc.bold("doc2mcp chat")}\n`);
   process.stdout.write(
-    `${pc.dim("Paste a docs URL to create a new MCP, paste a project id, or press Enter to choose existing.")}\n\n`
+    `${pc.dim("Paste a docs URL to create a new MCP, a project id, or press Enter to pick an existing one.")}\n\n`
   );
 
-  const first = await readLine(`${pc.bold(">")} docs url or project id: `);
+  const first = await readLine(`${pc.cyan("›")} docs url or project id: `);
   if (!first) {
     return await pickExistingProject();
   }
   if (isDocsUrl(first)) {
-    return await convertUrlToProject(first, { offerInstall: false });
+    return await convertUrlToProject(first, { offerInstall: true });
   }
   return await apiFetch<ProjectDetail>(`/api/cli/projects/${first}`);
 }
@@ -162,19 +162,17 @@ async function askDocs(
 }
 
 function renderAnswer(answer: AskAnswer): void {
-  process.stdout.write(`\n${pc.cyan("╭─ doc2mcp")}\n`);
-  for (const line of answer.answer.trim().split("\n")) {
-    process.stdout.write(`${pc.cyan("│")} ${line}\n`);
-  }
+  process.stdout.write(`\n${pc.green("●")} ${pc.bold("doc2mcp")}\n\n`);
+  process.stdout.write(`${renderMarkdown(answer.answer.trim())}\n`);
   if (answer.sources && answer.sources.length > 0) {
-    process.stdout.write(`${pc.cyan("│")}\n${pc.cyan("│")} ${pc.dim("Sources:")}\n`);
+    process.stdout.write(`\n${pc.dim("Sources")}\n`);
     for (const source of answer.sources.slice(0, 6)) {
       process.stdout.write(
-        `${pc.cyan("│")} ${pc.dim("•")} ${source.title} ${pc.dim(source.url)}\n`
+        `  ${pc.cyan("•")} ${source.title}\n    ${pc.dim(source.url)}\n`
       );
     }
   }
-  process.stdout.write(`${pc.cyan("╰")}\n\n`);
+  process.stdout.write("\n");
 }
 
 async function answerOnce(
@@ -219,17 +217,18 @@ export async function runChat(
       return;
     }
 
+    const title = ` doc2mcp chat · ${detail.project.name} `;
+    const bar = "─".repeat(title.length);
+    process.stdout.write(`\n${pc.cyan(`╭${bar}╮`)}\n`);
+    process.stdout.write(`${pc.cyan("│")}${pc.bold(title)}${pc.cyan("│")}\n`);
+    process.stdout.write(`${pc.cyan(`╰${bar}╯`)}\n`);
     process.stdout.write(
-      `\n${pc.cyan("╭─")} ${pc.bold(`Chatting with ${detail.project.name}`)}\n`
+      `${pc.dim("Ask anything about these docs. Type /exit to quit.")}\n\n`
     );
-    process.stdout.write(
-      `${pc.cyan("│")} ${pc.dim("Ask anything about these docs. Type /exit to leave.")}\n`
-    );
-    process.stdout.write(`${pc.cyan("╰")}\n\n`);
 
     let active = true;
     while (active) {
-      const question = await readLine(`${pc.bold(">")} `);
+      const question = await readLine(`${pc.cyan("›")} `);
       if (question === null) {
         active = false;
         break;
@@ -247,7 +246,9 @@ export async function runChat(
       await answerOnce(mcp, trimmed);
     }
 
-    process.stdout.write(`${pc.dim("Bye — your docs MCP stays live for your editor.")}\n`);
+    process.stdout.write(
+      `\n${pc.dim("Bye — your docs MCP stays live for your editor.")}\n`
+    );
   } catch (error) {
     printError(error);
     process.exitCode = 1;
