@@ -53,7 +53,7 @@ export function AppSidebar() {
 
   const handleDeleteAll = () => {
     setShowDeleteAllDialog(false);
-    router.replace("/playground");
+    router.replace("/chat");
     mutate(unstable_serialize(getChatHistoryPaginationKey), [], {
       revalidate: false,
     });

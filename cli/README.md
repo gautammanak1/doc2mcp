@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/doc2mcp-cli-banner.png" alt="doc2mcp — turn any docs site into a hosted MCP server from your terminal" width="100%" />
+<img src="https://doc2mcp.site/doc2mcp-cli-banner.png" alt="doc2mcp — turn any docs site into a hosted MCP server from your terminal" width="100%" />
 
 # doc2mcp
 
@@ -13,7 +13,7 @@ Point it at a docs URL, and doc2mcp crawls, analyzes, and serves it as a token-s
 [![node](https://img.shields.io/node/v/doc2mcp?color=8b5cf6&logo=node.js)](https://nodejs.org)
 [![license](https://img.shields.io/npm/l/doc2mcp?color=8b5cf6)](https://github.com/gautammanak1/doc2mcp/blob/main/LICENSE)
 
-[Website](https://doc2mcp.site) · [Playground](https://doc2mcp.site/playground) · [Docs](https://doc2mcp.site/docs) · [CLI guide](https://doc2mcp.site/docs/cli)
+[Website](https://doc2mcp.site) · [CLI](https://doc2mcp.site/cli) · [Docs](https://doc2mcp.site/docs) · [CLI guide](https://doc2mcp.site/docs/cli)
 
 </div>
 
@@ -51,11 +51,13 @@ doc2mcp https://docs.stripe.com
 
 # 3. When it's ready, pick your editor — the MCP is installed for you
 #    ✔ Cursor   ✔ VS Code   ✔ Claude Desktop   ✔ Windsurf
+
+# 4. Chat with your docs without leaving the terminal
+doc2mcp chat
 ```
 
-That's it. The same hosted pipeline powers the [website](https://doc2mcp.site) and the
-[Playground](https://doc2mcp.site/playground), so a project you create in the CLI shows up in your
-dashboard and marketplace too.
+That's it. The same hosted pipeline powers the [website](https://doc2mcp.site), so a project you
+create in the CLI shows up in your dashboard and marketplace too.
 
 ## Commands
 
@@ -67,6 +69,7 @@ dashboard and marketplace too.
 | [`doc2mcp whoami`](#doc2mcp-whoami) | Show the account you're signed in as |
 | [`doc2mcp list`](#doc2mcp-list) | List the MCP projects on your account |
 | [`doc2mcp install <projectId>`](#doc2mcp-install-projectid) | Install an existing MCP into your editors |
+| [`doc2mcp chat [projectId]`](#doc2mcp-chat-projectid) | Chat with your docs in the terminal (AI answers from your MCP) |
 | `doc2mcp --version` | Print the installed CLI version |
 | `doc2mcp --help` | Show usage and all commands |
 
@@ -92,7 +95,7 @@ Tips:
 - Point at the **docs** URL (`https://docs.stripe.com`), not the marketing homepage.
 - The URL must start with `http://` or `https://`.
 - Conversions count against your plan's monthly limit (free includes 5/month), shared with the
-  website, Playground, and chat.
+  website and chat.
 
 ---
 
@@ -161,6 +164,29 @@ You'll be prompted to choose which detected clients to write to:
 
 Existing config is merged, not overwritten.
 
+---
+
+### `doc2mcp chat [projectId]`
+
+Chat with your docs **right from the terminal**. doc2mcp answers natural-language questions from
+the crawled documentation — with cited sources — using the project's hosted MCP (the same
+`ask_documentation` tool your editor calls). This is the Playground experience, in your shell.
+
+```bash
+# Interactive: choose a project, then ask anything
+doc2mcp chat
+
+# Skip the picker by passing a project ID
+doc2mcp chat prj_123abc
+
+# One-shot answer (handy in scripts / CI)
+doc2mcp chat prj_123abc -m "How do I authenticate requests?"
+```
+
+- With no arguments, you pick from your `ready` projects.
+- Type `/exit` (or press Esc) to leave an interactive session.
+- Each answer lists the source pages it used so you can verify it.
+
 ## Configuration
 
 | Setting | Default | Notes |
@@ -175,7 +201,7 @@ Existing config is merged, not overwritten.
 | `command not found: doc2mcp` | You installed locally or your shell cached PATH. Reinstall with `npm i -g doc2mcp`, then run `hash -r` or open a new terminal. You can also use `npx doc2mcp <url>`. |
 | Browser doesn't open on `login` | Copy the printed URL into your browser manually, then approve. |
 | `login` can't reach the server | Confirm you're online; for self-hosting set `DOC2MCP_API_URL` to your instance. |
-| "Limit reached" | You've hit your plan's monthly conversion limit (shared across CLI, web, and Playground). |
+| "Limit reached" | You've hit your plan's monthly conversion limit (shared across CLI and web). |
 | Editor doesn't pick up the MCP | Fully restart the editor after install so it reloads MCP config. |
 
 ## How it works
@@ -209,7 +235,7 @@ already exists).
 
 - 📦 npm: https://www.npmjs.com/package/doc2mcp
 - 🌐 Website: https://doc2mcp.site
-- 🕹️ Playground: https://doc2mcp.site/playground
+- 🖥️ CLI page: https://doc2mcp.site/cli
 - 📚 Docs: https://doc2mcp.site/docs
 - 🧭 CLI guide: https://doc2mcp.site/docs/cli
 

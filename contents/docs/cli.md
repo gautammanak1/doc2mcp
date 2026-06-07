@@ -15,9 +15,9 @@ documentation URL and it crawls, analyzes, and serves the docs as a hosted, toke
 [MCP](/docs/what-is-mcp) server — then installs it straight into Cursor, VS Code, Claude
 Desktop, or Windsurf.
 
-It shares the same backend as the [website](https://doc2mcp.site) and the
-[Playground](/playground): same pipeline, same plan limits, same marketplace listing once a
-project is `ready`. A project you create in the CLI shows up in your dashboard, and vice‑versa.
+It shares the same backend as the [website](https://doc2mcp.site): same pipeline, same plan
+limits, same marketplace listing once a project is `ready`. A project you create in the CLI
+shows up in your dashboard, and vice‑versa. See the [CLI landing page](/cli) for a visual tour.
 
 ## Install
 
@@ -42,6 +42,9 @@ doc2mcp login
 doc2mcp https://docs.stripe.com
 
 # 3. Pick your editor at the install prompt
+
+# 4. Chat with your docs right in the terminal
+doc2mcp chat
 ```
 
 ## Command reference
@@ -114,6 +117,27 @@ You choose which detected clients to write to:
 
 Existing config is merged, never overwritten.
 
+### `doc2mcp chat [projectId]`
+
+Chat with your docs **without leaving the terminal**. doc2mcp answers natural‑language
+questions from the crawled documentation (with cited sources) using the project's hosted MCP —
+the same `ask_documentation` tool your editor calls.
+
+```bash
+# Interactive: pick a project, then ask away
+doc2mcp chat
+
+# Target a specific project
+doc2mcp chat prj_123abc
+
+# One-shot question (great for scripts)
+doc2mcp chat prj_123abc -m "How do I authenticate requests?"
+```
+
+- Run `doc2mcp chat` with no arguments to choose from your `ready` projects.
+- Type `/exit` (or press Esc) to leave an interactive session.
+- Answers include source page titles and URLs so you can verify them.
+
 ## Configuration
 
 | Setting | Default | Notes |
@@ -128,11 +152,12 @@ Existing config is merged, never overwritten.
 | `command not found: doc2mcp` | Installed locally or the shell cached PATH — use `npm i -g doc2mcp`, then run `hash -r` or open a new terminal. `npx doc2mcp <url>` also works |
 | Browser won't open on `login` | Copy the printed URL into your browser and approve manually |
 | `login` can't reach the server | Check connectivity; for self-hosting set `DOC2MCP_API_URL` |
-| "Limit reached" | Monthly conversion limit hit (shared across CLI, web, and Playground) |
+| "Limit reached" | Monthly conversion limit hit (shared across CLI and web) |
 | Editor ignores the new MCP | Fully restart the editor so it reloads MCP config |
+| `doc2mcp chat` says no projects | Convert docs first (`doc2mcp <url>`) and wait for `ready` |
 
 ## Next
 
-- [Playground](/docs/playground)
+- [CLI landing page](/cli)
 - [Connect to Cursor](/docs/connect-cursor)
 - [Connect to Claude Desktop](/docs/connect-claude)

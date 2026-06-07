@@ -42,7 +42,8 @@ Use these conventions for any change.
     authorizes MCP runtime calls via `resolveMcpProject()`.
 - New `app/api/cli/*` routes must call `resolveCliUser(request)` and reuse
   `assertCanStartConversion()` for limits. Conversion limits are shared across
-  web, CLI, and playground (free = 5/month).
+  web and CLI (free = 5/month). The `/cli` route is the CLI landing page; the
+  terminal `doc2mcp chat` command replaces the old web playground.
 
 ## Database migrations
 

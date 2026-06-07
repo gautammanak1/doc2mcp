@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import pc from "picocolors";
 import { runWhoami, runLogout } from "./commands/account.js";
+import { runChat } from "./commands/chat.js";
 import { runConvert, runList } from "./commands/convert.js";
 import { runInstallCommand } from "./commands/install.js";
 import { runLogin } from "./commands/login.js";
@@ -50,6 +51,14 @@ program
   .description("Install an existing MCP into Cursor, VS Code, Claude, or Windsurf")
   .action(async (projectId: string) => {
     await runInstallCommand(projectId);
+  });
+
+program
+  .command("chat [projectId]")
+  .description("Chat with your docs in the terminal (AI answers from your MCP)")
+  .option("-m, --message <text>", "Ask a single question and exit")
+  .action(async (projectId: string | undefined, options: { message?: string }) => {
+    await runChat(projectId, options);
   });
 
 program
