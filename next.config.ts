@@ -17,7 +17,15 @@ const nextConfig: NextConfig = {
           },
         ],
       }
-    : {}),
+    : {
+        redirects: async () => [
+          {
+            source: "/playground",
+            destination: "/cli",
+            permanent: true,
+          },
+        ],
+      }),
   env: {
     NEXT_PUBLIC_BASE_PATH: basePath,
   },

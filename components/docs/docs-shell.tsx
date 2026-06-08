@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react";
+import { Github, Menu } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
@@ -8,6 +8,13 @@ import { DocsSearchLoader } from "@/components/docs/docs-search-loader";
 import { DocsSidebarLoader } from "@/components/docs/docs-sidebar-loader";
 import { Button } from "@/components/ui/button";
 
+const NAV_LINKS = [
+  { href: "/docs", label: "Docs" },
+  { href: "/marketplace", label: "Marketplace" },
+  { href: "/blog", label: "Blog" },
+  { href: "/pricing", label: "Pricing" },
+] as const;
+
 function SidebarFallback() {
   return (
     <div className="w-full">
@@ -15,7 +22,7 @@ function SidebarFallback() {
       <div className="space-y-2">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
-            className="h-9 animate-pulse rounded-lg bg-muted/60"
+            className="h-8 animate-pulse rounded-md bg-muted/60"
             key={`doc-nav-skel-${String(i)}`}
           />
         ))}
@@ -53,44 +60,63 @@ export function DocsShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <header className="sticky top-0 z-30 border-border/60 border-b bg-background/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+        <div className="mx-auto flex h-14 max-w-(--breakpoint-2xl) items-center gap-4 px-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2">
             <Suspense fallback={<MobileNavFallback />}>
               <DocsMobileNavLoader />
             </Suspense>
-            <Link className="flex shrink-0 items-center" href="/">
-              <Doc2McpLogo size={28} />
+            <Link className="flex shrink-0 items-center gap-2" href="/">
+              <Doc2McpLogo size={26} />
             </Link>
           </div>
-          <div className="mx-4 hidden max-w-xs flex-1 justify-end sm:flex">
-            <Suspense fallback={null}>
-              <DocsSearchLoader />
-            </Suspense>
-          </div>
-          <div className="flex shrink-0 items-center gap-1 text-sm sm:gap-3">
+
+          <nav className="hidden items-center gap-1 md:flex">
+            {NAV_LINKS.map((link) => (
+              <Link
+                className="rounded-md px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-accent/60 hover:text-foreground"
+                href={link.href}
+                key={link.href}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden w-56 sm:block">
+              <Suspense fallback={null}>
+                <DocsSearchLoader />
+              </Suspense>
+            </div>
             <Link
-              className="hidden text-muted-foreground hover:text-foreground sm:inline"
-              href="/"
+              aria-label="GitHub repository"
+              className="hidden size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground sm:inline-flex"
+              href="https://github.com/gautammanak1/doc2mcp"
+              rel="noopener noreferrer"
+              target="_blank"
             >
-              Home
-            </Link>
-            <Link
-              className="text-muted-foreground hover:text-foreground"
-              href="/chat"
-            >
-              App
+              <Github className="size-4" />
             </Link>
             <ThemeToggle />
+            <Link
+              className="inline-flex h-9 items-center rounded-md bg-primary px-3.5 font-medium text-primary-foreground text-sm transition-colors hover:bg-primary/90"
+              href="/chat"
+            >
+              Open App
+            </Link>
           </div>
         </div>
       </header>
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-0 px-4 sm:px-6 lg:flex-row lg:gap-12 lg:py-0">
-        <aside className="hidden w-56 shrink-0 lg:sticky lg:top-[72px] lg:block lg:h-[calc(100dvh-72px)] lg:overflow-y-auto lg:py-10 lg:pr-2">
+
+      <div className="mx-auto flex w-full max-w-(--breakpoint-2xl) flex-1 flex-col lg:flex-row">
+        <aside className="hidden shrink-0 border-border/60 [scrollbar-width:none] lg:sticky lg:top-14 lg:block lg:h-[calc(100dvh-3.5rem)] lg:w-64 lg:overflow-y-auto lg:border-r lg:px-4 lg:py-8 [&::-webkit-scrollbar]:hidden">
           <Suspense fallback={<SidebarFallback />}>
             <DocsSidebarLoader />
           </Suspense>
         </aside>
-        <div className="min-w-0 flex-1 py-8 lg:py-10">{children}</div>
+        <div className="min-w-0 flex-1 px-4 py-8 sm:px-8 lg:py-10">
+          {children}
+        </div>
       </div>
     </div>
   );

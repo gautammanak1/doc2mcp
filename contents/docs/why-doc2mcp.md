@@ -2,7 +2,7 @@
 title: Why doc2mcp?
 description: Why a documentation infrastructure layer beats building MCP servers by hand.
 category: Getting Started
-order: 2
+order: 3
 ---
 
 ## Overview

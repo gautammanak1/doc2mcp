@@ -1,0 +1,70 @@
+---
+description: doc2mcp project conventions — CLI package, auth/tokens, DB migrations, CI/CD and deploy workflow
+globs: "**/*.{ts,tsx,sql,yml,yaml}"
+alwaysApply: true
+---
+
+# doc2mcp Project Conventions
+
+This repo is a single Next.js app (App Router) plus a standalone CLI package.
+Use these conventions for any change.
+
+## Repository layout
+
+- Next.js app at the repo root (`app/`, `components/`, `lib/`, `services/`).
+- `cli/` is a self-contained npm package published as **`doc2mcp`**. It has its
+  own `package.json`, `pnpm-lock.yaml`, and `tsup` build. It is excluded from
+  Biome (`biome.jsonc` -> `!cli`).
+- `contents/docs/*.md` are the product docs, surfaced at `/docs` via
+  `lib/docs/loader.ts` (frontmatter: `title`, `description`, `category`,
+  `order`, optional `nav_title`).
+
+## CLI package (`cli/`, published as `doc2mcp`)
+
+- The CLI MUST NOT import app code. It talks to the backend only over HTTP
+  against the `app/api/cli/*` routes.
+- Commands live in `cli/src/commands/`; on-disk editor writers in
+  `cli/src/installers/`. Credentials are stored at `~/.doc2mcp/config.json`.
+- Base URL comes from `DOC2MCP_API_URL` (defaults to production).
+- Publishing is automated: the `publish-cli.yml` workflow publishes to npm on
+  push to `main` when `cli/**` changes AND the version in `cli/package.json` is
+  not already on npm. **To ship a CLI update, bump `cli/package.json` version**
+  in the same push; otherwise publish is a no-op.
+- After editing the CLI, run `cd cli && pnpm build` to typecheck/bundle.
+
+## Auth and tokens
+
+- Two token types, both hashed (SHA-256) and compared with `timingSafeEqual`:
+  - User PAT `d2mcp_pat_...` (`CliToken` table) — authorizes CLI actions via
+    `resolveCliUser()` in `lib/cli/auth.ts`. Minted by the browser device flow
+    (`app/cli/authorize` + `app/api/cli/auth/*`).
+  - Project token `d2mcp_...` (`PlatformProject.artifacts.mcpTokenHash`) —
+    authorizes MCP runtime calls via `resolveMcpProject()`.
+- New `app/api/cli/*` routes must call `resolveCliUser(request)` and reuse
+  `assertCanStartConversion()` for limits. Conversion limits are shared across
+  web and CLI (free = 5/month). The `/cli` route is the CLI landing page; the
+  terminal `doc2mcp chat` command replaces the old web playground.
+
+## Database migrations
+
+- Add idempotent SQL to `lib/db/migrations/NNNN_name.sql`
+  (`CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT EXISTS`, etc.), register it
+  in `lib/db/migrations/meta/_journal.json`, and mirror the change in
+  `lib/db/schema.ts`.
+- Local `pnpm db:migrate` is misconfigured in this environment; apply
+  migrations to the Supabase project directly (e.g. via the Supabase MCP
+  `apply_migration`). Never run destructive SQL against live data.
+
+## CI/CD and deploy workflow
+
+- Branches: feature -> `staging` -> `main`. CI (`ci.yml`) and PR checks
+  (`pr.yml`) run on `main`, `master`, and `staging`.
+- Every push runs `pnpm check` (Ultracite/Biome), `tsc --noEmit`, the Next
+  build, and a `cli` build job. Run `pnpm check` and `pnpm exec tsc --noEmit`
+  locally before pushing.
+- Deploys:
+  - Push to `staging` -> Vercel preview deploy (`deploy-staging.yml`).
+  - Tag `v*` on `main` -> Vercel production deploy (`deploy-production.yml`).
+    Pushing to `main` alone does NOT deploy (`vercel.json`).
+- Required GitHub secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`,
+  and `NPM_TOKEN` (for CLI publish).

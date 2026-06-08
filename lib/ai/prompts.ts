@@ -86,6 +86,8 @@ export const systemPrompt = ({
     "",
     imageAddendum(),
     "",
+    mediaPlaybackAddendum(),
+    "",
     getRequestPromptFromHints(requestHints),
   ].join("\n");
 };
@@ -110,6 +112,21 @@ PDF generation:
   and --- horizontal rules).
 - After the PDF is ready, link to it in your reply and mention the file
   name in one short sentence.`;
+
+const mediaPlaybackAddendum = () =>
+  `Music and media in chat:
+- When the user asks to play music, a song, a track, or to listen to something,
+  include a playable link so the chat UI can embed it.
+- Prefer a public YouTube or Spotify URL on its own line, or use a fenced block:
+
+\`\`\`music
+https://www.youtube.com/watch?v=VIDEO_ID
+\`\`\`
+
+- You can add a short line above the link ("Here's that track.") but put the URL
+  on its own line or inside the music fence so it autoplays in chat.
+- Do not invent URLs — use a real, well-known official link when you know it;
+  otherwise search the web first, then share the link you found.`;
 
 export const titlePrompt =
   "Generate a short title (max 6 words) summarizing the chat. Return only the title, no quotes.";

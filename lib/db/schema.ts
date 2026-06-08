@@ -1,9 +1,10 @@
-import type { InferSelectModel } from "drizzle-orm";
+import { type InferSelectModel, sql } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
   integer,
   json,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -165,11 +166,31 @@ export const platformProject = pgTable("PlatformProject", {
   crawlData: json("crawlData"),
   logs: json("logs"),
   tokenUsage: json("tokenUsage"),
+  source: varchar("source", { enum: ["web", "cli"] })
+    .notNull()
+    .default("web"),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
 
 export type PlatformProject = InferSelectModel<typeof platformProject>;
+
+/** Page — crawled documentation page content for a platform project. */
+export const page = pgTable("Page", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => platformProject.id),
+  url: text("url").notNull(),
+  title: text("title").notNull(),
+  contentType: varchar("contentType").notNull().default("page"),
+  content: text("content").notNull(),
+  contentHash: varchar("contentHash"),
+  bytes: integer("bytes"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type Page = InferSelectModel<typeof page>;
 
 export const mcpServer = pgTable("McpServer", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -187,6 +208,28 @@ export const mcpServer = pgTable("McpServer", {
 
 export type McpServer = InferSelectModel<typeof mcpServer>;
 
+/** McpServerRelease — public/generated release metadata for marketplace use. */
+export const mcpServerRelease = pgTable("McpServerRelease", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => platformProject.id),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  slug: varchar("slug").notNull(),
+  version: varchar("version").notNull().default("1.0.0"),
+  title: text("title").notNull(),
+  description: text("description"),
+  serverJson: jsonb("serverJson").notNull(),
+  isPublic: boolean("isPublic").notNull().default(false),
+  githubRepoUrl: text("githubRepoUrl"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type McpServerRelease = InferSelectModel<typeof mcpServerRelease>;
+
 export const aiWorkflow = pgTable("AiWorkflow", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
   projectId: uuid("projectId").references(() => platformProject.id),
@@ -201,6 +244,53 @@ export const aiWorkflow = pgTable("AiWorkflow", {
 });
 
 export type AiWorkflow = InferSelectModel<typeof aiWorkflow>;
+
+/** PipelineJob — background processing state for a project conversion. */
+export const pipelineJob = pgTable("PipelineJob", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => platformProject.id),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  status: varchar("status", {
+    enum: ["queued", "running", "success", "failed", "cancelled"],
+  })
+    .notNull()
+    .default("queued"),
+  phase: varchar("phase").notNull().default("queued"),
+  progress: integer("progress").notNull().default(0),
+  attempt: integer("attempt").notNull().default(1),
+  errorClass: varchar("errorClass"),
+  errorMessage: text("errorMessage"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  finishedAt: timestamp("finishedAt"),
+});
+
+export type PipelineJob = InferSelectModel<typeof pipelineJob>;
+
+/** ProjectEvent — ordered event log emitted while a project is processed. */
+export const projectEvent = pgTable("ProjectEvent", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  projectId: uuid("projectId")
+    .notNull()
+    .references(() => platformProject.id),
+  seq: integer("seq")
+    .notNull()
+    .default(sql`nextval('"ProjectEvent_seq_seq"'::regclass)`),
+  type: varchar("type").notNull(),
+  level: varchar("level", { enum: ["info", "warn", "error"] })
+    .notNull()
+    .default("info"),
+  phase: varchar("phase"),
+  message: text("message"),
+  data: jsonb("data"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type ProjectEvent = InferSelectModel<typeof projectEvent>;
 
 export const subscription = pgTable("Subscription", {
   id: uuid("id").primaryKey().notNull().defaultRandom(),
@@ -281,3 +371,150 @@ export const contactMessage = pgTable("ContactMessage", {
 });
 
 export type ContactMessage = InferSelectModel<typeof contactMessage>;
+
+/** IpRateLimit — per-IP counters for unauthenticated throttling. */
+export const ipRateLimit = pgTable("IpRateLimit", {
+  ip: varchar("ip").primaryKey().notNull(),
+  count: integer("count").notNull().default(0),
+  resetAt: timestamp("resetAt").notNull(),
+});
+
+export type IpRateLimit = InferSelectModel<typeof ipRateLimit>;
+
+/**
+ * Team — a workspace that groups users under a shared plan and credit pool.
+ * Mirrors the existing `Team` table already provisioned in the database.
+ */
+export const team = pgTable("Team", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  name: text("name").notNull(),
+  slug: varchar("slug").notNull().unique(),
+  ownerId: uuid("ownerId")
+    .notNull()
+    .references(() => user.id),
+  plan: varchar("plan", { enum: ["team", "enterprise"] })
+    .notNull()
+    .default("team"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type Team = InferSelectModel<typeof team>;
+
+/** TeamMember — a user's membership (and role) within a team. */
+export const teamMember = pgTable("TeamMember", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  teamId: uuid("teamId")
+    .notNull()
+    .references(() => team.id),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  role: varchar("role", { enum: ["owner", "admin", "member"] })
+    .notNull()
+    .default("member"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type TeamMember = InferSelectModel<typeof teamMember>;
+
+/** TeamInvite — a pending email invitation to join a team. */
+export const teamInvite = pgTable("TeamInvite", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  teamId: uuid("teamId")
+    .notNull()
+    .references(() => team.id),
+  email: varchar("email").notNull(),
+  role: varchar("role", { enum: ["admin", "member"] })
+    .notNull()
+    .default("member"),
+  invitedBy: uuid("invitedBy")
+    .notNull()
+    .references(() => user.id),
+  tokenHash: varchar("tokenHash").notNull(),
+  status: varchar("status", {
+    enum: ["pending", "accepted", "revoked", "expired"],
+  })
+    .notNull()
+    .default("pending"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  acceptedAt: timestamp("acceptedAt"),
+  revokedAt: timestamp("revokedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type TeamInvite = InferSelectModel<typeof teamInvite>;
+
+/**
+ * CreditWallet — the credit balance for either a single user or a team.
+ * Exactly one of `userId` / `teamId` is set per wallet.
+ */
+export const creditWallet = pgTable("CreditWallet", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId").references(() => user.id),
+  teamId: uuid("teamId").references(() => team.id),
+  balance: integer("balance").notNull().default(0),
+  monthlyAllowance: integer("monthlyAllowance").notNull().default(0),
+  monthlyUsed: integer("monthlyUsed").notNull().default(0),
+  monthAnchor: timestamp("monthAnchor").notNull().defaultNow(),
+  plan: varchar("plan", {
+    enum: ["free", "starter", "pro", "team", "enterprise"],
+  })
+    .notNull()
+    .default("free"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+});
+
+export type CreditWallet = InferSelectModel<typeof creditWallet>;
+
+/** CreditLedger — append-only log of every credit change on a wallet. */
+export const creditLedger = pgTable("CreditLedger", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  walletId: uuid("walletId")
+    .notNull()
+    .references(() => creditWallet.id),
+  delta: integer("delta").notNull(),
+  reason: varchar("reason").notNull(),
+  projectId: uuid("projectId").references(() => platformProject.id),
+  metadata: json("metadata"),
+  idemKey: varchar("idemKey"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+});
+
+export type CreditLedger = InferSelectModel<typeof creditLedger>;
+
+/** CliAuthRequest — device authorization flow for the doc2mcp CLI. */
+export const cliAuthRequest = pgTable("CliAuthRequest", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  deviceCodeHash: varchar("deviceCodeHash", { length: 128 }).notNull().unique(),
+  userCode: varchar("userCode", { length: 16 }).notNull().unique(),
+  status: varchar("status", {
+    enum: ["pending", "approved", "denied", "expired"],
+  })
+    .notNull()
+    .default("pending"),
+  userId: uuid("userId").references(() => user.id),
+  cliTokenId: uuid("cliTokenId"),
+  /** Cleared after the CLI polls and receives the PAT once. */
+  issuedTokenPlaintext: text("issuedTokenPlaintext"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  expiresAt: timestamp("expiresAt").notNull(),
+});
+
+export type CliAuthRequest = InferSelectModel<typeof cliAuthRequest>;
+
+/** CliToken — personal access token for doc2mcp CLI (PAT). */
+export const cliToken = pgTable("CliToken", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id),
+  tokenHash: varchar("tokenHash", { length: 128 }).notNull().unique(),
+  name: varchar("name", { length: 120 }).notNull().default("CLI"),
+  lastUsedAt: timestamp("lastUsedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  revokedAt: timestamp("revokedAt"),
+});
+
+export type CliToken = InferSelectModel<typeof cliToken>;

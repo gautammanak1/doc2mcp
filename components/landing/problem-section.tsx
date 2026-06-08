@@ -6,6 +6,8 @@ import {
   ArrowRight,
   ClipboardX,
   Clock,
+  Code2,
+  FileWarning,
   Ghost,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -108,7 +110,7 @@ function ChaosVisual() {
             <pre className="text-foreground/70 dark:text-foreground/80 leading-relaxed overflow-x-auto text-[10px] sm:text-[11px]">
               <code>
                 {`import stripe from 'stripe';
-
+ 
 await stripe.`}
                 <span className="text-rose-500 dark:text-rose-400 border-b border-dashed border-rose-500 font-bold">
                   checkout.sessions.create

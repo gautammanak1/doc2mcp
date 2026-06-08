@@ -5,8 +5,7 @@ import { ChatShell } from "./shell";
 
 export function ChatRouteShell() {
   const pathname = usePathname();
-  const isChatRoute =
-    pathname.startsWith("/playground") || pathname.startsWith("/chat");
+  const isChatRoute = pathname.startsWith("/chat");
 
   if (!isChatRoute) {
     return null;

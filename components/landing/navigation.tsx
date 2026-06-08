@@ -16,6 +16,7 @@ import {
   Sliders,
   Sparkles,
   Store,
+  Terminal,
   UserCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -48,6 +49,7 @@ import { cn } from "@/lib/utils";
 const NAV_LINKS = [
   { name: "Home", href: "/", icon: Home },
   { name: "Features", href: "/#features", icon: Sliders },
+  { name: "CLI", href: "/cli", icon: Terminal },
   { name: "Marketplace", href: "/marketplace", icon: Store },
   { name: "Compare", href: "/comparison", icon: ArrowLeftRight },
   { name: "Pricing", href: "/pricing", icon: CreditCard },

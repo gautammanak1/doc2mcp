@@ -2,7 +2,7 @@
 title: What is doc2mcp?
 description: Documentation infrastructure that makes any docs site usable by AI agents.
 category: Getting Started
-order: 1
+order: 2
 ---
 
 ## Overview

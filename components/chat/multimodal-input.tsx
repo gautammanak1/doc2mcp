@@ -66,6 +66,8 @@ import {
 import { SuggestedActions } from "./suggested-actions";
 import type { VisibilityType } from "./visibility-selector";
 
+const GUEST_QUERY_LIMIT = 5;
+
 function setCookie(name: string, value: string) {
   const maxAge = 60 * 60 * 24 * 365;
   // biome-ignore lint/suspicious/noDocumentCookie: needed for client-side cookie setting
@@ -153,7 +155,12 @@ function PureMultimodalInput({
   }, [searchParams, setInput, setDoc2mcpMode]);
   const [doc2mcpLoading, setDoc2mcpLoading] = useState(false);
   const { user } = useSupabaseAuth();
-  const isGuest = guestRegex.test(user?.email ?? "");
+  // Anonymous Supabase users have no email on the client, so the synthesized
+  // `guest-…` address only exists server-side. Detect the anonymous flag too,
+  // otherwise guests are mis-read as regular users and skip the chat-only /
+  // 5-query guardrails (and would be allowed to attempt MCP generation).
+  const isGuest =
+    !user || user.is_anonymous === true || guestRegex.test(user.email ?? "");
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -368,6 +375,19 @@ function PureMultimodalInput({
       return;
     }
 
+    if (isGuest) {
+      const guestUserMessages = messages.filter(
+        (m) => m.role === "user"
+      ).length;
+      if (guestUserMessages >= GUEST_QUERY_LIMIT) {
+        toast.error(
+          "You've used your 5 free messages — sign in to keep chatting."
+        );
+        router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
+        return;
+      }
+    }
+
     window.history.pushState(
       {},
       "",
@@ -416,6 +436,7 @@ function PureMultimodalInput({
     setDoc2mcpMode,
     runDoc2McpConversion,
     isGuest,
+    messages,
     router,
   ]);
 

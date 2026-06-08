@@ -43,9 +43,9 @@ const TRUST: Trust[] = [
     icon: GitBranch,
   },
   {
-    id: "asi1",
-    metric: "ASI1",
-    label: "AI engine under the hood",
+    id: "speed",
+    metric: "< 60s",
+    label: "Docs to a live MCP",
     icon: Sparkles,
   },
 ];

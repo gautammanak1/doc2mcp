@@ -197,6 +197,15 @@ export type ProjectArtifacts = {
   docsPageCount?: number;
   qualityScore?: QualityScore;
   generationReport?: GenerationReport;
+  /** Official MCP Registry listing, set when auto-publish runs on ready. */
+  registry?: {
+    name: string;
+    version: string;
+    url: string;
+    status: "published" | "skipped" | "error";
+    publishedAt: string;
+    message?: string;
+  };
 };
 
 export type ProcessingLog = {

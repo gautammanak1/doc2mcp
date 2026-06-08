@@ -27,33 +27,44 @@ export const auth = cache(async () => {
   const supabase = await createClient();
   const user = await getSafeUser(supabase);
 
-  if (!user?.email) {
+  if (!user) {
     return null;
   }
+
+  // Anonymous Supabase users have no email — synthesize a stable, digit-only
+  // guest identifier (matches `guestRegex`) so they're treated as guests
+  // throughout the app and can chat with the limited guest entitlement.
+  const isAnonymous = user.is_anonymous === true || !user.email;
+  const email =
+    user.email && user.email.length > 0
+      ? user.email
+      : `guest-${user.id.replace(/\D/g, "").slice(0, 15) || Date.now().toString()}`;
 
   let appUser: Awaited<ReturnType<typeof ensureAppUserFromSupabase>>;
   try {
     appUser = await ensureAppUserFromSupabase({
       id: user.id,
-      email: user.email,
-      name: user.user_metadata?.name,
-      image: user.user_metadata?.avatar_url ?? user.user_metadata?.image,
+      email,
+      name: isAnonymous ? null : user.user_metadata?.name,
+      image: isAnonymous
+        ? null
+        : (user.user_metadata?.avatar_url ?? user.user_metadata?.image),
     });
   } catch (error) {
     if (process.env.VERCEL_ENV !== "preview") {
       throw error;
     }
 
-    const userType: UserType = guestRegex.test(user.email)
-      ? "guest"
-      : "regular";
+    const userType: UserType = guestRegex.test(email) ? "guest" : "regular";
 
     return {
       user: {
         id: user.id,
-        email: user.email,
-        name: user.user_metadata?.name,
-        image: user.user_metadata?.avatar_url ?? user.user_metadata?.image,
+        email,
+        name: isAnonymous ? undefined : user.user_metadata?.name,
+        image: isAnonymous
+          ? undefined
+          : (user.user_metadata?.avatar_url ?? user.user_metadata?.image),
         type: userType,
       },
     };
