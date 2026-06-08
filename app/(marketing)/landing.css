@@ -7,7 +7,7 @@ html:has(.landing-page) {
 }
 
 .landing-page .font-display {
-  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: -0.02em;
 }
