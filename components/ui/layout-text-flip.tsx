@@ -23,7 +23,13 @@ export const LayoutTextFlip = ({
   }, []);
 
   return (
-    <div className="inline-flex flex-row items-center justify-center flex-wrap gap-2 text-inherit font-semibold tracking-tight">
+useEffect(() => {
+  const interval = setInterval(() => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
+  }, duration);
+
+  return () => clearInterval(interval);
+}, [duration, words]);
       <motion.span
         layoutId="subtext"
         className="text-inherit font-semibold font-display text-foreground"
