@@ -13,14 +13,29 @@ export const LayoutTextFlip = ({
   duration?: number;
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
     }, duration);
 
     return () => clearInterval(interval);
   }, [duration, words]);
+
+  if (!mounted) {
+    return (
+      <div className="inline-flex flex-row items-center justify-center flex-wrap gap-2 text-inherit font-semibold tracking-tight">
+        <span className="text-inherit font-semibold font-display text-foreground">
+          {text}
+        </span>
+        <span className="relative w-fit overflow-hidden px-1 font-display text-[0.92em] font-semibold text-[#4285f4] dark:text-[#8ab4f8]">
+          {words[0]}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className="inline-flex flex-row items-center justify-center flex-wrap gap-2 text-inherit font-semibold tracking-tight">

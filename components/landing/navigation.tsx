@@ -21,7 +21,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -91,6 +92,11 @@ export function LandingNavigation({
 }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <header className="fixed top-0 right-0 left-0 z-50 px-6 py-4 flex items-center justify-between max-w-[1200px] mx-auto w-full">
@@ -130,7 +136,7 @@ export function LandingNavigation({
             >
               <Icon className="size-3.5" />
               <span>{link.name}</span>
-              {isActive && (
+              {isActive && mounted && (
                 <motion.span
                   className="absolute inset-0 -z-10 rounded-full bg-[#e9eef6] dark:bg-[#282a2d]"
                   layoutId="active-nav-bg"
