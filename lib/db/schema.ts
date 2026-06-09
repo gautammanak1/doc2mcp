@@ -9,6 +9,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -169,6 +170,22 @@ export const platformProject = pgTable("PlatformProject", {
   source: varchar("source", { enum: ["web", "cli"] })
     .notNull()
     .default("web"),
+  /**
+   * Who owns this MCP. `developer` = a self-serve individual; `company` =
+   * official MCP infrastructure backing a paid team. Drives per-hit
+   * attribution so we know whether a company's customers/agents are hitting
+   * the endpoint vs an individual developer.
+   */
+  ownerType: varchar("ownerType", { enum: ["developer", "company"] })
+    .notNull()
+    .default("developer"),
+  /** Set when the project belongs to a company/team workspace. */
+  teamId: uuid("teamId"),
+  /** Company custom domain serving this MCP endpoint, e.g. mcp.acme.com. */
+  customDomain: text("customDomain"),
+  customDomainVerified: boolean("customDomainVerified")
+    .notNull()
+    .default(false),
   createdAt: timestamp("createdAt").notNull().defaultNow(),
   updatedAt: timestamp("updatedAt").notNull().defaultNow(),
 });
@@ -518,3 +535,34 @@ export const cliToken = pgTable("CliToken", {
 });
 
 export type CliToken = InferSelectModel<typeof cliToken>;
+
+/**
+ * McpHit — daily aggregate of MCP endpoint usage per project, tagged with
+ * owner attribution so analytics can separate developer traffic from company
+ * (official-infrastructure) traffic without a per-request row write.
+ *
+ * One row per (projectId, day); the `count` column is incremented on each
+ * billable hit via an upsert.
+ */
+export const mcpHit = pgTable(
+  "McpHit",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    projectId: uuid("projectId")
+      .notNull()
+      .references(() => platformProject.id, { onDelete: "cascade" }),
+    ownerType: varchar("ownerType", { enum: ["developer", "company"] })
+      .notNull()
+      .default("developer"),
+    teamId: uuid("teamId"),
+    day: varchar("day", { length: 10 }).notNull(),
+    count: integer("count").notNull().default(0),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("McpHit_project_day_unique").on(table.projectId, table.day),
+  ]
+);
+
+export type McpHit = InferSelectModel<typeof mcpHit>;

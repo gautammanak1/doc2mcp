@@ -1,7 +1,9 @@
 import {
   getPlatformProjectForMcp,
   getPlatformProjectMetaForMcp,
+  recordMcpHit,
 } from "@/lib/db/queries";
+import type { PlatformProject } from "@/lib/db/schema";
 import {
   buildDocsIndex,
   buildFullDocsMarkdown,
@@ -53,6 +55,24 @@ export async function resolveMcpProject(
     : [];
 
   return { project, pages, artifacts };
+}
+
+/**
+ * Fire-and-forget attribution of an MCP hit to developer vs company traffic.
+ * Never awaited by callers so analytics can't slow or break an MCP response.
+ */
+export function attributeMcpHit(project: {
+  id: string;
+  ownerType: PlatformProject["ownerType"];
+  teamId: string | null;
+}): void {
+  recordMcpHit({
+    projectId: project.id,
+    ownerType: project.ownerType,
+    teamId: project.teamId,
+  }).catch(() => {
+    // best-effort tracking; never block an MCP response
+  });
 }
 
 export function mcpJson(data: unknown, status = 200): Response {

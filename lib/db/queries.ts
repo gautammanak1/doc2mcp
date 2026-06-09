@@ -29,6 +29,7 @@ import {
   cliToken,
   type DBMessage,
   document,
+  mcpHit,
   mcpServer,
   message,
   type PlatformProject,
@@ -849,6 +850,9 @@ export async function getPlatformProjectMetaForMcp({ id }: { id: string }) {
       sourceType: platformProject.sourceType,
       status: platformProject.status,
       artifacts: platformProject.artifacts,
+      ownerType: platformProject.ownerType,
+      teamId: platformProject.teamId,
+      customDomain: platformProject.customDomain,
       // crawlData intentionally omitted; logs/tokenUsage not needed at runtime
       createdAt: platformProject.createdAt,
       updatedAt: platformProject.updatedAt,
@@ -866,6 +870,125 @@ export async function getPlatformProjectMetaForMcp({ id }: { id: string }) {
     logs: null,
     tokenUsage: null,
   };
+}
+
+/**
+ * MCP API: resolve a project by its (verified) company custom domain.
+ * Used to map an incoming Host header like `mcp.acme.com` to the backing
+ * project so company MCP traffic is attributed correctly.
+ */
+export async function getPlatformProjectByCustomDomain(domain: string) {
+  const normalized = domain.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  const [project] = await db
+    .select()
+    .from(platformProject)
+    .where(
+      and(
+        eq(platformProject.customDomain, normalized),
+        eq(platformProject.customDomainVerified, true)
+      )
+    );
+  return project ?? null;
+}
+
+/**
+ * Mark a project as company-owned (official MCP infrastructure) and attach an
+ * optional custom domain. Scoped to the owning user so a developer can only
+ * convert their own projects.
+ */
+export async function setProjectCompanyOwnership({
+  id,
+  userId,
+  ownerType,
+  teamId,
+  customDomain,
+  customDomainVerified,
+}: {
+  id: string;
+  userId: string;
+  ownerType: PlatformProject["ownerType"];
+  teamId?: string | null;
+  customDomain?: string | null;
+  customDomainVerified?: boolean;
+}) {
+  const [updated] = await db
+    .update(platformProject)
+    .set({
+      ownerType,
+      teamId: teamId ?? null,
+      customDomain: customDomain ? customDomain.trim().toLowerCase() : null,
+      customDomainVerified: customDomainVerified ?? false,
+      updatedAt: new Date(),
+    })
+    .where(and(eq(platformProject.id, id), eq(platformProject.userId, userId)))
+    .returning();
+  return updated ?? null;
+}
+
+/**
+ * Record one billable MCP hit, attributed to developer vs company traffic.
+ * Upserts a per-(project, day) aggregate row so the DB knows which kind of
+ * MCP is being hit without a write-amplifying per-request log. Best-effort:
+ * callers fire-and-forget so a tracking failure never breaks an MCP response.
+ */
+export async function recordMcpHit({
+  projectId,
+  ownerType,
+  teamId,
+}: {
+  projectId: string;
+  ownerType: PlatformProject["ownerType"];
+  teamId?: string | null;
+}) {
+  const day = new Date().toISOString().slice(0, 10);
+  await db
+    .insert(mcpHit)
+    .values({
+      projectId,
+      ownerType,
+      teamId: teamId ?? null,
+      day,
+      count: 1,
+    })
+    .onConflictDoUpdate({
+      target: [mcpHit.projectId, mcpHit.day],
+      set: {
+        count: sql`${mcpHit.count} + 1`,
+        ownerType,
+        teamId: teamId ?? null,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+/**
+ * Aggregate MCP usage for a project, split by owner attribution. Powers the
+ * "developer vs company" usage breakdown in dashboards/admin.
+ */
+export async function getMcpHitStats({ projectId }: { projectId: string }) {
+  const rows = await db
+    .select({
+      ownerType: mcpHit.ownerType,
+      total: sql<number>`coalesce(sum(${mcpHit.count}), 0)`,
+    })
+    .from(mcpHit)
+    .where(eq(mcpHit.projectId, projectId))
+    .groupBy(mcpHit.ownerType);
+
+  let developer = 0;
+  let company = 0;
+  for (const row of rows) {
+    const total = Number(row.total) || 0;
+    if (row.ownerType === "company") {
+      company += total;
+    } else {
+      developer += total;
+    }
+  }
+  return { developer, company, total: developer + company };
 }
 
 export async function updatePlatformProject({

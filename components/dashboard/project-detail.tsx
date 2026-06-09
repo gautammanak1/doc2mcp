@@ -2,18 +2,21 @@
 
 import {
   Activity,
+  Building2,
   CheckCircle2,
   Clock,
   Copy,
   Download,
   ExternalLink,
+  Globe,
   Loader2,
   Sparkles,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { updateProjectOwnership } from "@/app/(dashboard)/dashboard/projects/[id]/ownership-actions";
 import { McpPlayground } from "@/components/doc2mcp/mcp-playground";
 import { RegistryStatusCard } from "@/components/doc2mcp/registry-status-card";
 import { Badge } from "@/components/ui/badge";
@@ -75,12 +78,18 @@ type ExportBundle = {
   artifacts: McpExportArtifact[];
 };
 
+type HitStats = { developer: number; company: number; total: number };
+
 export function ProjectDetail({
   initialProject,
   exportBundle,
+  canPublishCompany = false,
+  hitStats = { developer: 0, company: 0, total: 0 },
 }: {
   initialProject: PlatformProject;
   exportBundle: ExportBundle | null;
+  canPublishCompany?: boolean;
+  hitStats?: HitStats;
 }) {
   const { project, isProcessing } = useRealtimeProject(initialProject);
   const artifacts = project.artifacts as ProjectArtifacts | null;
@@ -161,6 +170,7 @@ export function ProjectDetail({
           <TabsTrigger value="tools">Tools</TabsTrigger>
           <TabsTrigger value="exports">Exports</TabsTrigger>
           <TabsTrigger value="inspector">Inspector</TabsTrigger>
+          <TabsTrigger value="domain">Domain</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
 
@@ -262,6 +272,14 @@ export function ProjectDetail({
               title="MCP not ready"
             />
           )}
+        </TabsContent>
+
+        <TabsContent className="mt-4 space-y-4" value="domain">
+          <DomainTab
+            canPublishCompany={canPublishCompany}
+            hitStats={hitStats}
+            project={project}
+          />
         </TabsContent>
 
         <TabsContent className="mt-4" value="logs">
@@ -480,5 +498,147 @@ function EmptyTabState({
         <p className="mt-1 text-muted-foreground text-sm">{description}</p>
       </CardContent>
     </Card>
+  );
+}
+
+function DomainTab({
+  project,
+  canPublishCompany,
+  hitStats,
+}: {
+  project: PlatformProject;
+  canPublishCompany: boolean;
+  hitStats: HitStats;
+}) {
+  const [domain, setDomain] = useState(project.customDomain ?? "");
+  const [isCompany, setIsCompany] = useState(project.ownerType === "company");
+  const [pending, startTransition] = useTransition();
+
+  const save = () => {
+    startTransition(async () => {
+      const result = await updateProjectOwnership({
+        projectId: project.id,
+        ownerType: isCompany ? "company" : "developer",
+        customDomain: domain.trim() ? domain.trim() : null,
+      });
+      if (result.ok) {
+        toast.success(
+          isCompany
+            ? "Saved as company MCP. Custom domain pending verification."
+            : "Saved."
+        );
+      } else {
+        toast.error(result.error ?? "Could not save changes");
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="size-4" />
+                MCP ownership
+              </CardTitle>
+              <CardDescription>
+                Publish this as official company infrastructure so its traffic
+                is attributed to your organization, not an individual developer.
+              </CardDescription>
+            </div>
+            <Badge
+              className="shrink-0"
+              variant={isCompany ? "default" : "secondary"}
+            >
+              {isCompany ? "Company" : "Developer"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              checked={isCompany}
+              className="mt-0.5 size-4 accent-[#4285f4]"
+              disabled={!canPublishCompany}
+              onChange={(e) => setIsCompany(e.target.checked)}
+              type="checkbox"
+            />
+            <span>
+              <span className="font-medium text-foreground">
+                Mark as company MCP
+              </span>
+              <span className="block text-muted-foreground text-xs">
+                {canPublishCompany
+                  ? "Hits are tagged as company traffic for billing and analytics."
+                  : "Available on Pro and Team plans."}
+              </span>
+            </span>
+          </label>
+
+          <div className="space-y-1.5">
+            <p className="flex items-center gap-1.5 font-medium text-sm">
+              <Globe className="size-3.5" />
+              Custom domain
+            </p>
+            <input
+              className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 font-mono text-sm outline-none focus:border-[#4285f4]"
+              disabled={!canPublishCompany}
+              onChange={(e) => setDomain(e.target.value)}
+              placeholder="mcp.acme.com"
+              value={domain}
+            />
+            <p className="text-muted-foreground text-xs">
+              Point a CNAME from this host to{" "}
+              <code className="font-mono">cname.doc2mcp.site</code>. Domains
+              activate once verified.
+            </p>
+            {project.customDomain ? (
+              <p className="text-xs">
+                Status:{" "}
+                {project.customDomainVerified ? (
+                  <span className="text-emerald-500">Verified · live</span>
+                ) : (
+                  <span className="text-amber-500">Pending verification</span>
+                )}
+              </p>
+            ) : null}
+          </div>
+
+          <Button disabled={pending || !canPublishCompany} onClick={save}>
+            {pending ? <Loader2 className="mr-1 size-4 animate-spin" /> : null}
+            Save
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Usage attribution</CardTitle>
+          <CardDescription>
+            MCP tool calls split by who owns the traffic.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-3 gap-3">
+          <AttributionStat label="Total hits" value={hitStats.total} />
+          <AttributionStat label="Company" value={hitStats.company} />
+          <AttributionStat label="Developer" value={hitStats.developer} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function AttributionStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl border border-border/40 bg-muted/20 p-3">
+      <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+        {label}
+      </p>
+      <p className="mt-1 font-display font-bold text-2xl">
+        {value.toLocaleString()}
+      </p>
+    </div>
   );
 }

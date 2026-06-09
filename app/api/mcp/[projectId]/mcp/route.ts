@@ -1,4 +1,4 @@
-import { resolveMcpProject } from "@/lib/doc2mcp/mcp-api";
+import { attributeMcpHit, resolveMcpProject } from "@/lib/doc2mcp/mcp-api";
 import { runDocMcpTool } from "@/lib/doc2mcp/mcp-tools-runtime";
 import { addSpanAttributes, withSpan } from "@/lib/observability/tracing";
 import { getRatelimiter } from "@/lib/redis/upstash";
@@ -201,6 +201,14 @@ export async function POST(
       }
     }
 
+    // Attribute this billable hit to developer vs company traffic so the DB
+    // knows whose MCP infrastructure is being exercised. Fire-and-forget.
+    attributeMcpHit({
+      id: resolved.project.id,
+      ownerType: resolved.project.ownerType,
+      teamId: resolved.project.teamId,
+    });
+
     try {
       const result = await withSpan(
         "mcp.tools.call",
@@ -209,6 +217,8 @@ export async function POST(
             "mcp.tool_name": toolName,
             "doc2mcp.project_id": projectId,
             "doc2mcp.page_count": resolved.pages.length,
+            "doc2mcp.owner_type": resolved.project.ownerType,
+            "doc2mcp.team_id": resolved.project.teamId ?? "none",
           },
         },
         async () => {
