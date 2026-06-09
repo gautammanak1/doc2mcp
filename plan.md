@@ -5,6 +5,7 @@ Revise the landing page (`app/(marketing)/page.tsx` and all its component sectio
 
 ## Source of Truth
 `design.md` — Kombai Style Guide. Key tokens:
+
 | Token | Value |
 |---|---|
 | `bg-canvas` | `#0A0A0A` / `#000000` |

@@ -6,8 +6,6 @@ import {
   ArrowRight,
   ClipboardX,
   Clock,
-  Code2,
-  FileWarning,
   Ghost,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
