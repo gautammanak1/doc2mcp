@@ -27,9 +27,13 @@ export default function Page() {
       </Suspense>
       <HeroSection />
       <ToolsStripSection />
-      <ProblemSectionClient />
+      <Suspense fallback={<section className="relative h-[600px] border-border/30 border-y bg-background" />}>
+        <ProblemSectionClient />
+      </Suspense>
       <RealExampleSection />
-      <HowItWorksSectionClient />
+      <Suspense fallback={<section className="relative h-[600px] bg-background" />}>
+        <HowItWorksSectionClient />
+      </Suspense>
       <PlatformSection />
       <WhyTeamsSection />
       <UseCasesSection />
