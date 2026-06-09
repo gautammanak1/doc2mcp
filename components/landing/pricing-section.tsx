@@ -35,13 +35,13 @@ type FreePlan = {
 const FREE_PLAN: FreePlan = {
   id: "free",
   name: "Free",
-  tagline: "For tinkering, demos, and one-off experiments.",
+  tagline: "For trying doc2mcp and one-off experiments.",
   features: [
-    "5 MCP conversions / month",
-    "Up to 50 pages per docs site",
-    "Remote HTTP MCP for Cursor + Claude",
+    "1 MCP conversion / month",
+    "Up to 30 pages per docs site",
+    "Token-based remote MCP (Cursor + Claude)",
     "ask_documentation with ASI1",
-    "Community support",
+    "Public projects · community support",
   ],
   ctaLabel: "Start free",
 };
@@ -50,29 +50,30 @@ const PLAN_COPY: Plan[] = [
   {
     id: "starter",
     name: "Starter",
-    tagline: "For solo devs shipping side-projects.",
+    tagline: "For individual developers self-hosting MCPs.",
     features: [
-      "50 MCP conversions / month",
-      "Up to 150 pages per docs site",
-      "Remote HTTP MCP for Cursor + Claude + Windsurf",
+      "5 MCP conversions / month",
+      "Up to 50 pages per docs site",
+      "Export MCP config · self-host anywhere",
+      "Token-based HTTP MCP (Cursor + Claude + Windsurf)",
       "Semantic toolkits + workflow inference",
       "Public projects",
-      "Community support",
     ],
     ctaLabel: "Start Starter",
   },
   {
     id: "pro",
     name: "Pro",
-    tagline: "For builders shipping AI-native products.",
+    tagline: "For startups & API companies shipping official MCP.",
     badge: "Most popular",
     highlight: true,
     features: [
-      "Unlimited MCP conversions",
+      "10 MCP conversions / month",
       "Up to 750 pages per docs site",
-      "Workflow AI (auth, payment, upload, webhook flows)",
-      "Visual API graph + MCP playground",
-      "Auto re-crawl every 24h · private projects",
+      "Hosted MCP · auto re-crawl every 24h",
+      "Custom domain for your MCP endpoint",
+      "Workflow AI + visual API graph",
+      "Usage analytics · private projects",
       "Email support",
     ],
     ctaLabel: "Go Pro",
@@ -80,16 +81,95 @@ const PLAN_COPY: Plan[] = [
   {
     id: "team",
     name: "Team",
-    tagline: "For teams operating internal docs at scale.",
+    tagline: "For companies operating official MCP infrastructure.",
     features: [
       "Everything in Pro",
       "Up to 2,500 pages per docs site",
+      "Custom domain + company-attributed tokens",
       "Auto re-crawl every 6h",
       "5 teammates · role-based access",
-      "Custom domain for MCP endpoints",
       "Priority support (24h SLA)",
     ],
     ctaLabel: "Upgrade",
+  },
+];
+
+const COMPARISON_ROWS: Array<{
+  feature: string;
+  starter: string;
+  pro: string;
+  team: string;
+}> = [
+  {
+    feature: "MCP conversions / month",
+    starter: "5",
+    pro: "10",
+    team: "Unlimited",
+  },
+  {
+    feature: "Pages indexed per site",
+    starter: "50",
+    pro: "750",
+    team: "2,500",
+  },
+  {
+    feature: "Hosting",
+    starter: "Self-hosted",
+    pro: "Hosted by doc2mcp",
+    team: "Hosted + custom domain",
+  },
+  {
+    feature: "Doc sync",
+    starter: "Manual",
+    pro: "Auto · every 24h",
+    team: "Auto · every 6h",
+  },
+  {
+    feature: "Custom domain",
+    starter: "—",
+    pro: "✓",
+    team: "✓ company-attributed",
+  },
+  {
+    feature: "Private documentation",
+    starter: "—",
+    pro: "✓",
+    team: "✓",
+  },
+  {
+    feature: "Usage analytics",
+    starter: "—",
+    pro: "✓",
+    team: "✓",
+  },
+  {
+    feature: "Support",
+    starter: "Community",
+    pro: "Email",
+    team: "Priority · 24h SLA",
+  },
+];
+
+const FAQS: Array<{ q: string; a: string }> = [
+  {
+    q: "Why not build an MCP server manually?",
+    a: "Hand-writing tool wrappers per product is slow and goes stale the moment your docs change. doc2mcp turns any documentation URL into a structured, token-secured MCP server — and keeps it in sync automatically.",
+  },
+  {
+    q: "Can I self-host?",
+    a: "Yes. On Starter and above you can export the MCP config and run it anywhere. Pro and Team add a fully hosted MCP endpoint so you don't manage any infrastructure.",
+  },
+  {
+    q: "Do you support private docs?",
+    a: "Pro and Team support private projects — your documentation and knowledge bases stay behind token-based access and are never exposed publicly.",
+  },
+  {
+    q: "How are documentation updates synchronized?",
+    a: "Free and Starter sync manually on demand. Pro re-crawls every 24h and Team every 6h, so your agents always read the latest docs without redeploys.",
+  },
+  {
+    q: "Can I migrate between plans later?",
+    a: "Anytime. Upgrades apply instantly and your existing MCP endpoints, tokens, and projects carry over — no re-conversion required.",
   },
 ];
 
@@ -162,11 +242,13 @@ export function PricingSection() {
                 : "translate-y-4 opacity-0"
             )}
           >
-            Simple, builder-friendly pricing.
+            Documentation infrastructure for AI agents.
           </h2>
-          <p className="mt-4 text-muted-foreground text-sm max-w-lg mx-auto">
-            Every plan deploy the same robust remote MCP interface. Select a
-            tier based on page capacity and sync frequency.
+          <p className="mt-4 text-muted-foreground text-sm max-w-xl mx-auto">
+            For developers who want to generate and self-host MCPs — and for
+            companies publishing official MCP infrastructure for their customers
+            and AI agents. Token-based access, hosted endpoints, and custom
+            domains included.
           </p>
 
           <div className="mt-8 flex flex-col items-center gap-3">
@@ -350,7 +432,98 @@ export function PricingSection() {
           Unlimited MCP reads included · Conversions run once per docs portal ·
           Cancel anytime.
         </p>
+
+        <ComparisonTable />
+        <PricingFaq />
       </div>
     </section>
+  );
+}
+
+function ComparisonTable() {
+  return (
+    <div className="mt-20">
+      <h3 className="text-center font-display font-semibold text-2xl tracking-tight text-foreground sm:text-3xl">
+        Self-hosted, hosted, or enterprise
+      </h3>
+      <p className="mt-3 text-center text-muted-foreground text-sm">
+        Pick the operating model that fits your team.
+      </p>
+
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-border/50 bg-card/40 backdrop-blur-xl">
+        <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-border/50 border-b">
+              <th className="px-5 py-4 font-mono text-[11px] text-muted-foreground uppercase tracking-wider">
+                Feature
+              </th>
+              <th className="px-5 py-4 font-medium text-foreground">
+                Self-hosted
+                <span className="ml-1.5 font-mono text-[10px] text-muted-foreground/60">
+                  Starter
+                </span>
+              </th>
+              <th className="px-5 py-4 font-medium text-[#4285f4] dark:text-[#8ab4f8]">
+                Hosted
+                <span className="ml-1.5 font-mono text-[10px] text-muted-foreground/60">
+                  Pro
+                </span>
+              </th>
+              <th className="px-5 py-4 font-medium text-foreground">
+                Enterprise
+                <span className="ml-1.5 font-mono text-[10px] text-muted-foreground/60">
+                  Team
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARISON_ROWS.map((row) => (
+              <tr
+                className="border-border/30 border-b last:border-0"
+                key={row.feature}
+              >
+                <td className="px-5 py-3.5 text-muted-foreground">
+                  {row.feature}
+                </td>
+                <td className="px-5 py-3.5 text-foreground/90">
+                  {row.starter}
+                </td>
+                <td className="px-5 py-3.5 text-foreground/90">{row.pro}</td>
+                <td className="px-5 py-3.5 text-foreground/90">{row.team}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function PricingFaq() {
+  return (
+    <div className="mt-20 mx-auto max-w-3xl">
+      <h3 className="text-center font-display font-semibold text-2xl tracking-tight text-foreground sm:text-3xl">
+        Frequently asked questions
+      </h3>
+      <div className="mt-8 flex flex-col gap-3">
+        {FAQS.map((item) => (
+          <details
+            className="group rounded-xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-colors hover:border-border/80"
+            key={item.q}
+          >
+            <summary className="flex cursor-pointer items-center justify-between gap-4 font-medium text-foreground text-sm marker:content-['']">
+              {item.q}
+              <span className="text-muted-foreground transition-transform group-open:rotate-45">
+                +
+              </span>
+            </summary>
+            <p className="mt-3 text-muted-foreground text-sm leading-relaxed">
+              {item.a}
+            </p>
+          </details>
+        ))}
+      </div>
+    </div>
   );
 }
