@@ -114,22 +114,24 @@ export function WhyTeamsSection() {
       />
 
       <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-            <span className="h-px w-8 bg-foreground/30" />
-            Outcomes
-            <span className="h-px w-8 bg-foreground/30" />
-          </span>
-          <h2 className="mt-6 font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
-            Why teams use{" "}
-            <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
-              Doc2MCP
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-16 mb-12 sm:mb-16 text-left">
+          <div>
+            <span className="mb-4 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+              Outcomes
             </span>
-          </h2>
-          <p className="mt-5 text-base text-muted-foreground leading-relaxed sm:text-lg">
-            The compound effect of giving every agent — internal or customer-
-            facing — structured, current, AI-ready documentation.
-          </p>
+            <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight">
+              Why teams use{" "}
+              <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
+                Doc2MCP
+              </span>
+            </h2>
+          </div>
+          <div className="flex flex-col justify-end lg:pb-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              The compound effect of giving every agent — internal or customer-
+              facing — structured, current, AI-ready documentation.
+            </p>
+          </div>
         </div>
 
         <ul className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
