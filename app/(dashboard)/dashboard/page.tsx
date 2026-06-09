@@ -13,6 +13,7 @@ import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { CheckoutSuccessHandler } from "@/components/billing/checkout-success-handler";
 import { UpgradeBanner } from "@/components/dashboard/upgrade-banner";
+import { DashboardTour } from "@/components/onboarding/dashboard-tour";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -94,6 +95,7 @@ export default async function DashboardOverviewPage() {
       <Suspense fallback={null}>
         <CheckoutSuccessHandler />
       </Suspense>
+      <DashboardTour />
 
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -107,7 +109,7 @@ export default async function DashboardOverviewPage() {
             Ship MCP servers from any documentation site in minutes.
           </p>
         </div>
-        <Button asChild type="button">
+        <Button asChild data-tour="dash-new" type="button">
           <Link href="/chat">
             <Zap className="mr-1 size-4" />
             New conversion
@@ -183,7 +185,7 @@ export default async function DashboardOverviewPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2" data-tour="dash-plan">
           <CardHeader>
             <CardTitle>Your plan</CardTitle>
             <CardDescription>
@@ -226,7 +228,7 @@ export default async function DashboardOverviewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour="dash-links">
           <CardHeader>
             <CardTitle>Quick links</CardTitle>
             <CardDescription>Common dashboard actions</CardDescription>

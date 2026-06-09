@@ -94,6 +94,7 @@ export function HeroSection() {
         <motion.form
           animate={isVisible ? { y: 0, opacity: 1 } : { y: 15, opacity: 0 }}
           className="mt-10 w-full max-w-[620px] rounded-full border border-border/80 bg-card/50 hover:bg-card/75 hover:border-[#4285f4] dark:hover:border-[#8ab4f8] transition-all duration-300 p-1.5 focus-within:border-[#4285f4] dark:focus-within:border-[#8ab4f8] focus-within:ring-2 focus-within:ring-[#4285f4]/20 focus-within:shadow-[0_0_24px_rgba(66,133,244,0.15)] dark:focus-within:shadow-[0_0_24px_rgba(138,180,248,0.12)] flex items-center animate-fade-in"
+          data-tour="hero-url"
           onSubmit={handleSubmit}
           transition={{ delay: 0.3, duration: 0.6 }}
         >

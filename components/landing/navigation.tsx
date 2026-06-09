@@ -43,6 +43,12 @@ const NAV_LINKS = [
   { name: "Docs", href: "/docs", icon: FileText },
 ] as const;
 
+/** Onboarding-tour anchors keyed by nav href. */
+const TOUR_ANCHORS: Record<string, string> = {
+  "/cli": "nav-cli",
+  "/pricing": "nav-pricing",
+};
+
 export type LandingSessionInfo = {
   email: string;
   name?: string | null;
@@ -117,6 +123,7 @@ export function LandingNavigation({
                     ? "text-[#4285f4] dark:text-[#8ab4f8] font-semibold"
                     : "text-muted-foreground hover:text-foreground"
                 )}
+                data-tour={TOUR_ANCHORS[link.href]}
                 href={link.href}
                 key={link.name}
               >
@@ -135,7 +142,7 @@ export function LandingNavigation({
         </div>
 
         {/* Right actions */}
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2 md:flex" data-tour="nav-cta">
           <ThemeToggle />
           {session ? (
             <Button
