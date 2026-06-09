@@ -69,9 +69,9 @@ function CrawlingCard() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full">
+    <div className="flex flex-col gap-4 w-full h-full flex-1">
       {/* File Tree Explorer */}
-      <div className="flex flex-col gap-1.5 p-3.5 rounded-xl border border-border/40 bg-zinc-950/40 font-mono text-[10.5px] text-zinc-300 select-none">
+      <div className="flex flex-col gap-1.5 p-3.5 rounded-xl border border-border/40 bg-zinc-950/40 font-mono text-[10.5px] text-zinc-300 select-none flex-1">
         <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold border-b border-border/20 pb-1.5 mb-1.5 flex items-center justify-between">
           <span>Target Tree</span>
           <span className="text-emerald-500 font-bold">● Scan complete</span>
@@ -428,7 +428,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#4285f4]/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
       />
 
-      <div className="flex h-full flex-col justify-between gap-5">
+      <div className="flex h-full flex-col gap-5">
         <div>
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-foreground/85">
@@ -443,7 +443,9 @@ function FeatureCard({ feature }: { feature: Feature }) {
           </p>
         </div>
 
-        <div className="text-foreground/70">{feature.render(inView)}</div>
+        <div className="text-foreground/70 flex-1 flex flex-col justify-end">
+          {feature.render(inView)}
+        </div>
       </div>
     </motion.div>
   );
@@ -497,20 +499,14 @@ export function PlatformSection() {
       id="features"
       ref={sectionRef}
     >
-      {/* animated gradient mesh */}
+      {/* Background Subtle Gradient */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 opacity-60"
-        style={
-          reduce
-            ? undefined
-            : {
-                background:
-                  "radial-gradient(circle at 50% 50%, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.03) 60%, transparent 100%)",
-                backgroundSize: "200% 200%",
-                animation: "pf-mesh 18s ease-in-out infinite",
-              }
-        }
+        className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px] -z-10"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)",
+        }}
       />
       {/* parallax dot grid */}
       <motion.div
