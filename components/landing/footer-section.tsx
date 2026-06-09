@@ -172,24 +172,51 @@ function AnimatedWordmark() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none mt-12 select-none overflow-hidden text-center"
+      className="pointer-events-none relative mt-12 select-none overflow-hidden text-center"
     >
-      <p className="-mb-4 footer-wordmark bg-gradient-to-b from-foreground/15 via-foreground/5 to-foreground/0 bg-clip-text font-display font-bold leading-none tracking-tight text-transparent text-[clamp(3rem,14vw,18rem)] sm:-mb-10 lg:-mb-16">
+      <p className="-mb-4 footer-wordmark font-display font-bold leading-none tracking-tight text-[clamp(3rem,14vw,18rem)] sm:-mb-10 lg:-mb-16">
         doc2mcp
       </p>
       <style>{`
         .footer-wordmark {
-          background-size: 200% 200%;
-          animation: wordmark-shimmer 8s ease-in-out infinite;
+          background-image: linear-gradient(
+            110deg,
+            color-mix(in oklab, var(--foreground) 8%, transparent) 0%,
+            color-mix(in oklab, var(--foreground) 8%, transparent) 38%,
+            #4285f4 50%,
+            color-mix(in oklab, var(--foreground) 8%, transparent) 62%,
+            color-mix(in oklab, var(--foreground) 8%, transparent) 100%
+          );
+          background-size: 250% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation:
+            wordmark-sheen 5s linear infinite,
+            wordmark-float 7s ease-in-out infinite;
         }
-        @keyframes wordmark-shimmer {
+        .dark .footer-wordmark {
+          background-image: linear-gradient(
+            110deg,
+            color-mix(in oklab, var(--foreground) 10%, transparent) 0%,
+            color-mix(in oklab, var(--foreground) 10%, transparent) 38%,
+            #8ab4f8 50%,
+            color-mix(in oklab, var(--foreground) 10%, transparent) 62%,
+            color-mix(in oklab, var(--foreground) 10%, transparent) 100%
+          );
+        }
+        @keyframes wordmark-sheen {
+          0% { background-position: 150% 50%; }
+          100% { background-position: -50% 50%; }
+        }
+        @keyframes wordmark-float {
           0%, 100% {
-            background-position: 0% 50%;
+            transform: translateY(0);
             filter: drop-shadow(0 0 0 rgba(66, 133, 244, 0));
           }
           50% {
-            background-position: 100% 50%;
-            filter: drop-shadow(0 8px 32px rgba(66, 133, 244, 0.1));
+            transform: translateY(-6px);
+            filter: drop-shadow(0 12px 40px rgba(66, 133, 244, 0.18));
           }
         }
         @media (prefers-reduced-motion: reduce) {

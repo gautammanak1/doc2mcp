@@ -9,33 +9,19 @@ import {
   FileText,
   Home,
   LayoutDashboard,
-  LogOut,
   Menu,
-  Settings,
-  ShieldCheck,
   Sliders,
-  Sparkles,
   Store,
   Terminal,
-  UserCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -44,7 +30,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useSupabaseAuth } from "@/lib/supabase/auth";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -153,20 +138,17 @@ export function LandingNavigation({
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
           {session ? (
-            <>
-              <Button
-                asChild
-                className="group h-8.5 gap-1.5 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
-                size="sm"
-              >
-                <Link href={session.isAdmin ? "/admin" : "/dashboard"}>
-                  <LayoutDashboard aria-hidden="true" className="size-3.5" />
-                  {session.isAdmin ? "Admin" : "Dashboard"}
-                  <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Link>
-              </Button>
-              <UserMenu session={session} />
-            </>
+            <Button
+              asChild
+              className="group h-8.5 gap-1.5 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
+              size="sm"
+            >
+              <Link href={session.isAdmin ? "/admin" : "/dashboard"}>
+                <LayoutDashboard aria-hidden="true" className="size-3.5" />
+                {session.isAdmin ? "Admin" : "Dashboard"}
+                <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </Button>
           ) : (
             <>
               <Button
@@ -288,138 +270,5 @@ export function LandingNavigation({
         </div>
       </nav>
     </header>
-  );
-}
-
-function UserMenu({ session }: { session: NonNullable<LandingSessionInfo> }) {
-  const router = useRouter();
-  const { signOut } = useSupabaseAuth();
-  const homeHref = session.isAdmin ? "/admin" : "/dashboard";
-  const initial = session.initial.toUpperCase();
-  const displayName = displayNameFor(session);
-  const planLabel = session.isAdmin
-    ? "admin"
-    : session.plan === "free"
-      ? "free"
-      : session.plan;
-  const planBadgeClass = session.isAdmin
-    ? "border-foreground/20 bg-foreground/10 text-foreground"
-    : session.plan === "free"
-      ? "border-border bg-muted text-muted-foreground"
-      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Open account menu"
-          className="group relative flex h-9 items-center gap-2 rounded-full border border-border/60 bg-background/70 py-1 pr-2.5 pl-1 transition-colors hover:border-foreground/30 hover:bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40"
-          type="button"
-        >
-          <Avatar className="size-7">
-            <AvatarFallback className="bg-foreground font-medium text-[12px] text-background">
-              {initial}
-            </AvatarFallback>
-          </Avatar>
-          <span
-            className="hidden max-w-[140px] truncate font-medium text-[13px] text-foreground/90 group-hover:text-foreground lg:inline"
-            title={displayName}
-          >
-            {displayName}
-          </span>
-          <span
-            className={`hidden h-5 items-center gap-1 rounded-full border px-1.5 font-medium text-[10px] uppercase tracking-wide lg:inline-flex ${planBadgeClass}`}
-          >
-            {session.isAdmin ? (
-              <>
-                <ShieldCheck className="size-2.5" />
-                admin
-              </>
-            ) : session.plan === "free" ? (
-              "free"
-            ) : (
-              <>
-                <Sparkles className="size-2.5" />
-                {planLabel}
-              </>
-            )}
-          </span>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="w-64 rounded-xl border border-border/60 bg-popover/95 p-1.5 shadow-lg backdrop-blur-xl"
-        sideOffset={10}
-      >
-        <DropdownMenuLabel className="flex items-center gap-3 px-2 py-2">
-          <Avatar className="size-9">
-            <AvatarFallback className="bg-foreground font-medium text-background text-sm">
-              {initial}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-medium text-foreground text-sm">
-              {displayName}
-            </p>
-            <div className="mt-0.5 flex items-center gap-1.5">
-              <Badge
-                className={`gap-1 px-1.5 py-0 text-[10px] ${planBadgeClass}`}
-                variant="outline"
-              >
-                {session.isAdmin ? (
-                  <>
-                    <ShieldCheck className="size-2.5" />
-                    Admin
-                  </>
-                ) : (
-                  planLabel
-                )}
-              </Badge>
-            </div>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="cursor-pointer gap-2 rounded-md text-sm"
-          onSelect={() => router.push(homeHref)}
-        >
-          <LayoutDashboard className="size-4" />
-          {session.isAdmin ? "Admin dashboard" : "Dashboard"}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer gap-2 rounded-md text-sm"
-          onSelect={() => router.push("/dashboard/profile")}
-        >
-          <UserCircle className="size-4" />
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer gap-2 rounded-md text-sm"
-          onSelect={() => router.push("/chat")}
-        >
-          <Sparkles className="size-4" />
-          New conversion
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer gap-2 rounded-md text-sm"
-          onSelect={() => router.push("/pricing")}
-        >
-          <Settings className="size-4" />
-          Billing & plans
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="cursor-pointer gap-2 rounded-md text-destructive text-sm focus:text-destructive"
-          onSelect={async () => {
-            await signOut();
-            router.push("/");
-            router.refresh();
-          }}
-        >
-          <LogOut className="size-4" />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
