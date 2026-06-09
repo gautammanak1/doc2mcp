@@ -10,7 +10,7 @@ import {
   Workflow,
   Zap,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 type UseCase = {
@@ -82,29 +82,11 @@ const TRUST_ROW = [
 
 export function UseCasesSection() {
   const [activeTab, setActiveTab] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <section
       className="relative overflow-hidden py-20 sm:py-28 lg:py-32"
       id="use-cases"
-      ref={sectionRef}
     >
       {/* Background Subtle Gradient */}
       <div
@@ -159,14 +141,14 @@ export function UseCasesSection() {
               const active = i === activeTab;
               return (
                 <button
-                  key={uc.id}
-                  onClick={() => setActiveTab(i)}
                   className={cn(
                     "flex flex-col text-left p-5 rounded-2xl border transition-all duration-300 backdrop-blur-md",
                     active
                       ? "border-[#4285f4] bg-[#4285f4]/5 dark:border-[#8ab4f8] dark:bg-[#8ab4f8]/5 shadow-sm"
                       : "border-border/40 bg-card/20 hover:bg-card/45 hover:border-border/80"
                   )}
+                  key={uc.id}
+                  onClick={() => setActiveTab(i)}
                   type="button"
                 >
                   <div className="flex items-center gap-3">
@@ -213,8 +195,12 @@ export function UseCasesSection() {
               {activeTab === 0 && (
                 <div className="flex flex-col gap-3 bg-zinc-950 p-4 rounded-xl border border-border/40 font-mono text-[10.5px] w-full max-w-md mx-auto shadow-inner">
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-1">
-                    <span className="text-zinc-500 font-bold uppercase">stripe-mcp-server</span>
-                    <span className="text-emerald-500 font-bold">● Public Registry</span>
+                    <span className="text-zinc-500 font-bold uppercase">
+                      stripe-mcp-server
+                    </span>
+                    <span className="text-emerald-500 font-bold">
+                      ● Public Registry
+                    </span>
                   </div>
                   <div className="space-y-1">
                     <p className="text-zinc-400">Available Tools (23):</p>
@@ -228,13 +214,21 @@ export function UseCasesSection() {
               {activeTab === 1 && (
                 <div className="flex flex-col gap-3 bg-zinc-950 p-4 rounded-xl border border-border/40 font-mono text-[10.5px] w-full max-w-md mx-auto shadow-inner">
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-1">
-                    <span className="text-zinc-500 font-bold uppercase">claude_desktop_config.json</span>
-                    <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">● Connected</span>
+                    <span className="text-zinc-500 font-bold uppercase">
+                      claude_desktop_config.json
+                    </span>
+                    <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">
+                      ● Connected
+                    </span>
                   </div>
                   <div className="space-y-1 text-zinc-300">
-                    <p className="text-zinc-500">// Integrated context for support agents</p>
+                    <p className="text-zinc-500">
+                      {"// Integrated context for support agents"}
+                    </p>
                     <p>"stripe": {"{"}</p>
-                    <p className="pl-4">"url": "https://api.doc2mcp.com/stripe"</p>
+                    <p className="pl-4">
+                      "url": "https://api.doc2mcp.com/stripe"
+                    </p>
                     <p>{"}"}</p>
                   </div>
                 </div>
@@ -243,13 +237,26 @@ export function UseCasesSection() {
               {activeTab === 2 && (
                 <div className="flex flex-col gap-3 bg-zinc-950 p-4 rounded-xl border border-border/40 font-mono text-[10.5px] w-full max-w-md mx-auto shadow-inner">
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-1">
-                    <span className="text-zinc-500 font-bold uppercase">VPC Deployment</span>
-                    <span className="text-emerald-500 font-bold flex items-center gap-1"><Lock className="size-3" /> Secure Gateway</span>
+                    <span className="text-zinc-500 font-bold uppercase">
+                      VPC Deployment
+                    </span>
+                    <span className="text-emerald-500 font-bold flex items-center gap-1">
+                      <Lock className="size-3" /> Secure Gateway
+                    </span>
                   </div>
                   <div className="space-y-2 text-zinc-400 py-1">
-                    <div className="flex justify-between border-b border-zinc-900 pb-1"><span>Audit Log:</span><span className="text-zinc-200">Enabled</span></div>
-                    <div className="flex justify-between border-b border-zinc-900 pb-1"><span>Auth SSO:</span><span className="text-zinc-200">SAML 2.0</span></div>
-                    <div className="flex justify-between pb-0"><span>Data boundary:</span><span className="text-zinc-200">US-East-1 Only</span></div>
+                    <div className="flex justify-between border-b border-zinc-900 pb-1">
+                      <span>Audit Log:</span>
+                      <span className="text-zinc-200">Enabled</span>
+                    </div>
+                    <div className="flex justify-between border-b border-zinc-900 pb-1">
+                      <span>Auth SSO:</span>
+                      <span className="text-zinc-200">SAML 2.0</span>
+                    </div>
+                    <div className="flex justify-between pb-0">
+                      <span>Data boundary:</span>
+                      <span className="text-zinc-200">US-East-1 Only</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -257,11 +264,16 @@ export function UseCasesSection() {
               {activeTab === 3 && (
                 <div className="flex flex-col gap-3 bg-zinc-950 p-4 rounded-xl border border-border/40 font-mono text-[10.5px] w-full max-w-md mx-auto shadow-inner">
                   <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-1">
-                    <span className="text-zinc-500 font-bold uppercase">GitHub Readme</span>
+                    <span className="text-zinc-500 font-bold uppercase">
+                      GitHub Readme
+                    </span>
                     <span className="text-blue-400 font-bold">● Free tier</span>
                   </div>
                   <div className="p-3 rounded border border-zinc-800 bg-zinc-900/40 flex items-center justify-between">
-                    <span className="font-mono text-zinc-400 select-all">[![MCP Server](https://mcp.run/doc2mcp.svg)](https://registry.doc2mcp.com)</span>
+                    <span className="font-mono text-zinc-400 select-all">
+                      [![MCP
+                      Server](https://mcp.run/doc2mcp.svg)](https://registry.doc2mcp.com)
+                    </span>
                   </div>
                 </div>
               )}
@@ -274,7 +286,10 @@ export function UseCasesSection() {
               </span>
               <ul className="space-y-2 text-xs">
                 {USE_CASES[activeTab].bullets.map((b) => (
-                  <li className="flex items-start gap-2.5 text-foreground/90" key={b}>
+                  <li
+                    className="flex items-start gap-2.5 text-foreground/90"
+                    key={b}
+                  >
                     <span
                       aria-hidden="true"
                       className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#4285f4] dark:bg-[#8ab4f8]"
