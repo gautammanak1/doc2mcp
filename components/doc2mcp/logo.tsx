@@ -30,9 +30,7 @@ export function Doc2McpWordmark({ className }: { className?: string }) {
       )}
     >
       <span className="text-foreground">doc</span>
-      <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-        2
-      </span>
+      <span className="text-[#4285f4] dark:text-[#8ab4f8]">2</span>
       <span className="text-foreground">mcp</span>
     </span>
   );
