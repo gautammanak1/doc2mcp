@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
 import { ProjectDetail } from "@/components/dashboard/project-detail";
-import { getPlatformProjectById } from "@/lib/db/queries";
+import { getUserPlan } from "@/lib/billing/entitlements";
+import { getMcpHitStats, getPlatformProjectById } from "@/lib/db/queries";
 import { generateMcpExportBundle } from "@/services/mcp/exports";
 import type { ProjectArtifacts } from "@/types/platform";
 
@@ -34,5 +35,17 @@ export default async function DashboardProjectDetailPage({
       })
     : null;
 
-  return <ProjectDetail exportBundle={exportBundle} initialProject={project} />;
+  const [plan, hitStats] = await Promise.all([
+    getUserPlan(session.user.id),
+    getMcpHitStats({ projectId: id }),
+  ]);
+
+  return (
+    <ProjectDetail
+      canPublishCompany={plan.entitlements.privateProjects}
+      exportBundle={exportBundle}
+      hitStats={hitStats}
+      initialProject={project}
+    />
+  );
 }
