@@ -76,7 +76,7 @@ doc2mcp https://docs.stripe.com
 
 - Point at the **docs** URL, not the marketing homepage.
 - The URL must start with `http://` or `https://`.
-- Counts against your plan's monthly conversion limit (free includes 5/month).
+- Counts against your plan's monthly conversion limit (free includes 1/month).
 
 ### `doc2mcp login`
 

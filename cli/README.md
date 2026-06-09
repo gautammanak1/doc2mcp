@@ -111,7 +111,7 @@ Tips:
 
 - Point at the **docs** URL (`https://docs.stripe.com`), not the marketing homepage.
 - The URL must start with `http://` or `https://`.
-- Conversions count against your plan's monthly limit (free includes 5/month), shared with the
+- Conversions count against your plan's monthly limit (free includes 1/month), shared with the
   website and chat.
 
 ---

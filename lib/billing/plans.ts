@@ -55,8 +55,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       },
     },
     entitlements: {
-      mcpConversionsPerMonth: 50,
-      maxPagesPerSite: 150,
+      mcpConversionsPerMonth: 5,
+      maxPagesPerSite: 50,
       privateProjects: false,
       recrawlHours: null,
       teammates: 1,
@@ -78,7 +78,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       },
     },
     entitlements: {
-      mcpConversionsPerMonth: -1,
+      mcpConversionsPerMonth: 10,
       maxPagesPerSite: 750,
       privateProjects: true,
       recrawlHours: 24,
@@ -111,8 +111,8 @@ export const PLANS: Record<PlanId, PlanConfig> = {
 };
 
 export const FREE_ENTITLEMENTS: PlanEntitlements = {
-  mcpConversionsPerMonth: 5,
-  maxPagesPerSite: 50,
+  mcpConversionsPerMonth: 1,
+  maxPagesPerSite: 30,
   privateProjects: false,
   recrawlHours: null,
   teammates: 1,
