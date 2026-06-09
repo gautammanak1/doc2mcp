@@ -108,7 +108,7 @@ export function RealExampleSection() {
           </span>
           <h2 className="mt-6 font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
             See it{" "}
-            <span className="bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+            <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
               in action
             </span>
           </h2>

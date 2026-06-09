@@ -20,31 +20,17 @@ import {
 } from "framer-motion";
 import {
   Bot,
-  Check,
-  Copy,
   Download,
-  FileText,
-  Folder,
   type LucideIcon,
   Network,
   RefreshCw,
-  Sparkles,
   Target,
   Workflow,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
-const HEADING_WORDS = [
-  "One",
-  "platform.",
-  "Every",
-  "layer",
-  "of",
-  "AI",
-  "documentation",
-  "infrastructure.",
-];
+const HEADING_WORDS = ["One", "platform.", "Every", "layer."];
 
 const containerVariants = {
   hidden: {},
@@ -64,131 +50,73 @@ const cardVariants = {
 
 /* ----------------------------- 1. Crawling ------------------------------ */
 
-const CRAWLER_TREE = [
-  { kind: "folder", label: "/docs", indent: 0 },
-  { kind: "file", label: "introduction.mdx", indent: 1 },
-  { kind: "file", label: "quickstart.mdx", indent: 1 },
-  { kind: "folder", label: "/api", indent: 1 },
-  { kind: "file", label: "customers.mdx", indent: 2 },
-  { kind: "file", label: "payment_intents.mdx", indent: 2 },
-  { kind: "file", label: "webhooks.mdx", indent: 2 },
-  { kind: "file", label: "node.mdx", indent: 2 },
-] as const;
+function CrawlingCard() {
+  const fileTree = [
+    { name: "stripe-docs", size: "" },
+    { name: "  ├── api-reference", size: "" },
+    { name: "  │   ├── charges.mdx", size: "12kb" },
+    { name: "  │   ├── customers.mdx", size: "18kb" },
+    { name: "  │   └── refunds.mdx", size: "9kb" },
+    { name: "  ├── checkout", size: "" },
+    { name: "  └── billing", size: "" },
+  ];
 
-function useCountUp(
-  target: number,
-  active: boolean,
-  durationMs = 1600
-): number {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!active) {
-      return;
-    }
-    let raf = 0;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / durationMs);
-      const eased = 1 - (1 - t) ** 3;
-      setValue(Math.round(eased * target));
-      if (t < 1) {
-        raf = requestAnimationFrame(tick);
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, active, durationMs]);
-  return value;
-}
-
-function CrawlingCard({ active }: { active: boolean }) {
-  const [scanRow, setScanRow] = useState(-1);
-  const reduce = useReducedMotion();
-  const count = useCountUp(1284, active && !reduce);
-
-  useEffect(() => {
-    if (!active || reduce) {
-      setScanRow(CRAWLER_TREE.length - 1);
-      return;
-    }
-    let row = -1;
-    const id = setInterval(() => {
-      row = (row + 1) % (CRAWLER_TREE.length + 3);
-      setScanRow(row);
-    }, 520);
-    return () => clearInterval(id);
-  }, [active, reduce]);
+  const stats = [
+    { label: "Host URL", value: "docs.stripe.com" },
+    { label: "Total Pages", value: "1,284 pages" },
+    { label: "Data Scanned", value: "12.4 MB" },
+    { label: "Crawl Speed", value: "52 pages/sec" },
+  ];
 
   return (
-    <div className="relative h-full min-h-[280px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 backdrop-blur-xl sm:min-h-[300px]">
-      <div className="flex items-center justify-between border-border/30 border-b pb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-rose-400/60" />
-          <span className="size-2 rounded-full bg-amber-400/60" />
-          <span className="size-2 rounded-full bg-emerald-400/60" />
-        </div>
-        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-          docs.stripe.com · sitemap
+    <div className="flex flex-col gap-4 w-full h-full flex-1">
+      {/* File Tree Explorer */}
+      <div className="flex flex-col gap-1.5 p-3.5 rounded-xl border border-border/40 bg-zinc-950/40 font-mono text-[10.5px] text-zinc-300 select-none flex-1">
+        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold border-b border-border/20 pb-1.5 mb-1.5 flex items-center justify-between">
+          <span>Target Tree</span>
+          <span className="text-emerald-500 font-bold">● Scan complete</span>
         </span>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
-          <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-          crawling
-        </span>
+        {fileTree.map((node) => (
+          <div
+            className="flex items-center justify-between py-0.5 truncate hover:text-foreground"
+            key={node.name}
+          >
+            <span>{node.name}</span>
+            {node.size && (
+              <span className="text-muted-foreground/60 text-[9px]">
+                {node.size}
+              </span>
+            )}
+          </div>
+        ))}
       </div>
 
-      <ul className="mt-2.5 space-y-1 font-mono text-[11px]">
-        {CRAWLER_TREE.map((row, i) => {
-          const done = i <= scanRow;
-          const scanning = i === scanRow;
-          return (
-            <li
-              className="relative flex items-center gap-1.5 overflow-hidden rounded transition-colors"
-              key={row.label}
-              style={{ paddingLeft: `${row.indent * 14}px` }}
-            >
-              {row.kind === "folder" ? (
-                <Folder
-                  aria-hidden="true"
-                  className="size-3 shrink-0 text-violet-500"
-                />
-              ) : (
-                <FileText
-                  aria-hidden="true"
-                  className="size-3 shrink-0 text-foreground/55"
-                />
-              )}
-              <span
-                className={cn(
-                  "truncate transition-colors",
-                  done ? "text-foreground/85" : "text-muted-foreground/60"
-                )}
-              >
-                {row.label}
-              </span>
-              {scanning ? (
-                <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0 right-0 left-0 bg-gradient-to-r from-transparent via-violet-400/25 to-transparent"
-                  style={{ animation: "pf-scan 0.5s linear" }}
-                />
-              ) : null}
-              <Check
-                aria-hidden="true"
-                className={cn(
-                  "ml-auto size-3 shrink-0 text-emerald-500 transition-all duration-300",
-                  done ? "scale-100 opacity-100" : "scale-50 opacity-0"
-                )}
-              />
-            </li>
-          );
-        })}
-      </ul>
-
-      <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between border-border/30 border-t pt-2 font-mono text-[10px]">
-        <span className="text-muted-foreground">pages indexed</span>
-        <span className="font-display font-semibold text-foreground/85 text-sm tabular-nums">
-          {count.toLocaleString()}
+      {/* Crawl Metrics */}
+      <div className="flex flex-col justify-between gap-3 p-3.5 rounded-xl border border-border/40 bg-card/30">
+        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold border-b border-border/20 pb-1.5 flex items-center justify-between">
+          <span>Metadata &amp; Stats</span>
+          <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">
+            doc2mcp-crawler/1.0
+          </span>
         </span>
+        <div className="grid grid-cols-2 gap-2.5 my-auto">
+          {stats.map((stat) => (
+            <div className="flex flex-col gap-0.5" key={stat.label}>
+              <span className="text-[9px] text-muted-foreground font-mono">
+                {stat.label}
+              </span>
+              <span className="text-[11px] text-foreground font-semibold font-mono truncate">
+                {stat.value}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="pt-2 border-t border-border/20 flex items-center justify-between text-[9px] font-mono text-muted-foreground">
+          <span>Security checks:</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+            100% Passed
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -196,376 +124,200 @@ function CrawlingCard({ active }: { active: boolean }) {
 
 /* --------------------------- 2. MCP generation -------------------------- */
 
-type TermFrame = {
-  lines: string[];
-  typing: string;
-  cursor: boolean;
-  delay: number;
-};
-
-const TERM_SCRIPT = [
-  { text: "doc2mcp generate ./stripe-docs", kind: "cmd" },
-  { text: "→ crawled 1,284 pages", kind: "out" },
-  { text: "→ structured 4,182 chunks", kind: "out" },
-  { text: "→ tools: 23 · workflows: 6", kind: "out" },
-  { text: "✓ mcp ready · hosted", kind: "ok" },
-] as const;
-
-function buildTermFrames(): TermFrame[] {
-  const frames: TermFrame[] = [];
-  const committed: string[] = [];
-  for (const line of TERM_SCRIPT) {
-    if (line.kind === "cmd") {
-      for (let i = 1; i <= line.text.length; i++) {
-        frames.push({
-          lines: [...committed],
-          typing: line.text.slice(0, i),
-          cursor: true,
-          delay: 34,
-        });
-      }
-      committed.push(`$ ${line.text}`);
-      frames.push({
-        lines: [...committed],
-        typing: "",
-        cursor: false,
-        delay: 320,
-      });
-    } else {
-      committed.push(line.text);
-      frames.push({
-        lines: [...committed],
-        typing: "",
-        cursor: false,
-        delay: 340,
-      });
-    }
-  }
-  frames.push({ lines: [...committed], typing: "", cursor: true, delay: 2400 });
-  return frames;
-}
-
-function MCPGenCard({ active }: { active: boolean }) {
-  const frames = useMemo(buildTermFrames, []);
-  const [idx, setIdx] = useState(0);
-  const reduce = useReducedMotion();
-
-  useEffect(() => {
-    if (!active || reduce) {
-      setIdx(frames.length - 1);
-      return;
-    }
-    const frame = frames[idx] ?? frames[0];
-    const timer = setTimeout(
-      () => setIdx((p) => (p + 1) % frames.length),
-      frame.delay
-    );
-    return () => clearTimeout(timer);
-  }, [active, reduce, idx, frames]);
-
-  const frame = frames[idx] ?? frames[0];
-
+function MCPGenCard() {
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-col justify-end overflow-hidden rounded-xl border border-border/40 bg-zinc-950/90 p-3 font-mono text-[10.5px] backdrop-blur-xl">
-      {frame.lines.map((line) => {
-        const isCmd = line.startsWith("$ ");
-        const isOk = line.startsWith("✓");
-        return (
-          <p
-            className={cn(
-              "leading-relaxed",
-              isOk
-                ? "text-violet-400"
-                : isCmd
-                  ? "text-zinc-100"
-                  : "text-emerald-400/90"
-            )}
-            key={line}
-          >
-            {isCmd ? (
-              <>
-                <span className="text-violet-400">$</span> {line.slice(2)}
-              </>
-            ) : (
-              line
-            )}
-          </p>
-        );
-      })}
-      {frame.typing ? (
-        <p className="text-zinc-100">
-          <span className="text-violet-400">$</span> {frame.typing}
-          {frame.cursor ? (
-            <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-zinc-100 align-middle" />
-          ) : null}
+    <div className="relative flex w-full flex-col overflow-hidden rounded-xl border border-border/40 bg-zinc-950 p-4 font-mono text-[10.5px] text-zinc-300 leading-relaxed shadow-inner">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2.5">
+        <span className="text-[9px] text-zinc-500 font-semibold tracking-wider uppercase">
+          Generated Tool Schema
+        </span>
+        <span className="size-1.5 rounded-full bg-emerald-500/80" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-zinc-500">{"// stripe/create_payment_intent"}</p>
+        <p>
+          <span className="text-violet-400">type</span>{" "}
+          <span className="text-blue-400">Input</span> = {"{"}
         </p>
-      ) : null}
+        <p className="pl-4">
+          <span className="text-sky-300">amount</span>:{" "}
+          <span className="text-amber-400">number</span>
+          {";"}
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">currency</span>:{" "}
+          <span className="text-amber-400">string</span>
+          {";"}
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">metadata</span>?:{" "}
+          <span className="text-violet-400">Record</span>&lt;
+          <span className="text-amber-400">string</span>,{" "}
+          <span className="text-amber-400">string</span>&gt;
+          {";"}
+        </p>
+        <p>{"};"}</p>
+      </div>
     </div>
   );
 }
 
 /* ---------------------------- 3. Retrieval ------------------------------ */
 
-const RETRIEVAL_ROWS = [
-  { label: "createCustomer", score: 0.94 },
-  { label: "retrievePaymentIntent", score: 0.89 },
-  { label: "listSubscriptions", score: 0.82 },
-];
+function RetrievalCard() {
+  const results = [
+    {
+      title: "Retrieve Payment Intent",
+      file: "payment_intents.mdx",
+      match: "94% match",
+    },
+    {
+      title: "Create Checkout Session",
+      file: "checkout_sessions.mdx",
+      match: "89% match",
+    },
+  ];
 
-function RetrievalCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
-  const animate = active && !reduce;
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-2">
-      {RETRIEVAL_ROWS.map((row, i) => {
-        const top = i === 0;
-        return (
+    <div className="flex flex-col gap-2.5 w-full">
+      <div className="rounded-lg border border-border/40 bg-card/25 px-3 py-2 flex items-center gap-2 font-mono text-[10.5px]">
+        <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">
+          Query:
+        </span>
+        <span className="text-foreground font-medium truncate">
+          stripe session return URL parameters
+        </span>
+      </div>
+      <div className="flex flex-col gap-2">
+        {results.map((res) => (
           <div
-            className={cn(
-              "rounded-lg border bg-card/60 px-3 py-2 backdrop-blur-xl",
-              top
-                ? "border-fuchsia-500/40 shadow-[0_0_18px_-6px] shadow-fuchsia-500/40"
-                : "border-border/40"
-            )}
-            key={row.label}
-            style={
-              animate
-                ? {
-                    animation: top
-                      ? "pf-fade-in 0.5s ease-out both, pf-glow 2.4s ease-in-out infinite"
-                      : "pf-fade-in 0.5s ease-out both",
-                    animationDelay: `${i * 0.18}s`,
-                  }
-                : undefined
-            }
+            className="p-3 rounded-lg border border-border/40 bg-card/30 flex items-center justify-between"
+            key={res.title}
           >
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-mono text-foreground/85">{row.label}</span>
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 font-mono text-[10px]",
-                  top
-                    ? "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-300"
-                    : "bg-foreground/5 text-muted-foreground"
-                )}
-              >
-                {row.score.toFixed(2)}
+            <div className="flex flex-col min-w-0">
+              <span className="font-mono text-[10.5px] text-foreground font-semibold truncate">
+                {res.title}
+              </span>
+              <span className="text-[9px] text-muted-foreground font-mono truncate">
+                {res.file}
               </span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
-              <span
-                className={cn(
-                  "block h-full rounded-full",
-                  top
-                    ? "bg-gradient-to-r from-fuchsia-500 to-violet-500"
-                    : "bg-foreground/40"
-                )}
-                style={
-                  reduce
-                    ? { width: `${row.score * 100}%` }
-                    : {
-                        // CSS var drives the looping fill keyframe.
-                        ["--pf-target" as string]: `${row.score * 100}%`,
-                        width: `${row.score * 100}%`,
-                        animation: "pf-bar 3s ease-in-out infinite",
-                        animationDelay: `${i * 0.18}s`,
-                      }
-                }
-              />
-            </div>
+            <span className="px-2 py-0.5 rounded-full font-mono text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 shrink-0">
+              {res.match}
+            </span>
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }
 
 /* ------------------------------ 4. Sync -------------------------------- */
 
-const ORBIT_ICONS = [
-  { Icon: FileText, name: "file" },
-  { Icon: Workflow, name: "workflow" },
-  { Icon: Network, name: "network" },
-  { Icon: Bot, name: "bot" },
-];
+function SyncCard() {
+  const syncLogs = [
+    {
+      source: "docs.stripe.com",
+      change: "12 pages updated",
+      time: "2 mins ago",
+    },
+    {
+      source: "stripe-openapi.json",
+      change: "1 tool generated",
+      time: "1 hr ago",
+    },
+  ];
 
-function SyncCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
   return (
-    <div className="relative flex h-full min-h-[120px] w-full items-center justify-center">
-      <div className="relative size-32">
-        {/* ripple rings */}
-        {!reduce && active
-          ? [0, 1].map((ring) => (
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 rounded-full border border-emerald-500/30"
-                key={`ring-${ring}`}
-                style={{
-                  animation: "pf-ripple 2.6s ease-out infinite",
-                  animationDelay: `${ring * 1.3}s`,
-                }}
-              />
-            ))
-          : null}
-
-        {/* orbiting doc icons */}
+    <div className="flex flex-col gap-2.5 w-full">
+      {syncLogs.map((log) => (
         <div
-          className="absolute inset-0"
-          style={
-            reduce ? undefined : { animation: "pf-orbit 9s linear infinite" }
-          }
+          className="p-3 rounded-xl border border-border/40 bg-card/30 flex flex-col gap-1 hover:bg-card/55 transition-colors"
+          key={log.source}
         >
-          {ORBIT_ICONS.map(({ Icon, name }, i) => {
-            const angle = (i / ORBIT_ICONS.length) * 2 * Math.PI;
-            const r = 56;
-            const x = Math.cos(angle) * r;
-            const y = Math.sin(angle) * r;
-            return (
-              <span
-                className="absolute flex size-7 items-center justify-center rounded-lg border border-border/60 bg-background/80 text-foreground/70"
-                key={name}
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                }}
-              >
-                <Icon className="size-3.5" />
-              </span>
-            );
-          })}
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10.5px] text-foreground font-semibold truncate">
+              {log.source}
+            </span>
+            <span className="text-[9px] text-muted-foreground font-mono shrink-0">
+              {log.time}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-[9.5px] font-mono text-muted-foreground">
+            <span className="size-1 rounded-full bg-emerald-500" />
+            <span>{log.change}</span>
+          </div>
         </div>
-
-        {/* center */}
-        <span className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 flex size-12 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/10">
-          <RefreshCw
-            className="size-5 text-emerald-500"
-            style={
-              reduce ? undefined : { animation: "spin 4s linear infinite" }
-            }
-          />
-        </span>
-      </div>
+      ))}
     </div>
   );
 }
 
 /* -------------------------- 5. Multi-agent ----------------------------- */
 
-const AGENTS = ["Cursor", "Claude", "VS Code", "Windsurf", "OpenAI"];
-
-function MultiAgentCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
-  const [activeAgent, setActiveAgent] = useState(0);
-
-  useEffect(() => {
-    if (!active || reduce) {
-      return;
-    }
-    const id = setInterval(() => {
-      setActiveAgent((p) => (p + 1) % AGENTS.length);
-    }, 1100);
-    return () => clearInterval(id);
-  }, [active, reduce]);
+function MultiAgentCard() {
+  const clients = [
+    { name: "Cursor", status: "Installed", path: ".cursor/mcp.json" },
+    {
+      name: "Claude Desktop",
+      status: "Configured",
+      path: "claude_desktop_config.json",
+    },
+    { name: "VS Code", status: "Active", path: "settings.json" },
+  ];
 
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-wrap items-center justify-center gap-2">
-      {AGENTS.map((label, i) => {
-        const hot = i === activeAgent && !reduce;
-        return (
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-xl transition-all duration-500",
-              hot
-                ? "scale-105 border-violet-500/50 bg-violet-500/15 text-violet-700 shadow-[0_0_16px_-4px] shadow-violet-500/50 dark:text-violet-200"
-                : "border-border/60 bg-card/60 text-foreground/75"
-            )}
-            key={label}
-            style={
-              reduce
-                ? undefined
-                : {
-                    animation: "pf-fade-in 0.5s ease-out both",
-                    animationDelay: `${i * 0.12}s`,
-                  }
-            }
-          >
-            <span
-              className={cn(
-                "size-1.5 rounded-full",
-                hot ? "bg-violet-500" : "bg-emerald-500"
-              )}
-            />
-            {label}
+    <div className="flex flex-col gap-2 w-full">
+      {clients.map((client) => (
+        <div
+          className="flex items-center justify-between p-2.5 rounded-lg border border-border/40 bg-card/30"
+          key={client.name}
+        >
+          <div className="flex flex-col min-w-0">
+            <span className="font-mono text-[10.5px] text-foreground font-semibold">
+              {client.name}
+            </span>
+            <span className="text-[9px] text-muted-foreground font-mono truncate">
+              {client.path}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full font-mono text-[9px] font-semibold text-[#4285f4] dark:text-[#8ab4f8] bg-[#4285f4]/10 border border-[#4285f4]/20 shrink-0">
+            {client.status}
           </span>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }
 
 /* ----------------------------- 6. Export ------------------------------- */
 
-const EXPORT_JSON = `{
-  "mcpServers": {
-    "stripe": {
-      "url": "https://doc2mcp.site/…",
-      "headers": { "Authorization": "Bearer …" }
-    }
-  }
-}`;
-
-function ExportCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
-  const [chars, setChars] = useState(reduce ? EXPORT_JSON.length : 0);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!active || reduce) {
-      setChars(EXPORT_JSON.length);
-      return;
-    }
-    let n = 0;
-    const type = setInterval(() => {
-      n += 2;
-      if (n >= EXPORT_JSON.length) {
-        n = EXPORT_JSON.length;
-        clearInterval(type);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1200);
-      }
-      setChars(n);
-    }, 36);
-    return () => clearInterval(type);
-  }, [active, reduce]);
-
-  // Re-trigger the copy flash periodically once typed out.
-  useEffect(() => {
-    if (!active || reduce) {
-      return;
-    }
-    const id = setInterval(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1000);
-    }, 4000);
-    return () => clearInterval(id);
-  }, [active, reduce]);
-
+function ExportCard() {
   return (
-    <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-xl border border-border/40 bg-zinc-950/90 p-3 font-mono text-[10px] text-zinc-300 backdrop-blur-xl">
-      <pre className="whitespace-pre">{EXPORT_JSON.slice(0, chars)}</pre>
-      <span
-        className={cn(
-          "absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[9px] uppercase tracking-wider transition-all duration-300",
-          copied
-            ? "scale-100 border-emerald-500/40 bg-emerald-500/15 text-emerald-300 opacity-100"
-            : "scale-90 border-border/50 bg-background/40 text-muted-foreground opacity-70"
-        )}
-      >
-        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-        {copied ? "copied!" : "copy"}
-      </span>
+    <div className="relative w-full overflow-hidden rounded-xl border border-border/40 bg-zinc-950 p-4 font-mono text-[10.5px] text-zinc-300 leading-relaxed shadow-inner">
+      <div className="text-zinc-400 select-all">
+        <p>
+          <span className="text-violet-400">"stripe-mcp"</span>: {"{"}
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">"command"</span>:{" "}
+          <span className="text-emerald-400">"npx"</span>,
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">"args"</span>: [
+        </p>
+        <p className="pl-8">
+          <span className="text-emerald-400">"-y"</span>,
+        </p>
+        <p className="pl-8">
+          <span className="text-emerald-400">"doc2mcp-server@latest"</span>,
+        </p>
+        <p className="pl-8">
+          <span className="text-emerald-400">"--key=st_3a1"</span>
+        </p>
+        <p className="pl-4">]</p>
+        <p>{"}"}</p>
+      </div>
     </div>
   );
 }
@@ -590,9 +342,9 @@ const FEATURES: Feature[] = [
     description:
       "Automatically understands documentation hierarchy and structure — Mintlify, Docusaurus, Swagger, GitBook, raw markdown.",
     icon: Network,
-    span: "lg:col-span-2 lg:row-span-2",
-    accent: "from-sky-500/20 via-violet-500/10 to-transparent",
-    render: (a) => <CrawlingCard active={a} />,
+    span: "lg:col-span-3 lg:row-span-2",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
+    render: () => <CrawlingCard />,
   },
   {
     id: "mcp",
@@ -600,9 +352,9 @@ const FEATURES: Feature[] = [
     description:
       "Generate MCP servers without writing MCP code. Tools, workflows, auth, hosting — done.",
     icon: Workflow,
-    span: "lg:col-span-2",
-    accent: "from-violet-500/20 via-fuchsia-500/10 to-transparent",
-    render: (a) => <MCPGenCard active={a} />,
+    span: "lg:col-span-3",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
+    render: () => <MCPGenCard />,
   },
   {
     id: "retrieval",
@@ -610,10 +362,10 @@ const FEATURES: Feature[] = [
     description:
       "Improve AI coding accuracy and reduce hallucinations with semantic, schema-aware retrieval.",
     icon: Target,
-    span: "lg:col-span-2",
-    accent: "from-fuchsia-500/25 via-rose-500/15 to-transparent",
+    span: "lg:col-span-3",
+    accent: "from-[#4285f4]/20 via-[#8ab4f8]/10 to-transparent",
     highlight: true,
-    render: (a) => <RetrievalCard active={a} />,
+    render: () => <RetrievalCard />,
   },
   {
     id: "sync",
@@ -622,8 +374,8 @@ const FEATURES: Feature[] = [
       "Keep documentation synchronized automatically — your MCP server tracks the source.",
     icon: RefreshCw,
     span: "lg:col-span-2",
-    accent: "from-emerald-500/20 via-sky-500/10 to-transparent",
-    render: (a) => <SyncCard active={a} />,
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
+    render: () => <SyncCard />,
   },
   {
     id: "agents",
@@ -632,8 +384,8 @@ const FEATURES: Feature[] = [
       "Works across the modern MCP ecosystem — Cursor, Claude, VS Code, Windsurf, OpenAI Agents.",
     icon: Bot,
     span: "lg:col-span-2",
-    accent: "from-amber-500/20 via-orange-500/10 to-transparent",
-    render: (a) => <MultiAgentCard active={a} />,
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
+    render: () => <MultiAgentCard />,
   },
   {
     id: "export",
@@ -642,8 +394,8 @@ const FEATURES: Feature[] = [
       "Instant MCP configuration generation. Copy a JSON snippet, paste into your editor, done.",
     icon: Download,
     span: "lg:col-span-2",
-    accent: "from-cyan-500/20 via-blue-500/10 to-transparent",
-    render: (a) => <ExportCard active={a} />,
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
+    render: () => <ExportCard />,
   },
 ];
 
@@ -655,11 +407,11 @@ function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <motion.div
       className={cn(
-        "group relative col-span-1 overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-violet-500/10 hover:shadow-xl sm:p-7",
+        "group relative col-span-1 overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[#4285f4]/8 hover:shadow-xl sm:p-7",
         feature.span,
         feature.highlight
-          ? "border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 via-card/50 to-violet-500/10"
-          : "border-border/60 bg-card/40 hover:border-border"
+          ? "border-[#4285f4]/45 bg-gradient-to-br from-[#4285f4]/12 via-card/50 to-[#8ab4f8]/12"
+          : "border-border/60 bg-card/40 hover:border-[#4285f4]/50 dark:hover:border-[#8ab4f8]/50"
       )}
       ref={ref}
       variants={cardVariants}
@@ -673,10 +425,10 @@ function FeatureCard({ feature }: { feature: Feature }) {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#4285f4]/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
       />
 
-      <div className="flex h-full flex-col justify-between gap-5">
+      <div className="flex h-full flex-col gap-5">
         <div>
           <div className="mb-4 flex items-center gap-2.5">
             <span className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-foreground/85">
@@ -691,7 +443,9 @@ function FeatureCard({ feature }: { feature: Feature }) {
           </p>
         </div>
 
-        <div className="text-foreground/70">{feature.render(inView)}</div>
+        <div className="text-foreground/70 flex-1 flex flex-col justify-end">
+          {feature.render(inView)}
+        </div>
       </div>
     </motion.div>
   );
@@ -745,20 +499,14 @@ export function PlatformSection() {
       id="features"
       ref={sectionRef}
     >
-      {/* animated gradient mesh */}
+      {/* Background Subtle Gradient */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10 opacity-60"
-        style={
-          reduce
-            ? undefined
-            : {
-                background:
-                  "radial-gradient(40% 40% at 20% 20%, oklch(0.6 0.2 290 / 0.12), transparent), radial-gradient(40% 40% at 80% 30%, oklch(0.6 0.2 230 / 0.12), transparent), radial-gradient(40% 40% at 50% 90%, oklch(0.6 0.2 320 / 0.1), transparent)",
-                backgroundSize: "200% 200%",
-                animation: "pf-mesh 18s ease-in-out infinite",
-              }
-        }
+        className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px] -z-10"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)",
+        }}
       />
       {/* parallax dot grid */}
       <motion.div
@@ -775,41 +523,50 @@ export function PlatformSection() {
 
       <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
         <div
-          className="mx-auto mb-12 max-w-3xl text-center sm:mb-16"
+          className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-16 mb-12 sm:mb-16 text-left"
           ref={headerRef}
         >
-          <span className="mb-5 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-            <span className="h-px w-8 bg-foreground/30" />
-            Platform
-            <span className="h-px w-8 bg-foreground/30" />
-          </span>
-          <h2 className="font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
-            {HEADING_WORDS.map((word, i) => {
-              const gradient = word === "Every" || word === "layer";
-              return (
-                <motion.span
-                  animate={headerInView ? { opacity: 1, y: 0 } : {}}
-                  className={cn(
-                    "mr-[0.25em] inline-block",
-                    gradient &&
-                      "bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent"
-                  )}
-                  initial={{ opacity: 0, y: 14 }}
-                  key={word}
-                  transition={{ delay: reduce ? 0 : i * 0.07, duration: 0.5 }}
-                >
-                  {word}
-                </motion.span>
-              );
-            })}
-          </h2>
-          <p className="mt-5 text-base text-muted-foreground leading-relaxed sm:text-lg">
-            From crawl to retrieval to deployment — the full stack between your
-            docs and an AI agent.
-          </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 font-mono text-[10px] text-violet-700 uppercase tracking-[0.16em] dark:text-violet-200">
-            <Sparkles aria-hidden="true" className="size-3" />6 capabilities · 1
-            endpoint
+          <div>
+            <span className="mb-4 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+              Platform
+            </span>
+            <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight">
+              {HEADING_WORDS.map((word, i) => {
+                const isAccent = word === "Every" || word === "layer.";
+                return (
+                  <motion.span
+                    animate={headerInView ? { opacity: 1, y: 0 } : {}}
+                    className={cn(
+                      "mr-[0.25em] inline-block",
+                      isAccent
+                        ? "text-[#4285f4] dark:text-[#8ab4f8] font-semibold"
+                        : "text-foreground"
+                    )}
+                    initial={{ opacity: 0, y: 14 }}
+                    key={word}
+                    transition={{ delay: reduce ? 0 : i * 0.07, duration: 0.5 }}
+                  >
+                    {word}
+                  </motion.span>
+                );
+              })}
+            </h2>
+          </div>
+          <div className="flex flex-col justify-end lg:pb-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              From crawl to retrieval to deployment — the full stack between
+              your docs and an AI agent.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-4 text-xs font-mono text-[#4285f4] dark:text-[#8ab4f8]">
+              <span className="flex items-center gap-1.5 border border-[#4285f4]/30 bg-[#4285f4]/5 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-[#4285f4] animate-pulse" />
+                6 Capabilities
+              </span>
+              <span className="flex items-center gap-1.5 border border-[#8ab4f8]/30 bg-[#8ab4f8]/5 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-[#8ab4f8] animate-pulse" />
+                1 Secure Endpoint
+              </span>
+            </div>
           </div>
         </div>
 
@@ -841,9 +598,13 @@ export function PlatformSection() {
           55%  { width: var(--pf-target); }
           100% { width: var(--pf-target); }
         }
+        @keyframes pf-dash-travel {
+          0%   { left: 0%; transform: translateX(-100%); }
+          100% { left: 100%; transform: translateX(0%); }
+        }
         @keyframes pf-glow {
-          0%, 100% { box-shadow: 0 0 18px -6px rgba(217, 70, 239, 0.4); }
-          50%      { box-shadow: 0 0 26px -4px rgba(217, 70, 239, 0.65); }
+          0%, 100% { box-shadow: 0 0 18px -6px rgba(66, 133, 244, 0.35); }
+          50%      { box-shadow: 0 0 26px -4px rgba(138, 180, 248, 0.55); }
         }
         @keyframes pf-orbit {
           from { transform: rotate(0deg); }

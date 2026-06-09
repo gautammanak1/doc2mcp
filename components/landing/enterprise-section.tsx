@@ -129,7 +129,7 @@ export function EnterpriseSection() {
             >
               Enterprise-ready
               <br />
-              <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-sky-400 bg-clip-text text-transparent">
+              <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
                 AI infrastructure.
               </span>
             </h2>

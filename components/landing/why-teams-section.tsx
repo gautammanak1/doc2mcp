@@ -27,7 +27,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Agents respond from your real docs — not stale training data — so generated code actually compiles and ships.",
     icon: Brain,
-    accent: "from-violet-500/20 to-violet-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "accuracy",
@@ -35,7 +35,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Schema-aware retrieval narrows answers to the right endpoint, the right version, the right example.",
     icon: CheckCircle2,
-    accent: "from-emerald-500/20 to-emerald-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "manual",
@@ -43,7 +43,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Stop hand-writing tool wrappers per product. Doc2MCP generates them from documentation, automatically.",
     icon: GitBranch,
-    accent: "from-amber-500/20 to-amber-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "updates",
@@ -51,7 +51,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Live sync keeps the MCP server tracking your source — without redeploys, manual diffs, or token rotation.",
     icon: RefreshCw,
-    accent: "from-sky-500/20 to-sky-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "context",
@@ -59,7 +59,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Replace prompt stuffing with structured, retrievable, AI-optimized context — usable across every MCP client.",
     icon: Bot,
-    accent: "from-fuchsia-500/20 to-fuchsia-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "ship",
@@ -67,7 +67,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "From “read docs” to “write integration” in minutes — across Cursor, Claude, Windsurf, OpenAI Agents.",
     icon: Rocket,
-    accent: "from-rose-500/20 to-rose-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "scale",
@@ -75,7 +75,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Convert internal runbooks, ADRs, RFCs, and product docs into a queryable knowledge layer for your agents.",
     icon: Network,
-    accent: "from-cyan-500/20 to-cyan-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
   {
     id: "time",
@@ -83,7 +83,7 @@ const OUTCOMES: Outcome[] = [
     detail:
       "Stop pasting docs into prompts and debugging hallucinations — your team’s time goes back to product.",
     icon: Clock,
-    accent: "from-orange-500/20 to-orange-500/0",
+    accent: "from-[#4285f4]/15 to-[#8ab4f8]/0",
   },
 ];
 
@@ -93,28 +93,45 @@ export function WhyTeamsSection() {
       className="relative overflow-hidden py-20 sm:py-24 lg:py-32"
       id="why-teams"
     >
+      {/* Background Subtle Gradient */}
       <div
         aria-hidden="true"
-        className="-translate-x-1/2 pointer-events-none absolute top-10 left-1/2 size-[520px] rounded-full bg-emerald-500/8 blur-[140px]"
+        className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px] -z-10"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)",
+        }}
+      />
+      {/* dot grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at center, var(--color-border) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
       />
 
       <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-            <span className="h-px w-8 bg-foreground/30" />
-            Outcomes
-            <span className="h-px w-8 bg-foreground/30" />
-          </span>
-          <h2 className="mt-6 font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
-            Why teams use{" "}
-            <span className="bg-gradient-to-br from-emerald-400 via-sky-500 to-violet-500 bg-clip-text text-transparent">
-              Doc2MCP
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-16 mb-12 sm:mb-16 text-left">
+          <div>
+            <span className="mb-4 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+              Outcomes
             </span>
-          </h2>
-          <p className="mt-5 text-base text-muted-foreground leading-relaxed sm:text-lg">
-            The compound effect of giving every agent — internal or customer-
-            facing — structured, current, AI-ready documentation.
-          </p>
+            <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight">
+              Why teams use{" "}
+              <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
+                Doc2MCP
+              </span>
+            </h2>
+          </div>
+          <div className="flex flex-col justify-end lg:pb-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              The compound effect of giving every agent — internal or customer-
+              facing — structured, current, AI-ready documentation.
+            </p>
+          </div>
         </div>
 
         <ul className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
@@ -122,17 +139,13 @@ export function WhyTeamsSection() {
             const Icon = o.icon;
             return (
               <li
-                className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card/40 p-5 backdrop-blur-xl transition-colors hover:border-border"
+                className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card/25 p-5 backdrop-blur-md transition-all duration-300 hover:bg-card/40 hover:border-border/80"
                 key={o.id}
               >
-                <div
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br ${o.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
-                />
-                <span className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-background/60 text-foreground/85">
-                  <Icon className="size-4" />
+                <span className="flex size-9 items-center justify-center rounded-xl border border-border/40 bg-background/50 text-[#4285f4] dark:text-[#8ab4f8] group-hover:scale-[1.02] transition-transform duration-300">
+                  <Icon className="size-4.5" />
                 </span>
-                <h3 className="mt-4 font-display font-semibold text-foreground text-base">
+                <h3 className="mt-4 font-display font-semibold text-foreground text-base tracking-tight">
                   {o.title}
                 </h3>
                 <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
