@@ -19,6 +19,7 @@ import {
   type SetStateAction,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -37,6 +38,7 @@ import {
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
 import { Doc2McpModeToggle } from "@/components/doc2mcp/mode-toggle";
+import { UrlDetectBanner } from "@/components/doc2mcp/url-detect-banner";
 import {
   type ChatModel,
   chatModels,
@@ -302,7 +304,7 @@ function PureMultimodalInput({
             toast.error("Upgrade your plan to keep building MCPs", {
               description:
                 serverMessage ??
-                "You've hit the Free plan limit (5 conversions / month). Upgrade to Pro for unlimited conversions.",
+                "You've hit the Free plan limit (1 conversion / month). Upgrade to Starter or Pro for more.",
               duration: 12_000,
               action: {
                 label: "Upgrade",
@@ -332,6 +334,31 @@ function PureMultimodalInput({
     },
     [router, setInput, setLocalStorageInput, isGuest]
   );
+
+  // Auto-detect a docs URL in whatever the user has typed/pasted so we can
+  // surface the "convert to MCP" banner even when the toggle is off.
+  const detectedUrl = useMemo(() => extractDocsUrl(input), [input]);
+  const [dismissedUrl, setDismissedUrl] = useState<string | null>(null);
+  const showUrlBanner =
+    !editingMessage &&
+    detectedUrl !== null &&
+    detectedUrl !== dismissedUrl &&
+    !doc2mcpLoading;
+
+  const handleBannerGenerate = useCallback(() => {
+    if (!detectedUrl) {
+      return;
+    }
+    if (isGuest) {
+      toast.error("Sign in to generate an MCP server");
+      router.push(`/login?redirectUrl=${encodeURIComponent("/chat")}`);
+      return;
+    }
+    setDoc2mcpMode(true);
+    runDoc2McpConversion(detectedUrl).catch(() => {
+      // already toasted inside runDoc2McpConversion
+    });
+  }, [detectedUrl, isGuest, router, runDoc2McpConversion, setDoc2mcpMode]);
 
   // Prefetch the conversion route so navigation feels instant when the
   // server returns the project id.
@@ -602,6 +629,16 @@ function PureMultimodalInput({
           />
         )}
       </div>
+
+      {showUrlBanner && detectedUrl ? (
+        <UrlDetectBanner
+          loading={doc2mcpLoading}
+          modeEnabled={hasMounted && doc2mcpMode}
+          onDismiss={() => setDismissedUrl(detectedUrl)}
+          onGenerate={handleBannerGenerate}
+          url={detectedUrl}
+        />
+      ) : null}
 
       <PromptInput
         className="[&>div]:rounded-2xl [&>div]:border [&>div]:border-border/30 [&>div]:bg-card/70 [&>div]:shadow-[var(--shadow-composer)] [&>div]:transition-shadow [&>div]:duration-300 [&>div]:focus-within:shadow-[var(--shadow-composer-focus)]"
