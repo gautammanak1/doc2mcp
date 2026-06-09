@@ -19,6 +19,13 @@ const EXAMPLES = [
   "https://mintlify.com/docs",
 ];
 
+const STATS = [
+  { value: "<60s", label: "docs → MCP", tag: "PIPELINE" },
+  { value: "1 URL", label: "paste & go", tag: "INPUT" },
+  { value: "Hosted", label: "no install", tag: "REMOTE" },
+  { value: "5+", label: "MCP clients", tag: "EXPORTS" },
+];
+
 export function HeroSection() {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
@@ -122,6 +129,29 @@ export function HeroSection() {
             >
               {ex.replace("https://", "")}
             </button>
+          ))}
+        </motion.div>
+
+        {/* Stats */}
+        <motion.div
+          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+          className="mt-14 grid w-full max-w-[760px] grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+          transition={{ delay: 0.6, duration: 0.6 }}
+        >
+          {STATS.map((stat) => (
+            <div
+              className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/30 px-4 py-4 text-left backdrop-blur-md transition-colors hover:border-[#4285f4]/50 dark:hover:border-[#8ab4f8]/50"
+              key={stat.tag}
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#4285f4]/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100 dark:via-[#8ab4f8]/50" />
+              <p className="font-display font-semibold text-2xl tracking-tight sm:text-3xl">
+                {stat.value}
+              </p>
+              <p className="mt-1 text-muted-foreground text-xs">{stat.label}</p>
+              <p className="mt-3 font-mono text-[10px] text-muted-foreground/60 uppercase tracking-wider">
+                {stat.tag}
+              </p>
+            </div>
           ))}
         </motion.div>
       </div>
