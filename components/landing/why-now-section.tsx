@@ -3,8 +3,6 @@
 import { Bot, GitMerge, Globe2, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { cn } from "@/lib/utils";
-
 type Pillar = {
   id: string;
   title: string;
@@ -50,7 +48,7 @@ const PILLARS: Pillar[] = [
 ];
 
 export function WhyNowSection() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [_isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -74,98 +72,103 @@ export function WhyNowSection() {
       id="why-now"
       ref={sectionRef}
     >
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute top-0 right-1/4 size-[420px] rounded-full bg-sky-500/10 blur-[120px] dark:bg-sky-500/15" />
-        <div className="absolute bottom-0 left-1/4 size-[420px] rounded-full bg-fuchsia-500/10 blur-[120px] dark:bg-fuchsia-500/15" />
-      </div>
+      {/* Background Subtle Gradient */}
+      <div
+        aria-hidden="true"
+        className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px] -z-10"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)",
+        }}
+      />
+      {/* dot grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at center, var(--color-border) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
 
       <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/40 px-3 py-1 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.18em] backdrop-blur-xl">
-            <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-            Why now
-          </span>
-          <h2
-            className={cn(
-              "mt-5 font-display text-3xl tracking-tight transition-all duration-700 sm:text-5xl lg:text-6xl",
-              isVisible
-                ? "translate-y-0 opacity-100"
-                : "translate-y-4 opacity-0"
-            )}
-          >
-            Why this matters{" "}
-            <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
-              right now.
+        {/* Restructured Header in Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-16 mb-12 sm:mb-16 text-left">
+          <div>
+            <span className="mb-4 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+              Why now
             </span>
-          </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-base text-muted-foreground leading-relaxed sm:text-lg">
-            AI agents are becoming the next application layer. MCP is emerging
-            as the standard protocol for tool access. Millions of APIs and
-            documentation sites are not MCP-ready —{" "}
-            <span className="text-foreground">
-              Doc2MCP bridges that gap automatically
-            </span>
-            .
-          </p>
+            <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight text-foreground">
+              Why this matters{" "}
+              <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
+                right now.
+              </span>
+            </h2>
+          </div>
+          <div className="flex flex-col justify-end lg:pb-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              AI agents are becoming the next application layer. MCP is emerging
+              as the standard protocol for tool access. Millions of APIs and
+              documentation sites are not MCP-ready —{" "}
+              <span className="text-foreground font-medium">
+                doc2mcp bridges that gap automatically
+              </span>
+              .
+            </p>
+          </div>
         </div>
 
         {/* Highlighted quote */}
-        <figure
-          className={cn(
-            "mx-auto mt-10 max-w-3xl rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/8 via-card/40 to-fuchsia-500/8 p-7 backdrop-blur-xl transition-all duration-700 sm:mt-12 sm:p-9",
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-          )}
-        >
+        <figure className="mx-auto max-w-4xl rounded-2xl border border-border/40 bg-card/25 p-6 sm:p-8 backdrop-blur-md transition-all duration-300">
           <Sparkles
             aria-hidden="true"
-            className="size-5 text-violet-500 dark:text-violet-300"
+            className="size-5 text-[#4285f4] dark:text-[#8ab4f8] mb-3"
           />
-          <blockquote className="mt-3 font-display text-foreground text-xl leading-snug tracking-tight sm:text-2xl lg:text-3xl">
+          <blockquote className="font-display text-foreground text-lg sm:text-xl md:text-2xl font-medium italic leading-relaxed tracking-tight">
             “Documentation is becoming the knowledge layer for AI agents.”
           </blockquote>
-          <figcaption className="mt-4 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.16em]">
+          <figcaption className="mt-4 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
             — The thesis behind Doc2MCP
           </figcaption>
         </figure>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:mt-16 md:grid-cols-2">
-          {PILLARS.map((p, i) => {
+        {/* Recreated Pillars Grid */}
+        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {PILLARS.map((p) => {
             const Icon = p.icon;
             return (
               <article
-                className={cn(
-                  "group relative overflow-hidden rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur-xl transition-all duration-500 hover:border-border hover:bg-card/60 sm:p-7",
-                  isVisible
-                    ? "translate-y-0 opacity-100"
-                    : "translate-y-6 opacity-0"
-                )}
+                className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card/20 p-5 backdrop-blur-md transition-all duration-300 hover:bg-card/45 hover:border-border/80 flex flex-col justify-between min-h-[200px]"
                 key={p.id}
-                style={{ transitionDelay: `${i * 90}ms` }}
               >
-                <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-violet-500/0 via-transparent to-sky-500/0 transition-all duration-500 group-hover:from-violet-500/10 group-hover:to-sky-500/10" />
-                <div className="flex items-center justify-between gap-3">
-                  <span className="flex size-10 items-center justify-center rounded-xl border border-border/60 bg-background/60 backdrop-blur">
-                    <Icon className="size-4 text-foreground/80" />
-                  </span>
-                  <span className="font-display font-bold text-2xl tracking-tight sm:text-3xl">
-                    {p.metric}
-                  </span>
+                <div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="flex size-8 items-center justify-center rounded-lg border border-border/40 bg-background/50 text-[#4285f4] dark:text-[#8ab4f8] group-hover:scale-[1.02] transition-transform duration-300">
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="font-mono text-xs font-bold text-foreground">
+                      {p.metric}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-display font-semibold text-foreground text-sm tracking-tight leading-snug">
+                    {p.title}
+                  </h3>
+                  <p className="mt-2 text-muted-foreground text-xs leading-relaxed">
+                    {p.body}
+                  </p>
                 </div>
-                <h3 className="mt-5 font-display font-semibold text-lg leading-tight tracking-tight sm:text-xl">
-                  {p.title}
-                </h3>
-                <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                  {p.body}
-                </p>
-                <p className="mt-3 font-mono text-[10px] text-muted-foreground/70 uppercase tracking-[0.16em]">
-                  {p.metricLabel}
-                </p>
+                <div className="mt-4 pt-3 border-t border-border/20">
+                  <p className="font-mono text-[9px] text-muted-foreground/80 uppercase tracking-wider leading-relaxed">
+                    {p.metricLabel}
+                  </p>
+                </div>
               </article>
             );
           })}
         </div>
 
-        <p className="mt-10 text-center font-mono text-[11px] text-muted-foreground/70 uppercase tracking-[0.18em]">
+        <p className="mt-12 text-center font-mono text-[10px] text-muted-foreground/60 uppercase tracking-wider">
           Stats reflect internal observations across AI-native teams · May 2026
         </p>
       </div>
