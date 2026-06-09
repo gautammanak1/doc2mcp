@@ -32,7 +32,7 @@ type Trust = {
 const TRUST: Trust[] = [
   {
     id: "stack",
-    metric: "5 +",
+    metric: "5+",
     label: "MCP clients supported",
     icon: Layers,
   },
@@ -53,79 +53,97 @@ const TRUST: Trust[] = [
 export function SocialProofSection() {
   return (
     <section
-      className="relative overflow-hidden py-16 sm:py-20 lg:py-24"
+      className="relative overflow-hidden py-20 sm:py-24 lg:py-32"
       id="social-proof"
     >
+      {/* Background Subtle Gradient */}
       <div
         aria-hidden="true"
-        className="-translate-x-1/2 pointer-events-none absolute top-0 left-1/2 size-[420px] rounded-full bg-violet-500/10 blur-[120px]"
+        className="absolute top-0 right-0 w-[450px] h-[450px] rounded-full pointer-events-none opacity-15 dark:opacity-10 blur-[100px] -z-10"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(66, 133, 244, 0.1) 0%, transparent 100%)",
+        }}
+      />
+      {/* dot grid */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-[0.18]"
+        style={{
+          backgroundImage:
+            "radial-gradient(circle at center, var(--color-border) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
       />
 
-      <div className="relative z-10 mx-auto max-w-[1080px] px-4 sm:px-6 lg:px-12">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-            <span className="h-px w-8 bg-foreground/30" />
-            Trust
-            <span className="h-px w-8 bg-foreground/30" />
-          </span>
-          <h2 className="mt-5 font-display text-2xl tracking-tight sm:text-4xl">
-            Built for the people building the agentic web.
-          </h2>
+      <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
+        {/* Restructured 2-Column Split Layout for Header & Customer Quote */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-16 items-start mb-12 sm:mb-16">
+          <div className="space-y-6">
+            <div>
+              <span className="mb-4 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+                Trust
+              </span>
+              <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight text-foreground">
+                Built for the people building the agentic web.
+              </h2>
+            </div>
+
+            {/* Flat Pill Badges */}
+            <ul className="flex flex-wrap gap-2.5 pt-2">
+              {PILLS.map((p) => {
+                const Icon = p.icon;
+                return (
+                  <li
+                    className="group inline-flex items-center gap-2 rounded-full border border-border/40 bg-card/25 px-3.5 py-1.5 backdrop-blur-md transition-colors hover:border-border/60 hover:bg-card/40"
+                    key={p.id}
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      className="size-3.5 text-[#4285f4] dark:text-[#8ab4f8]"
+                    />
+                    <span className="font-display font-medium text-foreground/80 text-xs sm:text-sm">
+                      {p.label}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          {/* Customer Quote Box on the right */}
+          <figure className="rounded-2xl border border-border/40 bg-card/25 p-6 sm:p-8 backdrop-blur-md relative overflow-hidden h-full">
+            <Quote
+              aria-hidden="true"
+              className="size-5 text-[#4285f4] dark:text-[#8ab4f8] mb-3"
+            />
+            <blockquote className="font-display text-foreground text-base sm:text-lg leading-relaxed font-medium italic">
+              “We stopped pasting docs into prompts. Our agents finally know
+              what our APIs actually do — across every editor in our stack.”
+            </blockquote>
+            <figcaption className="mt-4 font-mono text-[10px] text-muted-foreground uppercase tracking-[0.16em]">
+              — Early Customer · AI infra team
+            </figcaption>
+          </figure>
         </div>
 
-        <ul className="mt-10 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-          {PILLS.map((p) => {
-            const Icon = p.icon;
-            return (
-              <li
-                className="group inline-flex items-center gap-2 rounded-full border border-border/60 bg-card/60 px-4 py-2 backdrop-blur-xl transition-all hover:border-violet-500/40 hover:bg-violet-500/5"
-                key={p.id}
-              >
-                <Icon
-                  aria-hidden="true"
-                  className="size-3.5 text-violet-500 dark:text-violet-300"
-                />
-                <span className="font-display font-medium text-foreground/85 text-sm">
-                  {p.label}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-
-        <figure className="mx-auto mt-12 max-w-2xl rounded-3xl border border-border/60 bg-card/40 p-7 backdrop-blur-xl">
-          <Quote
-            aria-hidden="true"
-            className="size-5 text-violet-500 dark:text-violet-300"
-          />
-          <blockquote className="mt-3 font-display text-foreground text-lg leading-relaxed sm:text-xl">
-            We stopped pasting docs into prompts. Our agents finally know what
-            our APIs actually do — across every editor in our stack.
-          </blockquote>
-          <figcaption className="mt-4 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.16em]">
-            — Early Doc2MCP customer · AI infra team
-          </figcaption>
-        </figure>
-
-        <ul className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
+        {/* Recreated Trust Grid Metrics */}
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {TRUST.map((t) => {
             const Icon = t.icon;
             return (
               <li
-                className="flex items-center gap-3 rounded-2xl border border-border/50 bg-card/30 px-4 py-3.5 backdrop-blur-xl"
+                className="group flex items-center gap-4 rounded-2xl border border-border/40 bg-card/20 px-5 py-4.5 backdrop-blur-md transition-all duration-300 hover:bg-card/45 hover:border-border/80"
                 key={t.id}
               >
-                <span className="flex size-9 items-center justify-center rounded-xl border border-border/60 bg-background/60">
-                  <Icon
-                    aria-hidden="true"
-                    className="size-4 text-foreground/80"
-                  />
+                <span className="flex size-9 items-center justify-center rounded-xl border border-border/40 bg-background/50 text-[#4285f4] dark:text-[#8ab4f8] group-hover:scale-[1.02] transition-transform duration-300">
+                  <Icon aria-hidden="true" className="size-4" />
                 </span>
                 <div className="min-w-0">
-                  <p className="font-display font-semibold text-foreground text-base tracking-tight">
+                  <p className="font-display font-semibold text-foreground text-base sm:text-lg tracking-tight">
                     {t.metric}
                   </p>
-                  <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.14em]">
+                  <p className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.14em]">
                     {t.label}
                   </p>
                 </div>
