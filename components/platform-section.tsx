@@ -28,7 +28,6 @@ import {
   type LucideIcon,
   Network,
   RefreshCw,
-  Sparkles,
   Target,
   Workflow,
 } from "lucide-react";
@@ -115,80 +114,106 @@ function CrawlingCard({ active }: { active: boolean }) {
     const id = setInterval(() => {
       row = (row + 1) % (CRAWLER_TREE.length + 3);
       setScanRow(row);
-    }, 520);
+    }, 450);
     return () => clearInterval(id);
   }, [active, reduce]);
 
   return (
-    <div className="relative h-full min-h-[280px] w-full overflow-hidden rounded-xl border border-border/40 bg-background/40 p-3 backdrop-blur-xl sm:min-h-[300px]">
-      <div className="flex items-center justify-between border-border/30 border-b pb-2">
+    <div className="relative h-full min-h-[280px] w-full overflow-hidden rounded-2xl border border-border/40 bg-card/25 p-4 backdrop-blur-md flex flex-col justify-between">
+      {/* Chrome tab headers */}
+      <div className="flex items-center justify-between border-border/30 border-b pb-3 mb-3">
         <div className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-rose-400/60" />
-          <span className="size-2 rounded-full bg-amber-400/60" />
-          <span className="size-2 rounded-full bg-emerald-400/60" />
+          <span className="size-2 rounded-full bg-[#ef4444] opacity-80" />
+          <span className="size-2 rounded-full bg-[#f59e0b] opacity-80" />
+          <span className="size-2 rounded-full bg-[#10b981] opacity-80" />
         </div>
-        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-          docs.stripe.com · sitemap
+        <span className="font-mono text-[10px] text-muted-foreground/85 tracking-wider">
+          stripe_crawler.ts
         </span>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-600 dark:text-emerald-400">
+        <span className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-emerald-500 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">
           <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-          crawling
+          active
         </span>
       </div>
 
-      <ul className="mt-2.5 space-y-1 font-mono text-[11px]">
+      {/* Main tree list */}
+      <ul className="flex-1 space-y-1.5 font-mono text-[11px] overflow-hidden py-1">
         {CRAWLER_TREE.map((row, i) => {
           const done = i <= scanRow;
           const scanning = i === scanRow;
+
+          // Determine label type
+          const isFolder = row.kind === "folder";
+          const isAPI =
+            row.label.includes("customers") ||
+            row.label.includes("payment_intents") ||
+            row.label.includes("webhooks");
+          const fileBadge = isFolder ? "" : isAPI ? "API" : "DOC";
+
           return (
             <li
-              className="relative flex items-center gap-1.5 overflow-hidden rounded transition-colors"
+              className={cn(
+                "relative flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-300",
+                scanning
+                  ? "bg-[#4285f4]/8 border border-[#4285f4]/20 scale-[1.01]"
+                  : "border border-transparent",
+                done ? "opacity-100" : "opacity-40"
+              )}
               key={row.label}
-              style={{ paddingLeft: `${row.indent * 14}px` }}
+              style={{ paddingLeft: `${row.indent * 12 + 6}px` }}
             >
-              {row.kind === "folder" ? (
-                <Folder
-                  aria-hidden="true"
-                  className="size-3 shrink-0 text-violet-500"
-                />
+              {isFolder ? (
+                <Folder className="size-3.5 shrink-0 text-[#4285f4]" />
               ) : (
-                <FileText
-                  aria-hidden="true"
-                  className="size-3 shrink-0 text-foreground/55"
-                />
+                <FileText className="size-3.5 shrink-0 text-muted-foreground/80" />
               )}
               <span
                 className={cn(
-                  "truncate transition-colors",
-                  done ? "text-foreground/85" : "text-muted-foreground/60"
+                  "truncate font-medium transition-colors",
+                  done ? "text-foreground" : "text-muted-foreground"
                 )}
               >
                 {row.label}
               </span>
-              {scanning ? (
+              {!isFolder && fileBadge && (
                 <span
-                  aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-0 right-0 left-0 bg-gradient-to-r from-transparent via-violet-400/25 to-transparent"
-                  style={{ animation: "pf-scan 0.5s linear" }}
-                />
-              ) : null}
-              <Check
-                aria-hidden="true"
-                className={cn(
-                  "ml-auto size-3 shrink-0 text-emerald-500 transition-all duration-300",
-                  done ? "scale-100 opacity-100" : "scale-50 opacity-0"
-                )}
-              />
+                  className={cn(
+                    "text-[8px] font-bold px-1.5 py-0.2 rounded shrink-0 scale-90",
+                    isAPI
+                      ? "bg-[#4285f4]/15 text-[#4285f4] dark:bg-[#8ab4f8]/20 dark:text-[#8ab4f8]"
+                      : "bg-neutral-500/15 text-neutral-400"
+                  )}
+                >
+                  {fileBadge}
+                </span>
+              )}
+              {scanning && (
+                <span className="ml-auto flex items-center gap-1 text-[8.5px] text-[#4285f4] font-semibold animate-pulse">
+                  scanning...
+                </span>
+              )}
+              {done && !scanning && (
+                <Check className="ml-auto size-3 text-emerald-500 shrink-0" />
+              )}
             </li>
           );
         })}
       </ul>
 
-      <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between border-border/30 border-t pt-2 font-mono text-[10px]">
-        <span className="text-muted-foreground">pages indexed</span>
-        <span className="font-display font-semibold text-foreground/85 text-sm tabular-nums">
-          {count.toLocaleString()}
-        </span>
+      {/* Crawl stats overlay dashboard */}
+      <div className="mt-3 grid grid-cols-2 gap-4 border-border/30 border-t pt-3 font-mono text-[10px]">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-muted-foreground">Crawler Depth</span>
+          <span className="font-semibold text-foreground text-xs font-display">
+            Level 3
+          </span>
+        </div>
+        <div className="flex flex-col gap-0.5 items-end">
+          <span className="text-muted-foreground">Pages Scanned</span>
+          <span className="font-semibold text-foreground text-xs font-display tabular-nums">
+            {count.toLocaleString()}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -316,136 +341,132 @@ function RetrievalCard({ active }: { active: boolean }) {
   const reduce = useReducedMotion();
   const animate = active && !reduce;
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-2">
-      {RETRIEVAL_ROWS.map((row, i) => {
-        const top = i === 0;
-        return (
-          <div
-            className={cn(
-              "rounded-lg border bg-card/60 px-3 py-2 backdrop-blur-xl",
-              top
-                ? "border-fuchsia-500/40 shadow-[0_0_18px_-6px] shadow-fuchsia-500/40"
-                : "border-border/40"
-            )}
-            key={row.label}
-            style={
-              animate
-                ? {
-                    animation: top
-                      ? "pf-fade-in 0.5s ease-out both, pf-glow 2.4s ease-in-out infinite"
-                      : "pf-fade-in 0.5s ease-out both",
-                    animationDelay: `${i * 0.18}s`,
+    <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-3">
+      {/* Query Bar */}
+      <div className="rounded-lg border border-border/40 bg-card/10 px-3 py-2 flex items-center gap-2 font-mono text-[10.5px] text-muted-foreground/80">
+        <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">Q:</span>
+        <span className="truncate">
+          Stripe checkout session redirect parameters...
+        </span>
+      </div>
+
+      {/* Results */}
+      <div className="space-y-2">
+        {RETRIEVAL_ROWS.map((row, i) => {
+          const top = i === 0;
+          return (
+            <div
+              className={cn(
+                "rounded-lg border bg-card/65 px-3 py-2 backdrop-blur-xl transition-all duration-300",
+                top
+                  ? "border-[#4285f4]/45 shadow-[0_0_18px_-6px] shadow-[#4285f4]/40"
+                  : "border-border/40"
+              )}
+              key={row.label}
+              style={
+                animate
+                  ? {
+                      animation: top
+                        ? "pf-fade-in 0.5s ease-out both, pf-glow 2.4s ease-in-out infinite"
+                        : "pf-fade-in 0.5s ease-out both",
+                      animationDelay: `${i * 0.18}s`,
+                    }
+                  : undefined
+              }
+            >
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="font-mono text-foreground/85 font-medium">
+                  {row.label}
+                </span>
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 font-mono text-[10px] font-bold",
+                    top
+                      ? "bg-[#4285f4]/15 text-[#4285f4] dark:bg-[#8ab4f8]/20 dark:text-[#8ab4f8]"
+                      : "bg-foreground/5 text-muted-foreground"
+                  )}
+                >
+                  {row.score.toFixed(2)}
+                </span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
+                <span
+                  className={cn(
+                    "block h-full rounded-full",
+                    top
+                      ? "bg-gradient-to-r from-[#4285f4] to-[#8ab4f8]"
+                      : "bg-foreground/40"
+                  )}
+                  style={
+                    reduce
+                      ? { width: `${row.score * 100}%` }
+                      : {
+                          // CSS var drives the looping fill keyframe.
+                          ["--pf-target" as string]: `${row.score * 100}%`,
+                          width: `${row.score * 100}%`,
+                          animation: "pf-bar 3s ease-in-out infinite",
+                          animationDelay: `${i * 0.18}s`,
+                        }
                   }
-                : undefined
-            }
-          >
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-mono text-foreground/85">{row.label}</span>
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 font-mono text-[10px]",
-                  top
-                    ? "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-300"
-                    : "bg-foreground/5 text-muted-foreground"
-                )}
-              >
-                {row.score.toFixed(2)}
-              </span>
+                />
+              </div>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
-              <span
-                className={cn(
-                  "block h-full rounded-full",
-                  top
-                    ? "bg-gradient-to-r from-fuchsia-500 to-violet-500"
-                    : "bg-foreground/40"
-                )}
-                style={
-                  reduce
-                    ? { width: `${row.score * 100}%` }
-                    : {
-                        // CSS var drives the looping fill keyframe.
-                        ["--pf-target" as string]: `${row.score * 100}%`,
-                        width: `${row.score * 100}%`,
-                        animation: "pf-bar 3s ease-in-out infinite",
-                        animationDelay: `${i * 0.18}s`,
-                      }
-                }
-              />
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
 
 /* ------------------------------ 4. Sync -------------------------------- */
 
-const ORBIT_ICONS = [
-  { Icon: FileText, name: "file" },
-  { Icon: Workflow, name: "workflow" },
-  { Icon: Network, name: "network" },
-  { Icon: Bot, name: "bot" },
-];
-
 function SyncCard({ active }: { active: boolean }) {
   const reduce = useReducedMotion();
   return (
-    <div className="relative flex h-full min-h-[120px] w-full items-center justify-center">
-      <div className="relative size-32">
-        {/* ripple rings */}
-        {!reduce && active
-          ? [0, 1].map((ring) => (
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 rounded-full border border-emerald-500/30"
-                key={`ring-${ring}`}
-                style={{
-                  animation: "pf-ripple 2.6s ease-out infinite",
-                  animationDelay: `${ring * 1.3}s`,
-                }}
-              />
-            ))
-          : null}
-
-        {/* orbiting doc icons */}
-        <div
-          className="absolute inset-0"
-          style={
-            reduce ? undefined : { animation: "pf-orbit 9s linear infinite" }
-          }
-        >
-          {ORBIT_ICONS.map(({ Icon, name }, i) => {
-            const angle = (i / ORBIT_ICONS.length) * 2 * Math.PI;
-            const r = 56;
-            const x = Math.cos(angle) * r;
-            const y = Math.sin(angle) * r;
-            return (
-              <span
-                className="absolute flex size-7 items-center justify-center rounded-lg border border-border/60 bg-background/80 text-foreground/70"
-                key={name}
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
-                }}
-              >
-                <Icon className="size-3.5" />
-              </span>
-            );
-          })}
+    <div className="relative flex h-full min-h-[120px] w-full flex-col items-center justify-center py-4 bg-card/10 border border-border/40 rounded-2xl p-4">
+      {/* Visual Sync Syncing Nodes */}
+      <div className="flex items-center justify-between w-full max-w-[220px] relative">
+        {/* Source Node */}
+        <div className="flex flex-col items-center gap-1.5 z-10">
+          <div className="flex size-10 items-center justify-center rounded-xl border border-border bg-background shadow-sm">
+            <FileText className="size-4.5 text-muted-foreground/80" />
+          </div>
+          <span className="font-mono text-[9px] text-muted-foreground">
+            docs.stripe.com
+          </span>
         </div>
 
-        {/* center */}
-        <span className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 flex size-12 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/10">
-          <RefreshCw
-            className="size-5 text-emerald-500"
-            style={
-              reduce ? undefined : { animation: "spin 4s linear infinite" }
-            }
-          />
-        </span>
+        {/* Syncing line connector */}
+        <div className="absolute left-[40px] right-[40px] top-[20px] h-0.5 border-t border-dashed border-border/60 overflow-hidden">
+          {!reduce && active && (
+            <div
+              className="h-full w-4 bg-[#8ab4f8] shadow-[0_0_8px_#8ab4f8] animate-dash relative"
+              style={{ animation: "pf-dash-travel 2s linear infinite" }}
+            />
+          )}
+        </div>
+
+        {/* Target Node */}
+        <div className="flex flex-col items-center gap-1.5 z-10">
+          <div className="flex size-10 items-center justify-center rounded-xl border border-[#4285f4]/40 bg-[#4285f4]/10 shadow-[0_0_12px_rgba(66,133,244,0.15)] animate-pulse">
+            <RefreshCw
+              className={cn(
+                "size-4.5 text-[#4285f4] dark:text-[#8ab4f8]",
+                !reduce && active && "animate-spin"
+              )}
+              style={!reduce && active ? { animationDuration: "6s" } : {}}
+            />
+          </div>
+          <span className="font-mono text-[9px] text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
+            doc2mcp server
+          </span>
+        </div>
+      </div>
+
+      {/* Sync Status Badge */}
+      <div className="mt-4 inline-flex items-center gap-1.5 font-mono text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.8 rounded-full border border-emerald-500/20">
+        <span className="size-1.5 rounded-full bg-emerald-500 animate-ping" />
+        Synced · 2 mins ago
       </div>
     </div>
   );
@@ -470,35 +491,34 @@ function MultiAgentCard({ active }: { active: boolean }) {
   }, [active, reduce]);
 
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-wrap items-center justify-center gap-2">
+    <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-2 w-full">
       {AGENTS.map((label, i) => {
         const hot = i === activeAgent && !reduce;
         return (
-          <span
+          <div
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider backdrop-blur-xl transition-all duration-500",
+              "flex flex-col gap-1.5 p-2 rounded-xl border transition-all duration-500 bg-card/40 backdrop-blur-md",
               hot
-                ? "scale-105 border-violet-500/50 bg-violet-500/15 text-violet-700 shadow-[0_0_16px_-4px] shadow-violet-500/50 dark:text-violet-200"
-                : "border-border/60 bg-card/60 text-foreground/75"
+                ? "border-[#4285f4] bg-[#4285f4]/8 shadow-[0_0_12px_rgba(66,133,244,0.15)] scale-[1.03]"
+                : "border-border/60 hover:border-border/80"
             )}
             key={label}
-            style={
-              reduce
-                ? undefined
-                : {
-                    animation: "pf-fade-in 0.5s ease-out both",
-                    animationDelay: `${i * 0.12}s`,
-                  }
-            }
           >
-            <span
-              className={cn(
-                "size-1.5 rounded-full",
-                hot ? "bg-violet-500" : "bg-emerald-500"
-              )}
-            />
-            {label}
-          </span>
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-[10px] font-bold text-foreground/95">
+                {label}
+              </span>
+              <span
+                className={cn(
+                  "size-1.5 rounded-full",
+                  hot ? "bg-emerald-500 animate-pulse" : "bg-neutral-500/50"
+                )}
+              />
+            </div>
+            <span className="text-[8.5px] font-mono text-muted-foreground">
+              {hot ? "connected" : "standby"}
+            </span>
+          </div>
         );
       })}
     </div>
@@ -507,60 +527,57 @@ function MultiAgentCard({ active }: { active: boolean }) {
 
 /* ----------------------------- 6. Export ------------------------------- */
 
-const EXPORT_JSON = `{
-  "mcpServers": {
-    "stripe": {
-      "url": "https://doc2mcp.site/…",
-      "headers": { "Authorization": "Bearer …" }
-    }
-  }
-}`;
-
 function ExportCard({ active }: { active: boolean }) {
   const reduce = useReducedMotion();
-  const [chars, setChars] = useState(reduce ? EXPORT_JSON.length : 0);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    if (!active || reduce) {
-      setChars(EXPORT_JSON.length);
-      return;
-    }
-    let n = 0;
-    const type = setInterval(() => {
-      n += 2;
-      if (n >= EXPORT_JSON.length) {
-        n = EXPORT_JSON.length;
-        clearInterval(type);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1200);
-      }
-      setChars(n);
-    }, 36);
-    return () => clearInterval(type);
-  }, [active, reduce]);
-
-  // Re-trigger the copy flash periodically once typed out.
+  // Periodic copy flash simulation
   useEffect(() => {
     if (!active || reduce) {
       return;
     }
     const id = setInterval(() => {
       setCopied(true);
-      setTimeout(() => setCopied(false), 1000);
-    }, 4000);
+      setTimeout(() => setCopied(false), 1200);
+    }, 4500);
     return () => clearInterval(id);
   }, [active, reduce]);
 
   return (
-    <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-xl border border-border/40 bg-zinc-950/90 p-3 font-mono text-[10px] text-zinc-300 backdrop-blur-xl">
-      <pre className="whitespace-pre">{EXPORT_JSON.slice(0, chars)}</pre>
+    <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-2xl border border-border/40 bg-zinc-950/95 p-3.5 font-mono text-[10px] leading-relaxed shadow-inner">
+      <div className="text-zinc-400 select-all">
+        <span className="text-amber-500 font-bold">{"{"}</span>
+        <br />
+        <span className="text-sky-300"> &quot;mcpServers&quot;</span>:{" "}
+        <span className="text-amber-500 font-bold">{"{"}</span>
+        <br />
+        <span className="text-sky-300"> &quot;stripe&quot;</span>:{" "}
+        <span className="text-amber-500 font-bold">{"{"}</span>
+        <br />
+        <span className="text-sky-300"> &quot;url&quot;</span>:{" "}
+        <span className="text-emerald-400">
+          &quot;https://doc2mcp.site/api/mcp/st_3a1&quot;
+        </span>
+        ,
+        <br />
+        <span className="text-sky-300"> &quot;headers&quot;</span>:{" "}
+        <span className="text-amber-500 font-bold">{"{"}</span>{" "}
+        <span className="text-sky-300">&quot;Authorization&quot;</span>:{" "}
+        <span className="text-emerald-400">&quot;Bearer st_…&quot;</span>{" "}
+        <span className="text-amber-500 font-bold">{"}"}</span>
+        <br />
+        <span className="text-amber-500 font-bold"> {"}"}</span>
+        <br />
+        <span className="text-amber-500 font-bold"> {"}"}</span>
+        <br />
+        <span className="text-amber-500 font-bold">{"}"}</span>
+      </div>
       <span
         className={cn(
-          "absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[9px] uppercase tracking-wider transition-all duration-300",
+          "absolute top-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[9px] uppercase tracking-wider transition-all duration-300 font-semibold",
           copied
-            ? "scale-100 border-emerald-500/40 bg-emerald-500/15 text-emerald-300 opacity-100"
-            : "scale-90 border-border/50 bg-background/40 text-muted-foreground opacity-70"
+            ? "scale-100 border-[#4285f4]/40 bg-[#4285f4]/15 text-[#4285f4] dark:text-[#8ab4f8] opacity-100 shadow-[0_0_8px_rgba(66,133,244,0.15)]"
+            : "scale-95 border-border/50 bg-background/50 text-muted-foreground opacity-70 hover:opacity-100 hover:scale-100 cursor-pointer"
         )}
       >
         {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
@@ -775,41 +792,49 @@ export function PlatformSection() {
 
       <div className="relative z-10 mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
         <div
-          className="mx-auto mb-12 max-w-3xl text-center sm:mb-16"
+          className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-16 mb-12 sm:mb-16 text-left"
           ref={headerRef}
         >
-          <span className="mb-5 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
-            <span className="h-px w-8 bg-foreground/30" />
-            Platform
-            <span className="h-px w-8 bg-foreground/30" />
-          </span>
-          <h2 className="font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
-            {HEADING_WORDS.map((word, i) => {
-              const gradient = word === "Every" || word === "layer";
-              return (
-                <motion.span
-                  animate={headerInView ? { opacity: 1, y: 0 } : {}}
-                  className={cn(
-                    "mr-[0.25em] inline-block",
-                    gradient &&
-                      "bg-gradient-to-r from-[#4285f4] to-[#8ab4f8] bg-clip-text text-transparent font-semibold"
-                  )}
-                  initial={{ opacity: 0, y: 14 }}
-                  key={word}
-                  transition={{ delay: reduce ? 0 : i * 0.07, duration: 0.5 }}
-                >
-                  {word}
-                </motion.span>
-              );
-            })}
-          </h2>
-          <p className="mt-5 text-base text-muted-foreground leading-relaxed sm:text-lg">
-            From crawl to retrieval to deployment — the full stack between your
-            docs and an AI agent.
-          </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[#4285f4]/30 bg-[#4285f4]/10 px-3 py-1 font-mono text-[10px] text-[#4285f4] dark:text-[#8ab4f8] uppercase tracking-[0.16em]">
-            <Sparkles aria-hidden="true" className="size-3" />6 capabilities · 1
-            endpoint
+          <div>
+            <span className="mb-4 inline-flex items-center gap-3 font-mono text-[11px] text-muted-foreground uppercase tracking-[0.18em]">
+              Platform
+            </span>
+            <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight">
+              {HEADING_WORDS.map((word, i) => {
+                const gradient = word === "Every" || word === "layer";
+                return (
+                  <motion.span
+                    animate={headerInView ? { opacity: 1, y: 0 } : {}}
+                    className={cn(
+                      "mr-[0.25em] inline-block",
+                      gradient &&
+                        "bg-gradient-to-r from-[#4285f4] to-[#8ab4f8] bg-clip-text text-transparent font-semibold"
+                    )}
+                    initial={{ opacity: 0, y: 14 }}
+                    key={word}
+                    transition={{ delay: reduce ? 0 : i * 0.07, duration: 0.5 }}
+                  >
+                    {word}
+                  </motion.span>
+                );
+              })}
+            </h2>
+          </div>
+          <div className="flex flex-col justify-end lg:pb-1">
+            <p className="text-base text-muted-foreground leading-relaxed">
+              From crawl to retrieval to deployment — the full stack between
+              your docs and an AI agent.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-4 text-xs font-mono text-[#4285f4] dark:text-[#8ab4f8]">
+              <span className="flex items-center gap-1.5 border border-[#4285f4]/30 bg-[#4285f4]/5 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-[#4285f4] animate-pulse" />
+                6 Capabilities
+              </span>
+              <span className="flex items-center gap-1.5 border border-[#8ab4f8]/30 bg-[#8ab4f8]/5 px-2.5 py-1 rounded-full">
+                <span className="size-1.5 rounded-full bg-[#8ab4f8] animate-pulse" />
+                1 Secure Endpoint
+              </span>
+            </div>
           </div>
         </div>
 
@@ -840,6 +865,10 @@ export function PlatformSection() {
           0%   { width: 0; }
           55%  { width: var(--pf-target); }
           100% { width: var(--pf-target); }
+        }
+        @keyframes pf-dash-travel {
+          0%   { left: 0%; transform: translateX(-100%); }
+          100% { left: 100%; transform: translateX(0%); }
         }
         @keyframes pf-glow {
           0%, 100% { box-shadow: 0 0 18px -6px rgba(66, 133, 244, 0.35); }
