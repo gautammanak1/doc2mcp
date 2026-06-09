@@ -389,7 +389,7 @@ export function ComparisonSection() {
           >
             Manual MCP development{" "}
             <span className="text-muted-foreground">vs</span>{" "}
-            <span className="bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+            <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
               Doc2MCP
             </span>
           </h2>

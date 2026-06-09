@@ -107,7 +107,7 @@ export function WhyTeamsSection() {
           </span>
           <h2 className="mt-6 font-display text-3xl tracking-tight sm:text-5xl lg:text-6xl">
             Why teams use{" "}
-            <span className="bg-gradient-to-r from-[#4285f4] to-[#8ab4f8] bg-clip-text text-transparent font-semibold">
+            <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
               Doc2MCP
             </span>
           </h2>

@@ -94,7 +94,7 @@ export function WhyNowSection() {
             )}
           >
             Why this matters{" "}
-            <span className="bg-gradient-to-r from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">
+            <span className="text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
               right now.
             </span>
           </h2>

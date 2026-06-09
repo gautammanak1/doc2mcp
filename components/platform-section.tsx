@@ -20,30 +20,17 @@ import {
 } from "framer-motion";
 import {
   Bot,
-  Check,
-  Copy,
   Download,
-  FileText,
-  Folder,
   type LucideIcon,
   Network,
   RefreshCw,
   Target,
   Workflow,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
-const HEADING_WORDS = [
-  "One",
-  "platform.",
-  "Every",
-  "layer",
-  "of",
-  "AI",
-  "documentation",
-  "infrastructure.",
-];
+const HEADING_WORDS = ["One", "platform.", "Every", "layer."];
 
 const containerVariants = {
   hidden: {},
@@ -63,155 +50,71 @@ const cardVariants = {
 
 /* ----------------------------- 1. Crawling ------------------------------ */
 
-const CRAWLER_TREE = [
-  { kind: "folder", label: "/docs", indent: 0 },
-  { kind: "file", label: "introduction.mdx", indent: 1 },
-  { kind: "file", label: "quickstart.mdx", indent: 1 },
-  { kind: "folder", label: "/api", indent: 1 },
-  { kind: "file", label: "customers.mdx", indent: 2 },
-  { kind: "file", label: "payment_intents.mdx", indent: 2 },
-  { kind: "file", label: "webhooks.mdx", indent: 2 },
-  { kind: "file", label: "node.mdx", indent: 2 },
-] as const;
+function CrawlingCard() {
+  const fileTree = [
+    { name: "stripe-docs", size: "" },
+    { name: "  ├── api-reference", size: "" },
+    { name: "  │   ├── charges.mdx", size: "12kb" },
+    { name: "  │   ├── customers.mdx", size: "18kb" },
+    { name: "  │   └── refunds.mdx", size: "9kb" },
+    { name: "  ├── checkout", size: "" },
+    { name: "  └── billing", size: "" },
+  ];
 
-function useCountUp(
-  target: number,
-  active: boolean,
-  durationMs = 1600
-): number {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!active) {
-      return;
-    }
-    let raf = 0;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / durationMs);
-      const eased = 1 - (1 - t) ** 3;
-      setValue(Math.round(eased * target));
-      if (t < 1) {
-        raf = requestAnimationFrame(tick);
-      }
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [target, active, durationMs]);
-  return value;
-}
-
-function CrawlingCard({ active }: { active: boolean }) {
-  const [scanRow, setScanRow] = useState(-1);
-  const reduce = useReducedMotion();
-  const count = useCountUp(1284, active && !reduce);
-
-  useEffect(() => {
-    if (!active || reduce) {
-      setScanRow(CRAWLER_TREE.length - 1);
-      return;
-    }
-    let row = -1;
-    const id = setInterval(() => {
-      row = (row + 1) % (CRAWLER_TREE.length + 3);
-      setScanRow(row);
-    }, 450);
-    return () => clearInterval(id);
-  }, [active, reduce]);
+  const stats = [
+    { label: "Host URL", value: "docs.stripe.com" },
+    { label: "Total Pages", value: "1,284 pages" },
+    { label: "Data Scanned", value: "12.4 MB" },
+    { label: "Crawl Speed", value: "52 pages/sec" },
+  ];
 
   return (
-    <div className="relative h-full min-h-[280px] w-full overflow-hidden rounded-2xl border border-border/40 bg-card/25 p-4 backdrop-blur-md flex flex-col justify-between">
-      {/* Chrome tab headers */}
-      <div className="flex items-center justify-between border-border/30 border-b pb-3 mb-3">
-        <div className="flex items-center gap-1.5">
-          <span className="size-2 rounded-full bg-[#ef4444] opacity-80" />
-          <span className="size-2 rounded-full bg-[#f59e0b] opacity-80" />
-          <span className="size-2 rounded-full bg-[#10b981] opacity-80" />
-        </div>
-        <span className="font-mono text-[10px] text-muted-foreground/85 tracking-wider">
-          stripe_crawler.ts
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-full">
+      {/* File Tree Explorer */}
+      <div className="flex flex-col gap-1.5 p-3.5 rounded-xl border border-border/40 bg-zinc-950/40 font-mono text-[10.5px] text-zinc-300 select-none">
+        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold border-b border-border/20 pb-1.5 mb-1.5 flex items-center justify-between">
+          <span>Target Tree</span>
+          <span className="text-emerald-500 font-bold">● Scan complete</span>
         </span>
-        <span className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-emerald-500 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full">
-          <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-          active
-        </span>
+        {fileTree.map((node) => (
+          <div
+            className="flex items-center justify-between py-0.5 truncate hover:text-foreground"
+            key={node.name}
+          >
+            <span>{node.name}</span>
+            {node.size && (
+              <span className="text-muted-foreground/60 text-[9px]">
+                {node.size}
+              </span>
+            )}
+          </div>
+        ))}
       </div>
 
-      {/* Main tree list */}
-      <ul className="flex-1 space-y-1.5 font-mono text-[11px] overflow-hidden py-1">
-        {CRAWLER_TREE.map((row, i) => {
-          const done = i <= scanRow;
-          const scanning = i === scanRow;
-
-          // Determine label type
-          const isFolder = row.kind === "folder";
-          const isAPI =
-            row.label.includes("customers") ||
-            row.label.includes("payment_intents") ||
-            row.label.includes("webhooks");
-          const fileBadge = isFolder ? "" : isAPI ? "API" : "DOC";
-
-          return (
-            <li
-              className={cn(
-                "relative flex items-center gap-2 px-2 py-1 rounded-md transition-all duration-300",
-                scanning
-                  ? "bg-[#4285f4]/8 border border-[#4285f4]/20 scale-[1.01]"
-                  : "border border-transparent",
-                done ? "opacity-100" : "opacity-40"
-              )}
-              key={row.label}
-              style={{ paddingLeft: `${row.indent * 12 + 6}px` }}
-            >
-              {isFolder ? (
-                <Folder className="size-3.5 shrink-0 text-[#4285f4]" />
-              ) : (
-                <FileText className="size-3.5 shrink-0 text-muted-foreground/80" />
-              )}
-              <span
-                className={cn(
-                  "truncate font-medium transition-colors",
-                  done ? "text-foreground" : "text-muted-foreground"
-                )}
-              >
-                {row.label}
-              </span>
-              {!isFolder && fileBadge && (
-                <span
-                  className={cn(
-                    "text-[8px] font-bold px-1.5 py-0.2 rounded shrink-0 scale-90",
-                    isAPI
-                      ? "bg-[#4285f4]/15 text-[#4285f4] dark:bg-[#8ab4f8]/20 dark:text-[#8ab4f8]"
-                      : "bg-neutral-500/15 text-neutral-400"
-                  )}
-                >
-                  {fileBadge}
-                </span>
-              )}
-              {scanning && (
-                <span className="ml-auto flex items-center gap-1 text-[8.5px] text-[#4285f4] font-semibold animate-pulse">
-                  scanning...
-                </span>
-              )}
-              {done && !scanning && (
-                <Check className="ml-auto size-3 text-emerald-500 shrink-0" />
-              )}
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* Crawl stats overlay dashboard */}
-      <div className="mt-3 grid grid-cols-2 gap-4 border-border/30 border-t pt-3 font-mono text-[10px]">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-muted-foreground">Crawler Depth</span>
-          <span className="font-semibold text-foreground text-xs font-display">
-            Level 3
+      {/* Crawl Metrics */}
+      <div className="flex flex-col justify-between gap-3 p-3.5 rounded-xl border border-border/40 bg-card/30">
+        <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold border-b border-border/20 pb-1.5 flex items-center justify-between">
+          <span>Metadata &amp; Stats</span>
+          <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">
+            doc2mcp-crawler/1.0
           </span>
+        </span>
+        <div className="grid grid-cols-2 gap-2.5 my-auto">
+          {stats.map((stat) => (
+            <div className="flex flex-col gap-0.5" key={stat.label}>
+              <span className="text-[9px] text-muted-foreground font-mono">
+                {stat.label}
+              </span>
+              <span className="text-[11px] text-foreground font-semibold font-mono truncate">
+                {stat.value}
+              </span>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-col gap-0.5 items-end">
-          <span className="text-muted-foreground">Pages Scanned</span>
-          <span className="font-semibold text-foreground text-xs font-display tabular-nums">
-            {count.toLocaleString()}
+        <div className="pt-2 border-t border-border/20 flex items-center justify-between text-[9px] font-mono text-muted-foreground">
+          <span>Security checks:</span>
+          <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+            100% Passed
           </span>
         </div>
       </div>
@@ -221,198 +124,89 @@ function CrawlingCard({ active }: { active: boolean }) {
 
 /* --------------------------- 2. MCP generation -------------------------- */
 
-type TermFrame = {
-  lines: string[];
-  typing: string;
-  cursor: boolean;
-  delay: number;
-};
-
-const TERM_SCRIPT = [
-  { text: "doc2mcp generate ./stripe-docs", kind: "cmd" },
-  { text: "→ crawled 1,284 pages", kind: "out" },
-  { text: "→ structured 4,182 chunks", kind: "out" },
-  { text: "→ tools: 23 · workflows: 6", kind: "out" },
-  { text: "✓ mcp ready · hosted", kind: "ok" },
-] as const;
-
-function buildTermFrames(): TermFrame[] {
-  const frames: TermFrame[] = [];
-  const committed: string[] = [];
-  for (const line of TERM_SCRIPT) {
-    if (line.kind === "cmd") {
-      for (let i = 1; i <= line.text.length; i++) {
-        frames.push({
-          lines: [...committed],
-          typing: line.text.slice(0, i),
-          cursor: true,
-          delay: 34,
-        });
-      }
-      committed.push(`$ ${line.text}`);
-      frames.push({
-        lines: [...committed],
-        typing: "",
-        cursor: false,
-        delay: 320,
-      });
-    } else {
-      committed.push(line.text);
-      frames.push({
-        lines: [...committed],
-        typing: "",
-        cursor: false,
-        delay: 340,
-      });
-    }
-  }
-  frames.push({ lines: [...committed], typing: "", cursor: true, delay: 2400 });
-  return frames;
-}
-
-function MCPGenCard({ active }: { active: boolean }) {
-  const frames = useMemo(buildTermFrames, []);
-  const [idx, setIdx] = useState(0);
-  const reduce = useReducedMotion();
-
-  useEffect(() => {
-    if (!active || reduce) {
-      setIdx(frames.length - 1);
-      return;
-    }
-    const frame = frames[idx] ?? frames[0];
-    const timer = setTimeout(
-      () => setIdx((p) => (p + 1) % frames.length),
-      frame.delay
-    );
-    return () => clearTimeout(timer);
-  }, [active, reduce, idx, frames]);
-
-  const frame = frames[idx] ?? frames[0];
-
+function MCPGenCard() {
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-col justify-end overflow-hidden rounded-xl border border-border/40 bg-zinc-950/90 p-3 font-mono text-[10.5px] backdrop-blur-xl">
-      {frame.lines.map((line) => {
-        const isCmd = line.startsWith("$ ");
-        const isOk = line.startsWith("✓");
-        return (
-          <p
-            className={cn(
-              "leading-relaxed",
-              isOk
-                ? "text-violet-400"
-                : isCmd
-                  ? "text-zinc-100"
-                  : "text-emerald-400/90"
-            )}
-            key={line}
-          >
-            {isCmd ? (
-              <>
-                <span className="text-violet-400">$</span> {line.slice(2)}
-              </>
-            ) : (
-              line
-            )}
-          </p>
-        );
-      })}
-      {frame.typing ? (
-        <p className="text-zinc-100">
-          <span className="text-violet-400">$</span> {frame.typing}
-          {frame.cursor ? (
-            <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-zinc-100 align-middle" />
-          ) : null}
+    <div className="relative flex w-full flex-col overflow-hidden rounded-xl border border-border/40 bg-zinc-950 p-4 font-mono text-[10.5px] text-zinc-300 leading-relaxed shadow-inner">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2.5">
+        <span className="text-[9px] text-zinc-500 font-semibold tracking-wider uppercase">
+          Generated Tool Schema
+        </span>
+        <span className="size-1.5 rounded-full bg-emerald-500/80" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-zinc-500">{"// stripe/create_payment_intent"}</p>
+        <p>
+          <span className="text-violet-400">type</span>{" "}
+          <span className="text-blue-400">Input</span> = {"{"}
         </p>
-      ) : null}
+        <p className="pl-4">
+          <span className="text-sky-300">amount</span>:{" "}
+          <span className="text-amber-400">number</span>
+          {";"}
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">currency</span>:{" "}
+          <span className="text-amber-400">string</span>
+          {";"}
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">metadata</span>?:{" "}
+          <span className="text-violet-400">Record</span>&lt;
+          <span className="text-amber-400">string</span>,{" "}
+          <span className="text-amber-400">string</span>&gt;
+          {";"}
+        </p>
+        <p>{"};"}</p>
+      </div>
     </div>
   );
 }
 
 /* ---------------------------- 3. Retrieval ------------------------------ */
 
-const RETRIEVAL_ROWS = [
-  { label: "createCustomer", score: 0.94 },
-  { label: "retrievePaymentIntent", score: 0.89 },
-  { label: "listSubscriptions", score: 0.82 },
-];
+function RetrievalCard() {
+  const results = [
+    {
+      title: "Retrieve Payment Intent",
+      file: "payment_intents.mdx",
+      match: "94% match",
+    },
+    {
+      title: "Create Checkout Session",
+      file: "checkout_sessions.mdx",
+      match: "89% match",
+    },
+  ];
 
-function RetrievalCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
-  const animate = active && !reduce;
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-col justify-center gap-3">
-      {/* Query Bar */}
-      <div className="rounded-lg border border-border/40 bg-card/10 px-3 py-2 flex items-center gap-2 font-mono text-[10.5px] text-muted-foreground/80">
-        <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">Q:</span>
-        <span className="truncate">
-          Stripe checkout session redirect parameters...
+    <div className="flex flex-col gap-2.5 w-full">
+      <div className="rounded-lg border border-border/40 bg-card/25 px-3 py-2 flex items-center gap-2 font-mono text-[10.5px]">
+        <span className="text-[#4285f4] dark:text-[#8ab4f8] font-bold">
+          Query:
+        </span>
+        <span className="text-foreground font-medium truncate">
+          stripe session return URL parameters
         </span>
       </div>
-
-      {/* Results */}
-      <div className="space-y-2">
-        {RETRIEVAL_ROWS.map((row, i) => {
-          const top = i === 0;
-          return (
-            <div
-              className={cn(
-                "rounded-lg border bg-card/65 px-3 py-2 backdrop-blur-xl transition-all duration-300",
-                top
-                  ? "border-[#4285f4]/45 shadow-[0_0_18px_-6px] shadow-[#4285f4]/40"
-                  : "border-border/40"
-              )}
-              key={row.label}
-              style={
-                animate
-                  ? {
-                      animation: top
-                        ? "pf-fade-in 0.5s ease-out both, pf-glow 2.4s ease-in-out infinite"
-                        : "pf-fade-in 0.5s ease-out both",
-                      animationDelay: `${i * 0.18}s`,
-                    }
-                  : undefined
-              }
-            >
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="font-mono text-foreground/85 font-medium">
-                  {row.label}
-                </span>
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 font-mono text-[10px] font-bold",
-                    top
-                      ? "bg-[#4285f4]/15 text-[#4285f4] dark:bg-[#8ab4f8]/20 dark:text-[#8ab4f8]"
-                      : "bg-foreground/5 text-muted-foreground"
-                  )}
-                >
-                  {row.score.toFixed(2)}
-                </span>
-              </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-foreground/10">
-                <span
-                  className={cn(
-                    "block h-full rounded-full",
-                    top
-                      ? "bg-gradient-to-r from-[#4285f4] to-[#8ab4f8]"
-                      : "bg-foreground/40"
-                  )}
-                  style={
-                    reduce
-                      ? { width: `${row.score * 100}%` }
-                      : {
-                          // CSS var drives the looping fill keyframe.
-                          ["--pf-target" as string]: `${row.score * 100}%`,
-                          width: `${row.score * 100}%`,
-                          animation: "pf-bar 3s ease-in-out infinite",
-                          animationDelay: `${i * 0.18}s`,
-                        }
-                  }
-                />
-              </div>
+      <div className="flex flex-col gap-2">
+        {results.map((res) => (
+          <div
+            className="p-3 rounded-lg border border-border/40 bg-card/30 flex items-center justify-between"
+            key={res.title}
+          >
+            <div className="flex flex-col min-w-0">
+              <span className="font-mono text-[10.5px] text-foreground font-semibold truncate">
+                {res.title}
+              </span>
+              <span className="text-[9px] text-muted-foreground font-mono truncate">
+                {res.file}
+              </span>
             </div>
-          );
-        })}
+            <span className="px-2 py-0.5 rounded-full font-mono text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 shrink-0">
+              {res.match}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -420,169 +214,110 @@ function RetrievalCard({ active }: { active: boolean }) {
 
 /* ------------------------------ 4. Sync -------------------------------- */
 
-function SyncCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
+function SyncCard() {
+  const syncLogs = [
+    {
+      source: "docs.stripe.com",
+      change: "12 pages updated",
+      time: "2 mins ago",
+    },
+    {
+      source: "stripe-openapi.json",
+      change: "1 tool generated",
+      time: "1 hr ago",
+    },
+  ];
+
   return (
-    <div className="relative flex h-full min-h-[120px] w-full flex-col items-center justify-center py-4 bg-card/10 border border-border/40 rounded-2xl p-4">
-      {/* Visual Sync Syncing Nodes */}
-      <div className="flex items-center justify-between w-full max-w-[220px] relative">
-        {/* Source Node */}
-        <div className="flex flex-col items-center gap-1.5 z-10">
-          <div className="flex size-10 items-center justify-center rounded-xl border border-border bg-background shadow-sm">
-            <FileText className="size-4.5 text-muted-foreground/80" />
+    <div className="flex flex-col gap-2.5 w-full">
+      {syncLogs.map((log) => (
+        <div
+          className="p-3 rounded-xl border border-border/40 bg-card/30 flex flex-col gap-1 hover:bg-card/55 transition-colors"
+          key={log.source}
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10.5px] text-foreground font-semibold truncate">
+              {log.source}
+            </span>
+            <span className="text-[9px] text-muted-foreground font-mono shrink-0">
+              {log.time}
+            </span>
           </div>
-          <span className="font-mono text-[9px] text-muted-foreground">
-            docs.stripe.com
-          </span>
-        </div>
-
-        {/* Syncing line connector */}
-        <div className="absolute left-[40px] right-[40px] top-[20px] h-0.5 border-t border-dashed border-border/60 overflow-hidden">
-          {!reduce && active && (
-            <div
-              className="h-full w-4 bg-[#8ab4f8] shadow-[0_0_8px_#8ab4f8] animate-dash relative"
-              style={{ animation: "pf-dash-travel 2s linear infinite" }}
-            />
-          )}
-        </div>
-
-        {/* Target Node */}
-        <div className="flex flex-col items-center gap-1.5 z-10">
-          <div className="flex size-10 items-center justify-center rounded-xl border border-[#4285f4]/40 bg-[#4285f4]/10 shadow-[0_0_12px_rgba(66,133,244,0.15)] animate-pulse">
-            <RefreshCw
-              className={cn(
-                "size-4.5 text-[#4285f4] dark:text-[#8ab4f8]",
-                !reduce && active && "animate-spin"
-              )}
-              style={!reduce && active ? { animationDuration: "6s" } : {}}
-            />
+          <div className="flex items-center gap-2 text-[9.5px] font-mono text-muted-foreground">
+            <span className="size-1 rounded-full bg-emerald-500" />
+            <span>{log.change}</span>
           </div>
-          <span className="font-mono text-[9px] text-[#4285f4] dark:text-[#8ab4f8] font-semibold">
-            doc2mcp server
-          </span>
         </div>
-      </div>
-
-      {/* Sync Status Badge */}
-      <div className="mt-4 inline-flex items-center gap-1.5 font-mono text-[9px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2.5 py-0.8 rounded-full border border-emerald-500/20">
-        <span className="size-1.5 rounded-full bg-emerald-500 animate-ping" />
-        Synced · 2 mins ago
-      </div>
+      ))}
     </div>
   );
 }
 
 /* -------------------------- 5. Multi-agent ----------------------------- */
 
-const AGENTS = ["Cursor", "Claude", "VS Code", "Windsurf", "OpenAI"];
-
-function MultiAgentCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
-  const [activeAgent, setActiveAgent] = useState(0);
-
-  useEffect(() => {
-    if (!active || reduce) {
-      return;
-    }
-    const id = setInterval(() => {
-      setActiveAgent((p) => (p + 1) % AGENTS.length);
-    }, 1100);
-    return () => clearInterval(id);
-  }, [active, reduce]);
+function MultiAgentCard() {
+  const clients = [
+    { name: "Cursor", status: "Installed", path: ".cursor/mcp.json" },
+    {
+      name: "Claude Desktop",
+      status: "Configured",
+      path: "claude_desktop_config.json",
+    },
+    { name: "VS Code", status: "Active", path: "settings.json" },
+  ];
 
   return (
-    <div className="relative grid grid-cols-2 sm:grid-cols-3 gap-2 w-full">
-      {AGENTS.map((label, i) => {
-        const hot = i === activeAgent && !reduce;
-        return (
-          <div
-            className={cn(
-              "flex flex-col gap-1.5 p-2 rounded-xl border transition-all duration-500 bg-card/40 backdrop-blur-md",
-              hot
-                ? "border-[#4285f4] bg-[#4285f4]/8 shadow-[0_0_12px_rgba(66,133,244,0.15)] scale-[1.03]"
-                : "border-border/60 hover:border-border/80"
-            )}
-            key={label}
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-[10px] font-bold text-foreground/95">
-                {label}
-              </span>
-              <span
-                className={cn(
-                  "size-1.5 rounded-full",
-                  hot ? "bg-emerald-500 animate-pulse" : "bg-neutral-500/50"
-                )}
-              />
-            </div>
-            <span className="text-[8.5px] font-mono text-muted-foreground">
-              {hot ? "connected" : "standby"}
+    <div className="flex flex-col gap-2 w-full">
+      {clients.map((client) => (
+        <div
+          className="flex items-center justify-between p-2.5 rounded-lg border border-border/40 bg-card/30"
+          key={client.name}
+        >
+          <div className="flex flex-col min-w-0">
+            <span className="font-mono text-[10.5px] text-foreground font-semibold">
+              {client.name}
+            </span>
+            <span className="text-[9px] text-muted-foreground font-mono truncate">
+              {client.path}
             </span>
           </div>
-        );
-      })}
+          <span className="px-2 py-0.5 rounded-full font-mono text-[9px] font-semibold text-[#4285f4] dark:text-[#8ab4f8] bg-[#4285f4]/10 border border-[#4285f4]/20 shrink-0">
+            {client.status}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
 
 /* ----------------------------- 6. Export ------------------------------- */
 
-function ExportCard({ active }: { active: boolean }) {
-  const reduce = useReducedMotion();
-  const [copied, setCopied] = useState(false);
-
-  // Periodic copy flash simulation
-  useEffect(() => {
-    if (!active || reduce) {
-      return;
-    }
-    const id = setInterval(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    }, 4500);
-    return () => clearInterval(id);
-  }, [active, reduce]);
-
+function ExportCard() {
   return (
-    <div className="relative h-full min-h-[120px] w-full overflow-hidden rounded-2xl border border-border/40 bg-zinc-950/95 p-3.5 font-mono text-[10px] leading-relaxed shadow-inner">
+    <div className="relative w-full overflow-hidden rounded-xl border border-border/40 bg-zinc-950 p-4 font-mono text-[10.5px] text-zinc-300 leading-relaxed shadow-inner">
       <div className="text-zinc-400 select-all">
-        <span className="text-amber-500 font-bold">{"{"}</span>
-        <br />
-        <span className="text-sky-300"> &quot;mcpServers&quot;</span>:{" "}
-        <span className="text-amber-500 font-bold">{"{"}</span>
-        <br />
-        <span className="text-sky-300"> &quot;stripe&quot;</span>:{" "}
-        <span className="text-amber-500 font-bold">{"{"}</span>
-        <br />
-        <span className="text-sky-300"> &quot;url&quot;</span>:{" "}
-        <span className="text-emerald-400">
-          &quot;https://doc2mcp.site/api/mcp/st_3a1&quot;
-        </span>
-        ,
-        <br />
-        <span className="text-sky-300"> &quot;headers&quot;</span>:{" "}
-        <span className="text-amber-500 font-bold">{"{"}</span>{" "}
-        <span className="text-sky-300">&quot;Authorization&quot;</span>:{" "}
-        <span className="text-emerald-400">&quot;Bearer st_…&quot;</span>{" "}
-        <span className="text-amber-500 font-bold">{"}"}</span>
-        <br />
-        <span className="text-amber-500 font-bold"> {"}"}</span>
-        <br />
-        <span className="text-amber-500 font-bold"> {"}"}</span>
-        <br />
-        <span className="text-amber-500 font-bold">{"}"}</span>
+        <p>
+          <span className="text-violet-400">"stripe-mcp"</span>: {"{"}
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">"command"</span>:{" "}
+          <span className="text-emerald-400">"npx"</span>,
+        </p>
+        <p className="pl-4">
+          <span className="text-sky-300">"args"</span>: [
+        </p>
+        <p className="pl-8">
+          <span className="text-emerald-400">"-y"</span>,
+        </p>
+        <p className="pl-8">
+          <span className="text-emerald-400">"doc2mcp-server@latest"</span>,
+        </p>
+        <p className="pl-8">
+          <span className="text-emerald-400">"--key=st_3a1"</span>
+        </p>
+        <p className="pl-4">]</p>
+        <p>{"}"}</p>
       </div>
-      <span
-        className={cn(
-          "absolute top-2.5 right-2.5 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[9px] uppercase tracking-wider transition-all duration-300 font-semibold",
-          copied
-            ? "scale-100 border-[#4285f4]/40 bg-[#4285f4]/15 text-[#4285f4] dark:text-[#8ab4f8] opacity-100 shadow-[0_0_8px_rgba(66,133,244,0.15)]"
-            : "scale-95 border-border/50 bg-background/50 text-muted-foreground opacity-70 hover:opacity-100 hover:scale-100 cursor-pointer"
-        )}
-      >
-        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-        {copied ? "copied!" : "copy"}
-      </span>
     </div>
   );
 }
@@ -609,7 +344,7 @@ const FEATURES: Feature[] = [
     icon: Network,
     span: "lg:col-span-3 lg:row-span-2",
     accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
-    render: (a) => <CrawlingCard active={a} />,
+    render: () => <CrawlingCard />,
   },
   {
     id: "mcp",
@@ -619,7 +354,7 @@ const FEATURES: Feature[] = [
     icon: Workflow,
     span: "lg:col-span-3",
     accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
-    render: (a) => <MCPGenCard active={a} />,
+    render: () => <MCPGenCard />,
   },
   {
     id: "retrieval",
@@ -630,7 +365,7 @@ const FEATURES: Feature[] = [
     span: "lg:col-span-3",
     accent: "from-[#4285f4]/20 via-[#8ab4f8]/10 to-transparent",
     highlight: true,
-    render: (a) => <RetrievalCard active={a} />,
+    render: () => <RetrievalCard />,
   },
   {
     id: "sync",
@@ -640,7 +375,7 @@ const FEATURES: Feature[] = [
     icon: RefreshCw,
     span: "lg:col-span-2",
     accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
-    render: (a) => <SyncCard active={a} />,
+    render: () => <SyncCard />,
   },
   {
     id: "agents",
@@ -650,7 +385,7 @@ const FEATURES: Feature[] = [
     icon: Bot,
     span: "lg:col-span-2",
     accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
-    render: (a) => <MultiAgentCard active={a} />,
+    render: () => <MultiAgentCard />,
   },
   {
     id: "export",
@@ -660,7 +395,7 @@ const FEATURES: Feature[] = [
     icon: Download,
     span: "lg:col-span-2",
     accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
-    render: (a) => <ExportCard active={a} />,
+    render: () => <ExportCard />,
   },
 ];
 
@@ -801,14 +536,15 @@ export function PlatformSection() {
             </span>
             <h2 className="font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl leading-tight">
               {HEADING_WORDS.map((word, i) => {
-                const gradient = word === "Every" || word === "layer";
+                const isAccent = word === "Every" || word === "layer.";
                 return (
                   <motion.span
                     animate={headerInView ? { opacity: 1, y: 0 } : {}}
                     className={cn(
                       "mr-[0.25em] inline-block",
-                      gradient &&
-                        "bg-gradient-to-r from-[#4285f4] to-[#8ab4f8] bg-clip-text text-transparent font-semibold"
+                      isAccent
+                        ? "text-[#4285f4] dark:text-[#8ab4f8] font-semibold"
+                        : "text-foreground"
                     )}
                     initial={{ opacity: 0, y: 14 }}
                     key={word}
