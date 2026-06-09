@@ -590,8 +590,8 @@ const FEATURES: Feature[] = [
     description:
       "Automatically understands documentation hierarchy and structure — Mintlify, Docusaurus, Swagger, GitBook, raw markdown.",
     icon: Network,
-    span: "lg:col-span-2 lg:row-span-2",
-    accent: "from-sky-500/20 via-violet-500/10 to-transparent",
+    span: "lg:col-span-3 lg:row-span-2",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
     render: (a) => <CrawlingCard active={a} />,
   },
   {
@@ -600,8 +600,8 @@ const FEATURES: Feature[] = [
     description:
       "Generate MCP servers without writing MCP code. Tools, workflows, auth, hosting — done.",
     icon: Workflow,
-    span: "lg:col-span-2",
-    accent: "from-violet-500/20 via-fuchsia-500/10 to-transparent",
+    span: "lg:col-span-3",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
     render: (a) => <MCPGenCard active={a} />,
   },
   {
@@ -610,8 +610,8 @@ const FEATURES: Feature[] = [
     description:
       "Improve AI coding accuracy and reduce hallucinations with semantic, schema-aware retrieval.",
     icon: Target,
-    span: "lg:col-span-2",
-    accent: "from-fuchsia-500/25 via-rose-500/15 to-transparent",
+    span: "lg:col-span-3",
+    accent: "from-[#4285f4]/20 via-[#8ab4f8]/10 to-transparent",
     highlight: true,
     render: (a) => <RetrievalCard active={a} />,
   },
@@ -622,7 +622,7 @@ const FEATURES: Feature[] = [
       "Keep documentation synchronized automatically — your MCP server tracks the source.",
     icon: RefreshCw,
     span: "lg:col-span-2",
-    accent: "from-emerald-500/20 via-sky-500/10 to-transparent",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
     render: (a) => <SyncCard active={a} />,
   },
   {
@@ -632,7 +632,7 @@ const FEATURES: Feature[] = [
       "Works across the modern MCP ecosystem — Cursor, Claude, VS Code, Windsurf, OpenAI Agents.",
     icon: Bot,
     span: "lg:col-span-2",
-    accent: "from-amber-500/20 via-orange-500/10 to-transparent",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
     render: (a) => <MultiAgentCard active={a} />,
   },
   {
@@ -642,7 +642,7 @@ const FEATURES: Feature[] = [
       "Instant MCP configuration generation. Copy a JSON snippet, paste into your editor, done.",
     icon: Download,
     span: "lg:col-span-2",
-    accent: "from-cyan-500/20 via-blue-500/10 to-transparent",
+    accent: "from-[#4285f4]/15 via-[#8ab4f8]/5 to-transparent",
     render: (a) => <ExportCard active={a} />,
   },
 ];
@@ -655,11 +655,11 @@ function FeatureCard({ feature }: { feature: Feature }) {
   return (
     <motion.div
       className={cn(
-        "group relative col-span-1 overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-violet-500/10 hover:shadow-xl sm:p-7",
+        "group relative col-span-1 overflow-hidden rounded-3xl border p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-[#4285f4]/8 hover:shadow-xl sm:p-7",
         feature.span,
         feature.highlight
-          ? "border-fuchsia-500/30 bg-gradient-to-br from-fuchsia-500/10 via-card/50 to-violet-500/10"
-          : "border-border/60 bg-card/40 hover:border-border"
+          ? "border-[#4285f4]/45 bg-gradient-to-br from-[#4285f4]/12 via-card/50 to-[#8ab4f8]/12"
+          : "border-border/60 bg-card/40 hover:border-[#4285f4]/50 dark:hover:border-[#8ab4f8]/50"
       )}
       ref={ref}
       variants={cardVariants}
@@ -673,7 +673,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#4285f4]/45 to-transparent opacity-0 transition-opacity group-hover:opacity-100"
       />
 
       <div className="flex h-full flex-col justify-between gap-5">
@@ -754,7 +754,7 @@ export function PlatformSection() {
             ? undefined
             : {
                 background:
-                  "radial-gradient(40% 40% at 20% 20%, oklch(0.6 0.2 290 / 0.12), transparent), radial-gradient(40% 40% at 80% 30%, oklch(0.6 0.2 230 / 0.12), transparent), radial-gradient(40% 40% at 50% 90%, oklch(0.6 0.2 320 / 0.1), transparent)",
+                  "radial-gradient(circle at 50% 50%, rgba(66, 133, 244, 0.12) 0%, rgba(66, 133, 244, 0.03) 60%, transparent 100%)",
                 backgroundSize: "200% 200%",
                 animation: "pf-mesh 18s ease-in-out infinite",
               }
@@ -792,7 +792,7 @@ export function PlatformSection() {
                   className={cn(
                     "mr-[0.25em] inline-block",
                     gradient &&
-                      "bg-gradient-to-br from-sky-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent"
+                      "bg-gradient-to-r from-[#4285f4] to-[#8ab4f8] bg-clip-text text-transparent font-semibold"
                   )}
                   initial={{ opacity: 0, y: 14 }}
                   key={word}
@@ -807,7 +807,7 @@ export function PlatformSection() {
             From crawl to retrieval to deployment — the full stack between your
             docs and an AI agent.
           </p>
-          <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 font-mono text-[10px] text-violet-700 uppercase tracking-[0.16em] dark:text-violet-200">
+          <div className="mt-6 inline-flex items-center gap-1.5 rounded-full border border-[#4285f4]/30 bg-[#4285f4]/10 px-3 py-1 font-mono text-[10px] text-[#4285f4] dark:text-[#8ab4f8] uppercase tracking-[0.16em]">
             <Sparkles aria-hidden="true" className="size-3" />6 capabilities · 1
             endpoint
           </div>
@@ -842,8 +842,8 @@ export function PlatformSection() {
           100% { width: var(--pf-target); }
         }
         @keyframes pf-glow {
-          0%, 100% { box-shadow: 0 0 18px -6px rgba(217, 70, 239, 0.4); }
-          50%      { box-shadow: 0 0 26px -4px rgba(217, 70, 239, 0.65); }
+          0%, 100% { box-shadow: 0 0 18px -6px rgba(66, 133, 244, 0.35); }
+          50%      { box-shadow: 0 0 26px -4px rgba(138, 180, 248, 0.55); }
         }
         @keyframes pf-orbit {
           from { transform: rotate(0deg); }

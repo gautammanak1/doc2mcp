@@ -1,0 +1,19 @@
+{
+  "decisions_and_improvements": [
+    {
+      "topic": "Next.js Dynamic Wrappers (SSR: false)",
+      "decision": "Bypassed Next.js static generation prerender constraints on Framer Motion layout animations (which generated random IDs dynamically) by loading animations exclusively client-side.",
+      "improvement": "Extracted animation-heavy logic to how-it-works-client.tsx and problem-section-client.tsx using dynamic(..., { ssr: false }) imports to guarantee build stability without losing UX fluidness."
+    },
+    {
+      "topic": "Theme Color Mapping",
+      "decision": "Replaced absolute/hardcoded gray, blue, and AI-like containers with curated CSS variable tokens mapped to the theme provider.",
+      "improvement": "Refactored background and border variables to cleanly transition between light mode and dark mode, using smooth glassmorphic backdrops."
+    },
+    {
+      "topic": "Clean Code & Refactoring",
+      "decision": "Manually cleaned up unneeded components and parameters identified by Biome rules rather than trusting unsafe automated rewrites.",
+      "improvement": "Purged the redundant FloatingChip component and unused FeatureCard loop indexes to maintain strict type safety and a lightweight codebase."
+    }
+  ]
+}
