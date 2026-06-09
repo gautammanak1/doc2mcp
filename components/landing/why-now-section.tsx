@@ -1,7 +1,6 @@
 "use client";
 
 import { Bot, GitMerge, Globe2, Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 
 type Pillar = {
   id: string;
@@ -48,29 +47,10 @@ const PILLARS: Pillar[] = [
 ];
 
 export function WhyNowSection() {
-  const [_isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section
       className="relative overflow-hidden py-20 sm:py-28 lg:py-32"
       id="why-now"
-      ref={sectionRef}
     >
       {/* Background Subtle Gradient */}
       <div
