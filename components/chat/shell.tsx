@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChatTour } from "@/components/onboarding/chat-tour";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -107,7 +108,10 @@ export function ChatShell() {
               votes={votes}
             />
 
-            <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
+            <div
+              className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4"
+              data-tour="chat-input"
+            >
               {!isReadonly && (
                 <MultimodalInput
                   attachments={attachments}
@@ -170,6 +174,7 @@ export function ChatShell() {
       </div>
 
       <DataStreamHandler />
+      <ChatTour />
 
       <AlertDialog
         onOpenChange={setShowCreditCardAlert}

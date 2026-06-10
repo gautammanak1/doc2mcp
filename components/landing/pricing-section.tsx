@@ -206,7 +206,7 @@ function monthlyHeadline(
   return formatMoney(perMonth, currency);
 }
 
-export function PricingSection() {
+export function PricingSection({ detailed = false }: { detailed?: boolean }) {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [isVisible, setIsVisible] = useState(false);
   const { currency, setCurrency } = useBillingCurrency();
@@ -433,8 +433,12 @@ export function PricingSection() {
           Cancel anytime.
         </p>
 
-        <ComparisonTable />
-        <PricingFaq />
+        {detailed ? (
+          <>
+            <ComparisonTable />
+            <PricingFaq />
+          </>
+        ) : null}
       </div>
     </section>
   );

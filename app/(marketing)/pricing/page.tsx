@@ -14,7 +14,7 @@ export default function PricingPage() {
     <main className="landing-page relative min-h-screen overflow-x-hidden">
       <LandingNavigation />
       <div className="h-24" />
-      <PricingSection />
+      <PricingSection detailed />
       <FooterSection />
     </main>
   );

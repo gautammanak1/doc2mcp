@@ -26,7 +26,7 @@ export const Greeting = () => {
         </div>
 
         <div className="p-5 font-mono">
-          <pre className="overflow-x-auto text-[7px] text-cyan-400 leading-[1.15] sm:text-[10px] md:text-xs">
+          <pre className="no-scrollbar overflow-x-auto text-[7px] text-cyan-400 leading-[1.15] sm:text-[10px] md:text-xs">
             {LOGO}
           </pre>
           <div className="mt-3 text-emerald-400/70 text-xs">

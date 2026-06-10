@@ -69,10 +69,15 @@ function PureMessages({
       <div
         className={cn(
           "absolute inset-0 touch-pan-y overflow-y-auto",
-          messages.length > 0 ? "bg-background" : "bg-transparent"
+          messages.length > 0 ? "bg-background" : "bg-transparent",
+          messages.length === 0 && "no-scrollbar"
         )}
         ref={messagesContainerRef}
-        style={isArtifactVisible ? { scrollbarWidth: "none" } : undefined}
+        style={
+          isArtifactVisible || messages.length === 0
+            ? { scrollbarWidth: "none" }
+            : undefined
+        }
       >
         <div className="mx-auto flex min-h-full min-w-0 max-w-4xl flex-col gap-5 px-2 py-6 md:gap-7 md:px-4">
           {messages.map((message, index) => (

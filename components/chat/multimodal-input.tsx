@@ -752,19 +752,21 @@ function PureMultimodalInput({
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
             />
-            <Doc2McpModeToggle
-              enabled={doc2mcpMode}
-              onChange={(next) => {
-                if (next && isGuest) {
-                  toast.error("Sign in to generate an MCP server");
-                  router.push(
-                    `/login?redirectUrl=${encodeURIComponent("/chat")}`
-                  );
-                  return;
-                }
-                setDoc2mcpMode(next);
-              }}
-            />
+            <span data-tour="chat-doc2mcp">
+              <Doc2McpModeToggle
+                enabled={doc2mcpMode}
+                onChange={(next) => {
+                  if (next && isGuest) {
+                    toast.error("Sign in to generate an MCP server");
+                    router.push(
+                      `/login?redirectUrl=${encodeURIComponent("/chat")}`
+                    );
+                    return;
+                  }
+                  setDoc2mcpMode(next);
+                }}
+              />
+            </span>
           </PromptInputTools>
 
           {status === "submitted" ? (
