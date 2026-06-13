@@ -26,7 +26,9 @@ export function AuthenticatedPricingSection({
 }) {
   return (
     <Suspense
-      fallback={<PricingSection detailed={detailed} initiallyAuthenticated={false} />}
+      fallback={
+        <PricingSection detailed={detailed} initiallyAuthenticated={false} />
+      }
     >
       <PricingSectionWithAuth detailed={detailed} />
     </Suspense>
