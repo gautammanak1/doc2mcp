@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import { LegalPage } from "@/components/legal/legal-page";
 import { CONTACT_EMAIL } from "@/lib/config/site";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function TermsAndConditionsPage() {
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden">
-      <LandingNavigation />
+      <AuthAwareLandingNavigation />
       <LegalPage
         intro="By creating a doc2mcp account or using our website, app, or APIs, you agree to these Terms & Conditions. Please read them carefully — they form a legally binding agreement between you and us."
         lastUpdated="29 May 2026"

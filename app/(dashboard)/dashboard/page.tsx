@@ -30,6 +30,7 @@ import {
 } from "@/lib/db/queries";
 import type { PlatformProject } from "@/lib/db/schema";
 import { cn } from "@/lib/utils";
+import { redactSecrets } from "@/services/mcp/exports";
 
 const STATUS_META: Record<
   PlatformProject["status"],
@@ -88,7 +89,7 @@ export default async function DashboardOverviewPage() {
       project.status === "pending"
   ).length;
 
-  const recentProjects = projects.slice(0, 6);
+  const recentProjects = redactSecrets(projects.slice(0, 6));
 
   return (
     <div className="space-y-8">

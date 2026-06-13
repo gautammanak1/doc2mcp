@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import { BLOG_POSTS, getPost } from "@/lib/blog/posts";
 
 type Params = { slug: string };
@@ -50,7 +50,7 @@ export default async function BlogPostPage({
 
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden">
-      <LandingNavigation />
+      <AuthAwareLandingNavigation />
 
       <article className="relative mx-auto max-w-3xl px-6 pt-32 pb-16 lg:px-8">
         <Link

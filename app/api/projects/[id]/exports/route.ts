@@ -31,6 +31,7 @@ export async function GET(
   const bundle = generateMcpExportBundle({
     config: artifacts.mcpConfig,
     generationReport: artifacts.generationReport,
+    redact: true,
   });
 
   const { searchParams } = new URL(request.url);

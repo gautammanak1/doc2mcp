@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import { MarketplaceExplorer } from "@/components/marketplace/marketplace-explorer";
 import { Button } from "@/components/ui/button";
 import { getMarketplaceProjects } from "@/lib/db/queries";
@@ -20,7 +20,7 @@ export default function MarketplacePage() {
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden">
       <Suspense fallback={<MarketplaceFallback />}>
-        <LandingNavigation />
+        <AuthAwareLandingNavigation />
         <MarketplaceContent />
         <FooterSection />
       </Suspense>

@@ -206,7 +206,13 @@ function monthlyHeadline(
   return formatMoney(perMonth, currency);
 }
 
-export function PricingSection({ detailed = false }: { detailed?: boolean }) {
+export function PricingSection({
+  detailed = false,
+  initiallyAuthenticated = false,
+}: {
+  detailed?: boolean;
+  initiallyAuthenticated?: boolean;
+}) {
   const [cycle, setCycle] = useState<BillingCycle>("monthly");
   const [isVisible, setIsVisible] = useState(false);
   const { currency, setCurrency } = useBillingCurrency();
@@ -421,6 +427,7 @@ export function PricingSection({ detailed = false }: { detailed?: boolean }) {
                 currency={currency}
                 cycle={cycle}
                 highlight={plan.highlight}
+                initiallyAuthenticated={initiallyAuthenticated}
                 label={plan.ctaLabel}
                 planId={plan.id}
               />

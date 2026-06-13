@@ -12,8 +12,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import { InstallPanel } from "@/components/marketplace/install-panel";
 import { SourceIcon } from "@/components/marketplace/source-icon";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ export default function MarketplaceDetailPage({
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden">
       <Suspense fallback={<MarketplaceDetailFallback />}>
-        <LandingNavigation />
+        <AuthAwareLandingNavigation />
         <MarketplaceDetailContent params={params} />
         <FooterSection />
       </Suspense>

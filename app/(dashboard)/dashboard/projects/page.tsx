@@ -5,6 +5,7 @@ import { auth } from "@/app/(auth)/auth";
 import { ProjectsExplorer } from "@/components/dashboard/projects-explorer";
 import { Button } from "@/components/ui/button";
 import { getPlatformProjectsByUserId } from "@/lib/db/queries";
+import { redactSecrets } from "@/services/mcp/exports";
 
 export default async function DashboardProjectsPage() {
   const session = await auth();
@@ -39,7 +40,7 @@ export default async function DashboardProjectsPage() {
         </Button>
       </header>
 
-      <ProjectsExplorer projects={projects} />
+      <ProjectsExplorer projects={redactSecrets(projects)} />
     </div>
   );
 }

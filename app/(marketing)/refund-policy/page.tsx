@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import { LegalPage } from "@/components/legal/legal-page";
 import { CONTACT_EMAIL } from "@/lib/config/site";
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RefundPolicyPage() {
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden">
-      <LandingNavigation />
+      <AuthAwareLandingNavigation />
       <LegalPage
         contactNote={
           <p className="text-sm">

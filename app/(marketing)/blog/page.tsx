@@ -2,8 +2,8 @@ import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import { BLOG_POSTS } from "@/lib/blog/posts";
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export default function BlogIndexPage() {
 
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden">
-      <LandingNavigation />
+      <AuthAwareLandingNavigation />
 
       <section className="relative mx-auto max-w-[1280px] px-6 pt-32 pb-12 lg:px-12">
         <div className="mb-12 max-w-2xl">

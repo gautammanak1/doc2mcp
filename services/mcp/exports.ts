@@ -30,6 +30,8 @@ export type McpExportBundle = {
   artifacts: McpExportArtifact[];
 };
 
+const TOKEN_PLACEHOLDER = "Bearer <DOC2MCP_TOKEN>";
+
 function serverEntry(config: McpServerConfig) {
   const name = config.name || "doc2mcp";
   const entry = (
@@ -44,6 +46,42 @@ function serverEntry(config: McpServerConfig) {
     url: entry?.url ?? "",
     headers: entry?.headers ?? {},
   };
+}
+
+function redactSecretValue(key: string, value: unknown): unknown {
+  const normalizedKey = key.toLowerCase();
+  if (
+    normalizedKey.includes("authorization") &&
+    typeof value === "string" &&
+    value.toLowerCase().startsWith("bearer ")
+  ) {
+    return TOKEN_PLACEHOLDER;
+  }
+  if (
+    (normalizedKey.includes("token") ||
+      normalizedKey.includes("secret") ||
+      normalizedKey.includes("jwt")) &&
+    typeof value === "string"
+  ) {
+    return "<redacted>";
+  }
+  return value;
+}
+
+export function redactSecrets<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => redactSecrets(item)) as T;
+  }
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const [key, raw] of Object.entries(value)) {
+    const redacted = redactSecretValue(key, raw);
+    out[key] = redacted === raw ? redactSecrets(raw) : redacted;
+  }
+  return out as T;
 }
 
 function json(value: unknown): string {
@@ -100,8 +138,10 @@ function validationReport(
 export function generateMcpExportBundle(options: {
   config: McpServerConfig;
   generationReport?: GenerationReport;
+  redact?: boolean;
 }): McpExportBundle {
-  const { config, generationReport } = options;
+  const { generationReport, redact = false } = options;
+  const config = redact ? redactSecrets(options.config) : options.config;
   const entry = serverEntry(config);
   const authHeader = entry.headers.Authorization;
   const cursorConfig = config.cursorConfig ?? {

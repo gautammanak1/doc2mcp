@@ -261,11 +261,7 @@ export function ProjectDetail({
 
         <TabsContent className="mt-4 space-y-4" value="inspector">
           {artifacts?.mcpAccessToken ? (
-            <McpPlayground
-              projectId={project.id}
-              token={artifacts.mcpAccessToken}
-              tools={tools}
-            />
+            <McpPlayground projectId={project.id} tools={tools} />
           ) : (
             <EmptyTabState
               description="The MCP playground unlocks once the access token is generated."
