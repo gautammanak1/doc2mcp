@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { auth } from "@/app/(auth)/auth";
 import { ConvertExperience } from "@/features/doc2mcp/convert-experience";
 import { getPlatformProjectById } from "@/lib/db/queries";
+import { redactSecrets } from "@/services/mcp/exports";
 
 async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,7 +28,7 @@ async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
     notFound();
   }
 
-  return <ConvertExperience initialProject={project} />;
+  return <ConvertExperience initialProject={redactSecrets(project)} />;
 }
 
 function ConvertFallback() {

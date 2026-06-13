@@ -4,6 +4,7 @@ import {
   getPlatformProjectById,
 } from "@/lib/db/queries";
 import { ChatbotError } from "@/lib/errors";
+import { redactSecrets } from "@/services/mcp/exports";
 
 export async function GET(
   _request: Request,
@@ -24,7 +25,7 @@ export async function GET(
     return new ChatbotError("not_found:document").toResponse();
   }
 
-  return Response.json({ project });
+  return Response.json({ project: redactSecrets(project) });
 }
 
 export async function DELETE(

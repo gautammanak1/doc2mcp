@@ -55,26 +55,15 @@ const DEFAULT_DOCS_TOOLS: ToolDef[] = [
 
 async function callMcp(
   projectId: string,
-  token: string,
   tool: string,
   args: Record<string, unknown>
 ): Promise<unknown> {
-  const headers: HeadersInit = {
-    "X-Doc2MCP-Token": token,
-    "Content-Type": "application/json",
-  };
-
-  const response = await fetch(`/api/mcp/${projectId}/mcp`, {
+  const response = await fetch(`/api/projects/${projectId}/playground`, {
     method: "POST",
-    headers,
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: "playground-call",
-      method: "tools/call",
-      params: {
-        name: tool,
-        arguments: args,
-      },
+      tool,
+      arguments: args,
     }),
   });
 
@@ -92,11 +81,10 @@ async function callMcp(
 
 export type McpPlaygroundProps = {
   projectId: string;
-  token: string;
   tools?: CompressedTool[];
 };
 
-export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
+export function McpPlayground({ projectId, tools }: McpPlaygroundProps) {
   const TOOLS = useMemo(() => {
     if (!tools || tools.length === 0) {
       return DEFAULT_DOCS_TOOLS;
@@ -169,7 +157,7 @@ export function McpPlayground({ projectId, token, tools }: McpPlaygroundProps) {
     setIsRunning(true);
     setOutput(null);
     try {
-      const data = await callMcp(projectId, token, selected, parsed);
+      const data = await callMcp(projectId, selected, parsed);
       setOutput(JSON.stringify(data, null, 2));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Request failed";

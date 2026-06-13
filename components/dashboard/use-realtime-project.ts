@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import type { PlatformProject } from "@/lib/db/schema";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 
 async function fetchProject(id: string): Promise<PlatformProject | null> {
   const res = await fetch(`/api/projects/${id}`);
@@ -19,10 +17,11 @@ async function fetchProject(id: string): Promise<PlatformProject | null> {
  * Combines:
  *   1. Initial server-rendered project state (no flash).
  *   2. SWR polling fallback every 2.5s when the project is still processing.
- *   3. Supabase Realtime UPDATE subscription on the PlatformProject row.
+ *   3. Polling through the authenticated API so secret fields stay server-side.
  *
- * Polling acts as a backup if Realtime is not enabled on the table; once
- * realtime publication is configured in Supabase, updates arrive within ~1s.
+ * We intentionally avoid direct Supabase Realtime here because raw row payloads
+ * include generated MCP tokens. The API response redacts those fields before
+ * they can appear in the browser network panel.
  */
 export function useRealtimeProject(initial: PlatformProject) {
   const [project, setProject] = useState<PlatformProject>(initial);
@@ -44,35 +43,5 @@ export function useRealtimeProject(initial: PlatformProject) {
       setProject(polled);
     }
   }, [polled]);
-
-  useEffect(() => {
-    if (!isSupabasePublicConfigured()) {
-      return;
-    }
-
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`project:${initial.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "PlatformProject",
-          filter: `id=eq.${initial.id}`,
-        },
-        (payload) => {
-          if (payload.new) {
-            setProject(payload.new as PlatformProject);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [initial.id]);
-
   return { project, isProcessing };
 }

@@ -640,11 +640,7 @@ export function ResultDashboard({
             highlight="the MCP"
             title="Test"
           />
-          <McpPlayground
-            projectId={project.id}
-            token={token}
-            tools={compressedTools}
-          />
+          <McpPlayground projectId={project.id} tools={compressedTools} />
         </section>
       ) : null}
 

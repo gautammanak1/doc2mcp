@@ -68,6 +68,7 @@ export function RazorpayCheckoutButton({
   currency,
   label,
   highlight,
+  initiallyAuthenticated = false,
   successRedirect = "/dashboard?checkout=success",
 }: {
   planId: PlanId;
@@ -75,6 +76,7 @@ export function RazorpayCheckoutButton({
   currency: BillingCurrency;
   label: string;
   highlight?: boolean;
+  initiallyAuthenticated?: boolean;
   successRedirect?: string;
 }) {
   const router = useRouter();
@@ -85,7 +87,7 @@ export function RazorpayCheckoutButton({
     if (authLoading) {
       return;
     }
-    if (!user) {
+    if (!(user || initiallyAuthenticated)) {
       router.push(`/login?redirectUrl=${encodeURIComponent("/pricing")}`);
       return;
     }
@@ -106,6 +108,14 @@ export function RazorpayCheckoutButton({
       });
 
       const data = (await res.json()) as CreateOrderResponse;
+      if (res.status === 401) {
+        router.push(`/login?redirectUrl=${encodeURIComponent("/pricing")}`);
+        toast.error("Please sign in again to continue checkout.", {
+          id: loadingId,
+        });
+        return;
+      }
+
       if (!res.ok) {
         toast.error(data.error ?? "Could not start checkout", {
           id: loadingId,
@@ -193,7 +203,16 @@ export function RazorpayCheckoutButton({
     } finally {
       setPending(false);
     }
-  }, [authLoading, user, router, planId, cycle, currency, successRedirect]);
+  }, [
+    authLoading,
+    user,
+    initiallyAuthenticated,
+    router,
+    planId,
+    cycle,
+    currency,
+    successRedirect,
+  ]);
 
   return (
     <>

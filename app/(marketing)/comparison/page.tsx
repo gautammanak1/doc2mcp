@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { MarketMatrixSection } from "@/components/landing/comparison-section";
 import { CtaSection } from "@/components/landing/cta-section";
 import { FooterSection } from "@/components/landing/footer-section";
-import { LandingNavigation } from "@/components/landing/navigation";
 import CompareUILib from "@/components/shadcn-studio/blocks/compare-07/compare-07";
 
 export const metadata: Metadata = {
@@ -97,7 +97,7 @@ const comparisonData = {
 export default function ComparisonPage() {
   return (
     <main className="landing-page relative min-h-screen overflow-x-hidden noise-overlay">
-      <LandingNavigation />
+      <AuthAwareLandingNavigation />
       <div className="h-20" />
       <CompareUILib data={comparisonData} />
       <MarketMatrixSection />

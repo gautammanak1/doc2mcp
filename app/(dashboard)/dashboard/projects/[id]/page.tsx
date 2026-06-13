@@ -3,7 +3,7 @@ import { auth } from "@/app/(auth)/auth";
 import { ProjectDetail } from "@/components/dashboard/project-detail";
 import { getUserPlan } from "@/lib/billing/entitlements";
 import { getMcpHitStats, getPlatformProjectById } from "@/lib/db/queries";
-import { generateMcpExportBundle } from "@/services/mcp/exports";
+import { generateMcpExportBundle, redactSecrets } from "@/services/mcp/exports";
 import type { ProjectArtifacts } from "@/types/platform";
 
 export default async function DashboardProjectDetailPage({
@@ -32,6 +32,7 @@ export default async function DashboardProjectDetailPage({
     ? generateMcpExportBundle({
         config: artifacts.mcpConfig,
         generationReport: artifacts.generationReport,
+        redact: true,
       })
     : null;
 
@@ -45,7 +46,7 @@ export default async function DashboardProjectDetailPage({
       canPublishCompany={plan.entitlements.privateProjects}
       exportBundle={exportBundle}
       hitStats={hitStats}
-      initialProject={project}
+      initialProject={redactSecrets(project)}
     />
   );
 }
