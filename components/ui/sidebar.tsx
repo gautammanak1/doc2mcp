@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { PanelLeftIcon } from "lucide-react"
+import { PanelLeftIcon, XIcon } from "lucide-react"
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -187,7 +187,17 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-sidebar-foreground/20" />
+          <div className="relative">
+            <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-sidebar-foreground/20" />
+            <button
+              aria-label="Close sidebar"
+              className="absolute top-1 right-2 flex size-9 items-center justify-center rounded-full text-sidebar-foreground/60 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              onClick={() => setOpenMobile(false)}
+              type="button"
+            >
+              <XIcon className="size-5" />
+            </button>
+          </div>
           <div className="flex h-full w-full flex-col overflow-y-auto pt-2">{children}</div>
         </SheetContent>
       </Sheet>
