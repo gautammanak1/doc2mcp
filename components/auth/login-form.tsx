@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState, useEffect } from "react";
+import { type LoginActionState, login } from "@/app/(auth)/actions";
 import { LoaderIcon } from "@/components/chat/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
 
 export function LoginForm({
@@ -19,49 +18,29 @@ export function LoginForm({
   className?: string;
   redirectUrl?: string | null;
 }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const postLoginUrl = redirectUrl
     ? `/post-login?redirectUrl=${encodeURIComponent(redirectUrl)}`
     : "/post-login";
+  const initialState: LoginActionState = { status: "idle" };
+  const [state, formAction, isLoading] = useActionState(login, initialState);
+  const error =
+    state.status === "failed"
+      ? "Invalid email or password."
+      : state.status === "invalid_data"
+        ? "Enter a valid email and password."
+        : null;
 
-  const handleLogin = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      if (!isSupabasePublicConfigured()) {
-        setError("Authentication is not configured for this deployment.");
-        return;
-      }
-
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) {
-        throw signInError;
-      }
-
+  useEffect(() => {
+    if (state.status === "success") {
       router.replace(postLoginUrl);
       router.refresh();
-    } catch (loginError: unknown) {
-      setError(
-        loginError instanceof Error ? loginError.message : "An error occurred"
-      );
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [postLoginUrl, router, state.status]);
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <form className="flex flex-col gap-4" onSubmit={handleLogin}>
+      <form action={formAction} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label className="font-normal text-muted-foreground" htmlFor="email">
             Email
@@ -71,11 +50,10 @@ export function LoginForm({
             autoFocus
             className="h-10 rounded-lg border-border/50 bg-muted/50 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
             id="email"
-            onChange={(event) => setEmail(event.target.value)}
+            name="email"
             placeholder="you@example.com"
             required
             type="email"
-            value={email}
           />
         </div>
 
@@ -89,10 +67,9 @@ export function LoginForm({
           <PasswordInput
             className="h-10 rounded-lg border-border/50 bg-muted/50 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
             id="password"
-            onChange={(event) => setPassword(event.target.value)}
+            name="password"
             placeholder="********"
             required
-            value={password}
           />
         </div>
 

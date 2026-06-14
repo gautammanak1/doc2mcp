@@ -7,15 +7,13 @@ import { useSupabaseAuth } from "@/lib/supabase/auth";
 /**
  * Ensures there is always a session on the chat route.
  *
- * Visitors who are not signed in get a Supabase **anonymous** session so they
- * can chat immediately (capped at the guest message limit). MCP generation and
- * unlimited chat still require a real login. If anonymous sign-in is
- * unavailable (e.g. disabled in the Supabase dashboard), we fall back to the
- * login redirect.
+ * Visitors who are not signed in get a server-issued guest session so they can
+ * chat immediately (capped at the guest message limit). MCP generation and
+ * unlimited chat still require a real login.
  */
 export function useGuestSession(redirectUrl = "/chat") {
   const router = useRouter();
-  const { user, loading, supabase } = useSupabaseAuth();
+  const { user, loading } = useSupabaseAuth();
   const attempted = useRef(false);
 
   useEffect(() => {
@@ -29,23 +27,18 @@ export function useGuestSession(redirectUrl = "/chat") {
       router.replace(`/login?redirectUrl=${encodeURIComponent(redirectUrl)}`);
     };
 
-    if (!supabase) {
-      redirectToLogin();
-      return;
-    }
-
-    supabase.auth
-      .signInAnonymously()
-      .then(({ error }) => {
-        if (error) {
+    fetch("/api/auth/guest", { method: "POST" })
+      .then((response) => {
+        if (!response.ok) {
           redirectToLogin();
+          return;
         }
-        // On success, onAuthStateChange in useSupabaseAuth updates `user`.
+        router.refresh();
       })
       .catch(() => {
         redirectToLogin();
       });
-  }, [loading, user, redirectUrl, router, supabase]);
+  }, [loading, user, redirectUrl, router]);
 
   return { user, loading };
 }

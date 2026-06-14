@@ -1,8 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { z } from "zod";
+import {
+  APP_SESSION_COOKIE,
+  appSessionCookieOptions,
+  createAppSessionToken,
+} from "@/lib/auth/app-session";
 import { getConfirmRedirectUrl } from "@/lib/auth/redirect-url";
+import { ensureAppUserFromSupabase } from "@/lib/db/queries";
 import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,6 +21,38 @@ const authFormSchema = z.object({
 export type LoginActionState = {
   status: "idle" | "in_progress" | "success" | "failed" | "invalid_data";
 };
+
+async function clearSupabaseAuthCookies() {
+  const cookieStore = await cookies();
+  for (const cookie of cookieStore.getAll()) {
+    if (cookie.name.startsWith("sb-")) {
+      cookieStore.set(cookie.name, "", { path: "/", maxAge: 0 });
+    }
+  }
+}
+
+async function startAppSession(input: {
+  id: string;
+  email: string;
+  name?: string | null;
+  image?: string | null;
+  isAnonymous?: boolean;
+}) {
+  const appUser = await ensureAppUserFromSupabase({
+    id: input.id,
+    email: input.email,
+    name: input.name,
+    image: input.image,
+  });
+  const cookieStore = await cookies();
+  const token = await createAppSessionToken({
+    userId: appUser.id,
+    email: appUser.email,
+    type: input.isAnonymous ? "guest" : "regular",
+  });
+  cookieStore.set(APP_SESSION_COOKIE, token, appSessionCookieOptions());
+  await clearSupabaseAuthCookies();
+}
 
 export const login = async (
   _: LoginActionState,
@@ -31,7 +70,7 @@ export const login = async (
 
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: validatedData.email,
       password: validatedData.password,
     });
@@ -40,6 +79,19 @@ export const login = async (
       console.error("Login error:", error.message);
       return { status: "failed" };
     }
+
+    if (!data.user?.email) {
+      return { status: "failed" };
+    }
+
+    await startAppSession({
+      id: data.user.id,
+      email: data.user.email,
+      name: data.user.user_metadata?.name,
+      image:
+        data.user.user_metadata?.avatar_url ?? data.user.user_metadata?.image,
+      isAnonymous: data.user.is_anonymous === true,
+    });
 
     revalidatePath("/", "layout");
     return { status: "success" };
@@ -101,19 +153,46 @@ export const register = async (
     }
 
     if (data.session) {
+      const sessionUser = data.session.user;
+      if (sessionUser.email) {
+        await startAppSession({
+          id: sessionUser.id,
+          email: sessionUser.email,
+          name: sessionUser.user_metadata?.name,
+          image:
+            sessionUser.user_metadata?.avatar_url ??
+            sessionUser.user_metadata?.image,
+          isAnonymous: sessionUser.is_anonymous === true,
+        });
+      }
       revalidatePath("/", "layout");
       return { status: "success" };
     }
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: validatedData.email,
-      password: validatedData.password,
-    });
+    const { data: signInData, error: signInError } =
+      await supabase.auth.signInWithPassword({
+        email: validatedData.email,
+        password: validatedData.password,
+      });
 
     if (signInError) {
       console.error("Sign in after registration:", signInError.message);
       return { status: "failed" };
     }
+
+    if (!signInData.user?.email) {
+      return { status: "failed" };
+    }
+
+    await startAppSession({
+      id: signInData.user.id,
+      email: signInData.user.email,
+      name: signInData.user.user_metadata?.name,
+      image:
+        signInData.user.user_metadata?.avatar_url ??
+        signInData.user.user_metadata?.image,
+      isAnonymous: signInData.user.is_anonymous === true,
+    });
 
     revalidatePath("/", "layout");
     return { status: "success" };

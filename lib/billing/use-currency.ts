@@ -39,7 +39,7 @@ function writeCookie(name: string, value: string) {
  *   1. User preference saved in localStorage (manual toggle wins).
  *   2. Currency cookie set by the geo middleware (server-side hint).
  *   3. Intl timezone — Asia/Kolkata → INR, everything else → USD.
- *   4. Fallback to DEFAULT_CURRENCY (USD).
+ *   4. Fallback to DEFAULT_CURRENCY (INR).
  */
 function detectCurrency(): BillingCurrency {
   if (typeof window === "undefined") {

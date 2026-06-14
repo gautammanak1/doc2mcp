@@ -115,20 +115,17 @@ function collectSources(parts: AnyPart[]): Source[] {
 
 export function McpChat({
   projectId,
-  token,
   pageCount,
 }: {
   projectId: string;
-  token: string;
   pageCount?: number;
 }) {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/api/mcp/${projectId}/agent`,
-        headers: { "X-Doc2MCP-Token": token },
       }),
-    [projectId, token]
+    [projectId]
   );
 
   const { messages, sendMessage, status, error } = useChat({ transport });

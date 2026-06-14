@@ -616,7 +616,7 @@ export function ResultDashboard({
             highlight="your docs"
             title="Chat with"
           />
-          <McpChat pageCount={pageCount} projectId={project.id} token={token} />
+          <McpChat pageCount={pageCount} projectId={project.id} />
         </section>
       ) : null}
 

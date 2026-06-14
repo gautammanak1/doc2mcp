@@ -2,99 +2,67 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
+import { type RegisterActionState, register } from "@/app/(auth)/actions";
 import { LoaderIcon } from "@/components/chat/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { cn } from "@/lib/utils";
 
 function getSignUpErrorMessage(error: unknown) {
-  const fallback = "We could not create your account. Please try again.";
-  if (!(error instanceof Error)) {
-    return fallback;
-  }
-
-  const message = error.message.toLowerCase();
-  if (message.includes("email rate limit")) {
-    return "Signup email limit is temporarily reached. Please try again in a few minutes, or contact support to activate your account.";
-  }
-
-  if (
-    message.includes("already registered") ||
-    message.includes("already exists")
-  ) {
+  if (error === "user_exists") {
     return "An account already exists for this email. Please sign in instead.";
   }
 
-  return error.message || fallback;
+  if (error === "invalid_data") {
+    return "Enter a valid email and a password with at least 6 characters.";
+  }
+
+  return "We could not create your account. Please try again.";
 }
 
 export function SignUpForm({ className }: { className?: string }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const initialState: RegisterActionState = { status: "idle" };
+  const [state, formAction, isLoading] = useActionState(register, initialState);
 
-  const handleSignUp = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    if (!isSupabasePublicConfigured()) {
-      setError("Authentication is not configured for this deployment.");
-      setIsLoading(false);
+  useEffect(() => {
+    if (state.status === "success") {
+      router.replace("/post-login");
+      router.refresh();
       return;
     }
 
+    if (state.status !== "idle" && state.status !== "in_progress") {
+      setError(getSignUpErrorMessage(state.status));
+    }
+  }, [router, state.status]);
+
+  const handleSubmit = (formData: FormData) => {
+    setError(null);
+    const password = String(formData.get("password") ?? "");
     if (password !== repeatPassword) {
       setError("Passwords do not match");
-      setIsLoading(false);
       return;
     }
 
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
-      setIsLoading(false);
       return;
     }
 
-    try {
-      const supabase = createClient();
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm`,
-        },
-      });
-
-      if (signUpError) {
-        throw signUpError;
-      }
-
-      if (data.session) {
-        router.replace("/post-login");
-        router.refresh();
-        return;
-      }
-
-      router.push("/auth/sign-up-success");
-    } catch (signUpError: unknown) {
-      setError(getSignUpErrorMessage(signUpError));
-    } finally {
-      setIsLoading(false);
-    }
+    startTransition(() => {
+      formAction(formData);
+    });
   };
 
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <form className="flex flex-col gap-4" onSubmit={handleSignUp}>
+      <form action={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label className="font-normal text-muted-foreground" htmlFor="email">
             Email
@@ -104,11 +72,10 @@ export function SignUpForm({ className }: { className?: string }) {
             autoFocus
             className="h-10 rounded-lg border-border/50 bg-muted/50 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
             id="email"
-            onChange={(event) => setEmail(event.target.value)}
+            name="email"
             placeholder="you@example.com"
             required
             type="email"
-            value={email}
           />
         </div>
 
@@ -122,10 +89,9 @@ export function SignUpForm({ className }: { className?: string }) {
           <PasswordInput
             className="h-10 rounded-lg border-border/50 bg-muted/50 text-sm transition-colors focus:border-foreground/20 focus:bg-muted"
             id="password"
-            onChange={(event) => setPassword(event.target.value)}
+            name="password"
             placeholder="********"
             required
-            value={password}
           />
         </div>
 

@@ -5,9 +5,14 @@ export type UserType = "guest" | "regular";
 
 export { createClient as getSupabaseClient } from "@/lib/supabase/server";
 
+import { cookies } from "next/headers";
 import { cache } from "react";
+import {
+  APP_SESSION_COOKIE,
+  readAppSessionToken,
+} from "@/lib/auth/app-session";
 import { guestRegex } from "@/lib/constants";
-import { ensureAppUserFromSupabase } from "@/lib/db/queries";
+import { ensureAppUserFromSupabase, getUserById } from "@/lib/db/queries";
 import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { getSafeUser } from "@/lib/supabase/safe-session";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +25,29 @@ import { createClient } from "@/lib/supabase/server";
  * round trip + DB sync instead of duplicating them.
  */
 export const auth = cache(async () => {
+  const cookieStore = await cookies();
+  const appSession = await readAppSessionToken(
+    cookieStore.get(APP_SESSION_COOKIE)?.value
+  );
+
+  if (appSession) {
+    const appUser = await getUserById(appSession.userId);
+    if (appUser && !appUser.disabled) {
+      const userType: UserType = guestRegex.test(appUser.email)
+        ? "guest"
+        : appSession.type;
+      return {
+        user: {
+          id: appUser.id,
+          email: appUser.email,
+          name: appUser.name ?? undefined,
+          image: appUser.image ?? undefined,
+          type: userType,
+        },
+      };
+    }
+  }
+
   if (!isSupabasePublicConfigured()) {
     return null;
   }

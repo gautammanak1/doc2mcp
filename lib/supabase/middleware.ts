@@ -1,6 +1,14 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import {
+  APP_SESSION_COOKIE,
+  appSessionCookieOptions,
+  clearSupabaseAuthCookiesOnResponse,
+  createAppSessionToken,
+  readAppSessionToken,
+} from "@/lib/auth/app-session";
+import { guestRegex } from "@/lib/constants";
+import {
   getSupabasePublicEnv,
   isSupabasePublicConfigured,
 } from "@/lib/supabase/env";
@@ -10,6 +18,21 @@ export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   });
+
+  const appSession = await readAppSessionToken(
+    request.cookies.get(APP_SESSION_COOKIE)?.value
+  );
+  if (appSession) {
+    clearSupabaseAuthCookiesOnResponse(request, supabaseResponse);
+    return {
+      supabaseResponse,
+      user: {
+        id: appSession.userId,
+        email: appSession.email,
+        is_anonymous: appSession.type === "guest",
+      },
+    };
+  }
 
   if (!isSupabasePublicConfigured()) {
     return { supabaseResponse, user: null };
@@ -45,6 +68,22 @@ export async function updateSession(request: NextRequest) {
   });
 
   const user = await getSafeUser(supabase);
+  if (user?.email) {
+    const token = await createAppSessionToken({
+      userId: user.id,
+      email: user.email,
+      type:
+        user.is_anonymous === true || guestRegex.test(user.email)
+          ? "guest"
+          : "regular",
+    });
+    supabaseResponse.cookies.set(
+      APP_SESSION_COOKIE,
+      token,
+      appSessionCookieOptions()
+    );
+    clearSupabaseAuthCookiesOnResponse(request, supabaseResponse);
+  }
 
   return { supabaseResponse, user };
 }
