@@ -1,10 +1,16 @@
 "use client";
 
 import { Calendar, Github, Heart, Linkedin } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { CONTACT_EMAIL } from "@/lib/config/site";
+
+const PRODUCT_HUNT_URL =
+  "https://www.producthunt.com/products/doc2mcp?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-doc2mcp";
+const PRODUCT_HUNT_BADGE =
+  "https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1171095&theme=light&t=1781401698614";
 
 const FEATURES_LINKS = [
   { label: "Chat", href: "/chat" },
@@ -132,6 +138,22 @@ export function FooterSection() {
                 <span className="font-medium">Sponsor on GitHub</span>
               </a>
             </div>
+
+            <a
+              aria-label="doc2mcp on Product Hunt"
+              className="inline-block pt-2"
+              href={PRODUCT_HUNT_URL}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <Image
+                alt="doc2mcp - Paste a docs URL, get a hosted MCP server for AI agents | Product Hunt"
+                height={54}
+                src={PRODUCT_HUNT_BADGE}
+                unoptimized
+                width={250}
+              />
+            </a>
           </div>
 
           <FooterColumn links={FEATURES_LINKS} title="Features" />
