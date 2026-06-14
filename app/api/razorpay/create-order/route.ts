@@ -104,18 +104,41 @@ export async function POST(request: Request) {
       userName: session.user.name ?? null,
     });
   } catch (error) {
+    const razorpayError = error as {
+      statusCode?: number;
+      error?: { code?: string; description?: string; reason?: string };
+      message?: string;
+    } | null;
+    const description =
+      razorpayError?.error?.description ??
+      (error instanceof Error ? error.message : undefined);
+
     console.error("Razorpay create order error:", {
       currency,
       plan: parsed.plan,
       cycle: parsed.cycle,
-      message: error instanceof Error ? error.message : "Unknown error",
+      statusCode: razorpayError?.statusCode,
+      code: razorpayError?.error?.code,
+      reason: razorpayError?.error?.reason,
+      description: description ?? "Unknown error",
     });
-    const message = (error as { error?: { description?: string } } | null)
-      ?.error?.description;
+
+    // A 401/400 from Razorpay almost always means the live keys are missing or
+    // invalid in this environment — surface that distinctly from card errors.
+    if (razorpayError?.statusCode === 401) {
+      return Response.json(
+        {
+          error:
+            "Payment gateway rejected the request (invalid Razorpay keys). Please check RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET.",
+        },
+        { status: 502 }
+      );
+    }
+
     return Response.json(
       {
         error:
-          message ??
+          description ??
           (currency === "USD"
             ? "USD payments require International Payments to be enabled on your Razorpay account."
             : "Could not create payment order. Please try again."),
