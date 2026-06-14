@@ -6,14 +6,62 @@ import {
   type UIMessage,
 } from "ai";
 import { z } from "zod";
+import { auth } from "@/app/(auth)/auth";
 import { getAsi1Model } from "@/lib/asi1/provider";
-import { mcpError, resolveMcpProject } from "@/lib/doc2mcp/mcp-api";
+import {
+  getPlatformProjectById,
+  getPlatformProjectForMcp,
+} from "@/lib/db/queries";
+import { readMcpAuthToken, verifyMcpToken } from "@/lib/doc2mcp/mcp-access";
+import { mcpError } from "@/lib/doc2mcp/mcp-api";
 import {
   type DocMcpContext,
   runDocMcpTool,
 } from "@/lib/doc2mcp/mcp-tools-runtime";
+import type { CrawlResult, ProjectArtifacts } from "@/types/platform";
 
 export const maxDuration = 60;
+
+/**
+ * Authorize the internal documentation-chat agent.
+ *
+ * This endpoint backs our own web chat UI (not the public MCP protocol), so it
+ * accepts EITHER a valid `X-Doc2MCP-Token` (external callers) OR the logged-in
+ * project owner's session. The latter lets the browser chat work without the
+ * MCP token ever being sent to (or redacted on) the client.
+ */
+async function resolveAgentProject(request: Request, projectId: string) {
+  const project = await getPlatformProjectForMcp({ id: projectId });
+  if (!project) {
+    return { error: "not_found" as const };
+  }
+
+  const artifacts = project.artifacts as ProjectArtifacts | null;
+  const token = readMcpAuthToken(request);
+  let authorized = verifyMcpToken(token, artifacts?.mcpTokenHash);
+
+  if (!authorized) {
+    const session = await auth();
+    if (session?.user?.id) {
+      const owned = await getPlatformProjectById({
+        id: projectId,
+        userId: session.user.id,
+      });
+      authorized = Boolean(owned);
+    }
+  }
+
+  if (!authorized) {
+    return { error: "unauthorized" as const };
+  }
+
+  if (project.status !== "ready") {
+    return { error: "not_ready" as const };
+  }
+
+  const pages = (project.crawlData as CrawlResult[] | null) ?? [];
+  return { project, pages, artifacts };
+}
 
 /**
  * Agentic documentation chat — the same multi-step tool loop Cursor runs.
@@ -41,7 +89,7 @@ export async function POST(
     return mcpError("bad_request", 400);
   }
 
-  const resolved = await resolveMcpProject(request, projectId);
+  const resolved = await resolveAgentProject(request, projectId);
   if ("error" in resolved) {
     if (resolved.error === "not_found") {
       return mcpError("not_found", 404);

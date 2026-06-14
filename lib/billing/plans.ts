@@ -28,7 +28,7 @@ export type PlanConfig = {
 };
 
 export const SUPPORTED_CURRENCIES: BillingCurrency[] = ["USD", "INR"];
-export const DEFAULT_CURRENCY: BillingCurrency = "USD";
+export const DEFAULT_CURRENCY: BillingCurrency = "INR";
 
 /**
  * Pricing ladder.

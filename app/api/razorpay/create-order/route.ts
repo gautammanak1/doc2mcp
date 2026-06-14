@@ -10,7 +10,11 @@ import {
   isPlanId,
   PLANS,
 } from "@/lib/billing/plans";
-import { getRazorpay, getRazorpayKeyId } from "@/lib/razorpay/client";
+import {
+  getRazorpay,
+  getRazorpayKeyId,
+  isRazorpayConfigured,
+} from "@/lib/razorpay/client";
 
 const bodySchema = z.object({
   plan: z.string(),
@@ -53,6 +57,16 @@ export async function POST(request: Request) {
   const amount = getPlanPrice(parsed.plan, currency, parsed.cycle);
   const minAmount = getMinAmount(currency);
 
+  if (!isRazorpayConfigured()) {
+    return Response.json(
+      {
+        error:
+          "Payments are not configured yet. Add Razorpay keys in production and retry.",
+      },
+      { status: 503 }
+    );
+  }
+
   if (amount < minAmount) {
     return Response.json(
       {
@@ -90,7 +104,12 @@ export async function POST(request: Request) {
       userName: session.user.name ?? null,
     });
   } catch (error) {
-    console.error("Razorpay create order error:", error);
+    console.error("Razorpay create order error:", {
+      currency,
+      plan: parsed.plan,
+      cycle: parsed.cycle,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     const message = (error as { error?: { description?: string } } | null)
       ?.error?.description;
     return Response.json(
@@ -101,7 +120,7 @@ export async function POST(request: Request) {
             ? "USD payments require International Payments to be enabled on your Razorpay account."
             : "Could not create payment order. Please try again."),
       },
-      { status: 500 }
+      { status: currency === "USD" ? 400 : 502 }
     );
   }
 }

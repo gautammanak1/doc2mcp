@@ -1,55 +1,53 @@
 "use client";
 
-import type { User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { isSupabasePublicConfigured } from "@/lib/supabase/env";
+
+export type AppAuthUser = {
+  id: string;
+  email: string;
+  name?: string | null;
+  image?: string | null;
+  type?: "guest" | "regular";
+  is_anonymous?: boolean;
+};
 
 export function useSupabaseAuth() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppAuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const hasSupabaseConfig = isSupabasePublicConfigured();
-  const supabase = useMemo(
-    () => (hasSupabaseConfig ? createClient() : null),
-    [hasSupabaseConfig]
-  );
+  const supabase = useMemo(() => null, []);
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
+    let cancelled = false;
 
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user ?? null);
-      setLoading(false);
-    });
+    fetch("/api/auth/me")
+      .then((response) => response.json())
+      .then((data: { user?: AppAuthUser | null }) => {
+        if (!cancelled) {
+          setUser(data.user ?? null);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [supabase]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const signOut = useCallback(async () => {
-    if (!supabase) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Sign out error:", error);
-    }
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
     setLoading(false);
-  }, [supabase]);
+  }, []);
 
   return {
     user,
