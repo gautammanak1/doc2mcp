@@ -45,3 +45,25 @@ export function printCompactBanner(): void {
   }
   process.stdout.write(`  ${pc.dim(`powered by ${POWERED_BY}`)}\n\n`);
 }
+
+/** Install/first-run card sized for npm output. */
+export function printInstallBanner(): void {
+  const border = pc.cyan("╭────────────────────────────────────────────╮");
+  const footer = pc.cyan("╰────────────────────────────────────────────╯");
+  process.stdout.write("\n");
+  process.stdout.write(`${border}\n`);
+  process.stdout.write(
+    `${pc.cyan("│")} ${pc.bold("doc2mcp CLI")} ${pc.dim("is ready")}                    ${pc.cyan("│")}\n`
+  );
+  process.stdout.write(
+    `${pc.cyan("│")} ${pc.dim("Turn docs into MCP servers from terminal")} ${pc.cyan("│")}\n`
+  );
+  process.stdout.write(`${pc.cyan("│")}                                            ${pc.cyan("│")}\n`);
+  process.stdout.write(
+    `${pc.cyan("│")} ${pc.bold("Start:")} ${pc.green("doc2mcp login")}                    ${pc.cyan("│")}\n`
+  );
+  process.stdout.write(
+    `${pc.cyan("│")} ${pc.bold("Convert:")} ${pc.green("doc2mcp https://docs.site")}     ${pc.cyan("│")}\n`
+  );
+  process.stdout.write(`${footer}\n\n`);
+}

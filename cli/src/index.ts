@@ -7,6 +7,7 @@ import { runChat } from "./commands/chat.js";
 import { runConvert, runList } from "./commands/convert.js";
 import { runInstallCommand } from "./commands/install.js";
 import { runLogin } from "./commands/login.js";
+import { printCompactBanner } from "./banner.js";
 
 // Injected at build time by tsup `define` from package.json.
 declare const __CLI_VERSION__: string;
@@ -65,6 +66,7 @@ program
   .argument("[url]", "Documentation URL to convert")
   .action(async (url?: string) => {
     if (!url) {
+      printCompactBanner();
       program.help();
       return;
     }

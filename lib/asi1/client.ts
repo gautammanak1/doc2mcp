@@ -184,7 +184,9 @@ export async function asi1GenerateImage(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gemini image API error (${response.status}): ${errorText}`);
+    throw new Error(
+      `Gemini image API error (${response.status}): ${errorText}`
+    );
   }
 
   const data = (await response.json()) as GeminiGenerateContentResponse;

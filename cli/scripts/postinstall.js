@@ -3,6 +3,19 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 
+function printInstallBanner() {
+  process.stdout.write(`
+\x1b[36m╭────────────────────────────────────────────╮\x1b[0m
+\x1b[36m│\x1b[0m \x1b[1mdoc2mcp CLI\x1b[0m is ready                    \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m Turn docs into MCP servers from terminal \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m                                            \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m Start:   \x1b[32mdoc2mcp login\x1b[0m                    \x1b[36m│\x1b[0m
+\x1b[36m│\x1b[0m Convert: \x1b[32mdoc2mcp https://docs.site\x1b[0m        \x1b[36m│\x1b[0m
+\x1b[36m╰────────────────────────────────────────────╯\x1b[0m
+
+`);
+}
+
 function isGlobalInstall() {
   return (
     process.env.npm_config_global === "true" ||
@@ -21,6 +34,8 @@ function npmGlobalBin() {
     return "";
   }
 }
+
+printInstallBanner();
 
 if (isGlobalInstall()) {
   const binDir = npmGlobalBin();
