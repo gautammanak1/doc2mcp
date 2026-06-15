@@ -182,10 +182,10 @@ export function ChatShell() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Configure ASI1 API</AlertDialogTitle>
+            <AlertDialogTitle>Configure Gemini API</AlertDialogTitle>
             <AlertDialogDescription>
-              Set ASI_ONE_API_KEY in your environment to enable AI features
-              powered by ASI1.
+              Set GEMINI_API_KEY in your environment to enable AI features
+              powered by Gemini.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

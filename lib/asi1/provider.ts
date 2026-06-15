@@ -4,9 +4,9 @@ import { isTestEnvironment } from "@/lib/constants";
 import { ASI1_MODEL } from "./client";
 
 const asi1 = createOpenAICompatible({
-  name: "asi1",
-  baseURL: "https://api.asi1.ai/v1",
-  apiKey: process.env.ASI_ONE_API_KEY ?? "",
+  name: "gemini",
+  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai",
+  apiKey: process.env.GEMINI_API_KEY ?? process.env.ASI_ONE_API_KEY ?? "",
 });
 
 export const asi1Provider = customProvider({

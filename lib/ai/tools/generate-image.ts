@@ -11,7 +11,7 @@ import { asi1GenerateImage } from "@/lib/asi1/client";
  */
 export const generateImageTool = tool({
   description: [
-    "Generate a new image with the ASI1 image model.",
+    "Generate a new image with the Gemini image model.",
     "Call this ONLY when the user explicitly asks to create, generate, draw,",
     "or design an image, illustration, mockup, banner, or visual asset.",
     "Do not call it for charts, plots, diagrams, or data visualizations.",
@@ -32,7 +32,7 @@ export const generateImageTool = tool({
   }),
   execute: async ({ prompt, size }) => {
     try {
-      if (!process.env.ASI_ONE_API_KEY) {
+      if (!(process.env.GEMINI_API_KEY || process.env.ASI_ONE_API_KEY)) {
         return {
           ok: false,
           error: "Image generation is not configured on this deployment.",
@@ -43,7 +43,7 @@ export const generateImageTool = tool({
       if (!first) {
         return {
           ok: false,
-          error: "ASI1 returned no image for this prompt.",
+          error: "The image model returned no image for this prompt.",
         };
       }
       return {

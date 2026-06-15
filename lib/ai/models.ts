@@ -2,9 +2,9 @@ export const DEFAULT_CHAT_MODEL = "asi1";
 
 export const titleModel = {
   id: "asi1",
-  name: "ASI1",
-  provider: "asi1",
-  description: "Universal AI integration model",
+  name: "Gemini",
+  provider: "gemini",
+  description: "Google Gemini model",
 };
 
 export type ModelCapabilities = {
@@ -24,8 +24,8 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "asi1",
-    name: "ASI1",
-    provider: "asi1",
+    name: "Gemini",
+    provider: "gemini",
     description:
       "Production AI for docs ingestion, MCP generation, and developer workflows",
   },
@@ -38,7 +38,7 @@ export async function getCapabilities(): Promise<
   return {
     asi1: {
       tools: true,
-      vision: false,
+      vision: true,
       reasoning: true,
     },
   };
@@ -58,7 +58,7 @@ export async function getAllGatewayModels(): Promise<
     ...m,
     capabilities: caps[m.id] ?? {
       tools: true,
-      vision: false,
+      vision: true,
       reasoning: true,
     },
   }));
