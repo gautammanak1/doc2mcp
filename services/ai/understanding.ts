@@ -158,7 +158,7 @@ export async function analyzeDocumentation(
       useCases: [],
     };
   } else {
-    log("Sending documentation to ASI1 for analysis...");
+    log("Sending documentation to Gemini for analysis...");
     const aiResult = await asi1GenerateText([
       {
         role: "system",

@@ -149,7 +149,7 @@ async function runPipeline({
       data: { status: "analyzing", crawlData: crawlResults, logs },
     });
 
-    addLog("Analyzing documentation with ASI1...", "info", "ai");
+    addLog("Analyzing documentation with Gemini...", "info", "ai");
     const analysis = await withSpan(
       "pipeline.analyze",
       { attributes: { "doc2mcp.page_count": crawlResults.length } },
