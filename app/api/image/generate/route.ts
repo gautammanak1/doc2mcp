@@ -38,14 +38,14 @@ export async function POST(request: Request) {
 
     if (images.length === 0) {
       return Response.json(
-        { error: "ASI1 returned no image. Try a different prompt." },
+        { error: "The image model returned no image. Try a different prompt." },
         { status: 502 }
       );
     }
 
     return Response.json({ images });
   } catch (error) {
-    console.error("ASI1 image generation error:", error);
+    console.error("Gemini image generation error:", error);
     return Response.json(
       {
         error:

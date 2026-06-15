@@ -1,8 +1,28 @@
 import "server-only";
 
-const ASI1_BASE_URL = "https://api.asi1.ai/v1";
-export const ASI1_MODEL = process.env.ASI1_MODEL ?? "asi1";
-export const ASI1_IMAGE_MODEL = process.env.ASI1_IMAGE_MODEL ?? "asi1";
+/**
+ * AI client. Backed by Google Gemini.
+ *
+ * Text/chat uses Gemini's OpenAI-compatible endpoint so the request/response
+ * (and SSE streaming) shapes stay identical to the previous provider; image
+ * generation uses the native `generateContent` endpoint (gemini image model
+ * returns base64 PNG via inlineData).
+ *
+ * Function names keep their historical `asi1*` prefix so existing callers do
+ * not need to change; the implementation underneath is Gemini.
+ */
+
+const GEMINI_OPENAI_BASE_URL =
+  "https://generativelanguage.googleapis.com/v1beta/openai";
+const GEMINI_NATIVE_BASE_URL =
+  "https://generativelanguage.googleapis.com/v1beta";
+
+export const ASI1_MODEL =
+  process.env.GEMINI_MODEL ?? process.env.ASI1_MODEL ?? "gemini-2.5-flash";
+export const ASI1_IMAGE_MODEL =
+  process.env.GEMINI_IMAGE_MODEL ??
+  process.env.ASI1_IMAGE_MODEL ??
+  "gemini-2.5-flash-image";
 
 export type Asi1Message = {
   role: "system" | "user" | "assistant";
@@ -32,9 +52,9 @@ export type Asi1ChatCompletionResponse = {
 };
 
 function getApiKey(): string {
-  const key = process.env.ASI_ONE_API_KEY;
+  const key = process.env.GEMINI_API_KEY ?? process.env.ASI_ONE_API_KEY;
   if (!key) {
-    throw new Error("ASI_ONE_API_KEY is not configured");
+    throw new Error("GEMINI_API_KEY is not configured");
   }
   return key;
 }
@@ -42,7 +62,7 @@ function getApiKey(): string {
 export async function asi1ChatCompletion(
   request: Omit<Asi1ChatCompletionRequest, "model"> & { model?: string }
 ): Promise<Asi1ChatCompletionResponse> {
-  const response = await fetch(`${ASI1_BASE_URL}/chat/completions`, {
+  const response = await fetch(`${GEMINI_OPENAI_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -56,7 +76,7 @@ export async function asi1ChatCompletion(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`ASI1 API error (${response.status}): ${errorText}`);
+    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
   }
 
   return response.json() as Promise<Asi1ChatCompletionResponse>;
@@ -65,7 +85,7 @@ export async function asi1ChatCompletion(
 export async function asi1ChatCompletionStream(
   request: Omit<Asi1ChatCompletionRequest, "model"> & { model?: string }
 ): Promise<Response> {
-  const response = await fetch(`${ASI1_BASE_URL}/chat/completions`, {
+  const response = await fetch(`${GEMINI_OPENAI_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +100,7 @@ export async function asi1ChatCompletionStream(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`ASI1 API error (${response.status}): ${errorText}`);
+    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
   }
 
   return response;
@@ -118,67 +138,94 @@ export type GeneratedImage = {
   revisedPrompt?: string;
 };
 
+type GeminiInlineData = { mimeType?: string; data?: string };
+type GeminiPart = {
+  text?: string;
+  inlineData?: GeminiInlineData;
+  inline_data?: GeminiInlineData;
+};
+type GeminiGenerateContentResponse = {
+  candidates?: Array<{ content?: { parts?: GeminiPart[] } }>;
+  error?: { message?: string };
+};
+
 /**
- * Generate an image with the ASI1 image API.
+ * Generate an image with the Gemini image model.
  *
- *   POST https://api.asi1.ai/v1/image/generate
- *   { model, prompt, size }
+ *   POST {base}/models/{imageModel}:generateContent
  *
- * Returns the parsed list of images, normalising the different shapes the
- * upstream API has been observed to return.
+ * The model returns the image as base64 PNG inside `inlineData`. We normalise
+ * it to the historical `GeneratedImage` shape (`b64Json`) so existing callers
+ * and the UI keep working unchanged. `size` is folded into the prompt because
+ * the native API does not take a discrete size enum.
  */
 export async function asi1GenerateImage(
   request: Asi1ImageGenerationRequest
 ): Promise<{ images: GeneratedImage[]; raw: Asi1ImageGenerationResponse }> {
-  const response = await fetch(`${ASI1_BASE_URL}/image/generate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getApiKey()}`,
-    },
-    body: JSON.stringify({
-      model: request.model ?? ASI1_IMAGE_MODEL,
-      prompt: request.prompt,
-      size: request.size ?? "",
-      ...(request.n ? { n: request.n } : {}),
-    }),
-  });
+  const model = request.model ?? ASI1_IMAGE_MODEL;
+  const sizeHint =
+    request.size && request.size.length > 0
+      ? ` Render at roughly ${request.size} resolution.`
+      : "";
+
+  const response = await fetch(
+    `${GEMINI_NATIVE_BASE_URL}/models/${model}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": getApiKey(),
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `${request.prompt}${sizeHint}` }] }],
+      }),
+    }
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`ASI1 image API error (${response.status}): ${errorText}`);
+    throw new Error(`Gemini image API error (${response.status}): ${errorText}`);
   }
 
-  const raw = (await response.json()) as Asi1ImageGenerationResponse;
+  const data = (await response.json()) as GeminiGenerateContentResponse;
+  const parts = data.candidates?.at(0)?.content?.parts ?? [];
 
-  const fromData: GeneratedImage[] =
-    raw.data?.map((d) => ({
-      url: d.url,
-      b64Json: d.b64_json,
-      revisedPrompt: d.revised_prompt,
-    })) ?? [];
-
-  if (fromData.length === 0 && raw.image_url) {
-    fromData.push({ url: raw.image_url });
+  const images: GeneratedImage[] = [];
+  let revisedPrompt: string | undefined;
+  for (const part of parts) {
+    if (part.text) {
+      revisedPrompt = part.text;
+    }
+    const inline = part.inlineData ?? part.inline_data;
+    if (inline?.data) {
+      images.push({ b64Json: inline.data, revisedPrompt });
+    }
   }
 
-  return { images: fromData, raw };
+  const raw: Asi1ImageGenerationResponse = {
+    data: images.map((img) => ({
+      b64_json: img.b64Json,
+      revised_prompt: img.revisedPrompt,
+    })),
+  };
+
+  return { images, raw };
 }
 
 /**
- * Generate text via ASI1 chat completions.
+ * Generate text via Gemini chat completions.
  *
  * Defaults tuned for doc2mcp's actual workload (structured extraction,
  * documentation Q&A, deterministic API simulation):
- *   - temperature: 0.1 — was 0.7. doc2mcp parses JSON out of nearly every
- *     response; high temperature wastes tokens on creative phrasing and
- *     produces unparseable output ~5-10% of the time.
- *   - max_tokens: 2048 — was 4096. The longest legitimate response in this
- *     codebase is the analyze step's endpoint list, which empirically fits
- *     in ~1500 tokens. Lowering the cap halves the worst-case wait.
+ *   - temperature: 0.1 — doc2mcp parses JSON out of nearly every response;
+ *     high temperature wastes tokens on creative phrasing and produces
+ *     unparseable output ~5-10% of the time.
+ *   - max_tokens: 2048 — the longest legitimate response in this codebase is
+ *     the analyze step's endpoint list, which empirically fits in ~1500
+ *     tokens. Lowering the cap halves the worst-case wait.
  *
- * Retries use exponential backoff WITH jitter to avoid thundering-herd
- * during ASI1 regional outages.
+ * Retries use exponential backoff WITH jitter to avoid thundering-herd during
+ * regional outages.
  */
 export async function asi1GenerateText(
   messages: Asi1Message[],
@@ -207,5 +254,5 @@ export async function asi1GenerateText(
     }
   }
 
-  throw lastError ?? new Error("ASI1 request failed");
+  throw lastError ?? new Error("Gemini request failed");
 }
