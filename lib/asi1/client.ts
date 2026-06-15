@@ -23,6 +23,11 @@ export const ASI1_IMAGE_MODEL =
   process.env.GEMINI_IMAGE_MODEL ??
   process.env.ASI1_IMAGE_MODEL ??
   "gemini-2.5-flash-image";
+const DEFAULT_TEXT_FALLBACK_MODELS = [
+  ASI1_MODEL,
+  "models/gemini-2.5-flash-lite",
+  "models/gemini-flash-lite-latest",
+];
 
 export type Asi1Message = {
   role: "system" | "user" | "assistant";
@@ -145,9 +150,29 @@ type GeminiPart = {
   inline_data?: GeminiInlineData;
 };
 type GeminiGenerateContentResponse = {
-  candidates?: Array<{ content?: { parts?: GeminiPart[] } }>;
+  candidates?: Array<{
+    content?: { parts?: GeminiPart[] };
+    finishReason?: string;
+  }>;
   error?: { message?: string };
 };
+
+function getGeminiTextModels(): string[] {
+  const configured = process.env.GEMINI_FALLBACK_MODELS?.split(",")
+    .map((model) => model.trim())
+    .filter(Boolean);
+  const models =
+    configured && configured.length > 0
+      ? configured
+      : DEFAULT_TEXT_FALLBACK_MODELS;
+  return Array.from(new Set(models));
+}
+
+function isRetriableGeminiError(error: Error): boolean {
+  return /Gemini API error \((429|500|502|503|504)\)|UNAVAILABLE|RESOURCE_EXHAUSTED|rate.?limit|overloaded|high demand/i.test(
+    error.message
+  );
+}
 
 /**
  * Generate an image with the Gemini image model.
@@ -233,25 +258,32 @@ export async function asi1GenerateText(
   messages: Asi1Message[],
   options?: { temperature?: number; max_tokens?: number }
 ): Promise<{ text: string; usage?: Asi1ChatCompletionResponse["usage"] }> {
-  const maxRetries = 3;
+  const maxRetries = 2;
   let lastError: Error | null = null;
+  const temperature = options?.temperature ?? 0.1;
+  const maxTokens = options?.max_tokens ?? 2048;
 
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const result = await asi1ChatCompletion({
-        messages,
-        temperature: options?.temperature ?? 0.1,
-        max_tokens: options?.max_tokens ?? 2048,
-      });
-
-      const text = result.choices.at(0)?.message.content ?? "";
-      return { text, usage: result.usage };
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      if (attempt < maxRetries - 1) {
-        const base = 2 ** attempt * 500;
-        const jitter = Math.random() * 250;
-        await new Promise((resolve) => setTimeout(resolve, base + jitter));
+  for (const model of getGeminiTextModels()) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const result = await asi1ChatCompletion({
+          messages,
+          model,
+          temperature,
+          max_tokens: maxTokens,
+        });
+        const text = result.choices.at(0)?.message.content ?? "";
+        return { text, usage: result.usage };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        if (!isRetriableGeminiError(lastError)) {
+          throw lastError;
+        }
+        if (attempt < maxRetries - 1) {
+          const base = 2 ** attempt * 1500;
+          const jitter = Math.random() * 750;
+          await new Promise((resolve) => setTimeout(resolve, base + jitter));
+        }
       }
     }
   }
