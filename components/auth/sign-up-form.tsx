@@ -37,6 +37,11 @@ export function SignUpForm({ className }: { className?: string }) {
       return;
     }
 
+    if (state.status === "check_email") {
+      router.replace("/auth/sign-up-success");
+      return;
+    }
+
     if (state.status !== "idle" && state.status !== "in_progress") {
       setError(getSignUpErrorMessage(state.status));
     }

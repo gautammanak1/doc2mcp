@@ -15,7 +15,9 @@ export async function LandingNavigationServer() {
   const session = await auth();
 
   let info: LandingSessionInfo = null;
-  if (session?.user?.email) {
+  // Treat only real (non-guest) accounts as logged in. Anonymous visitors get
+  // a synthesized `guest-…` email, and must still see Sign in / Sign up.
+  if (session?.user?.email && session.user.type === "regular") {
     const plan = await getUserPlan(session.user.id).catch(() => null);
     info = {
       email: session.user.email,
