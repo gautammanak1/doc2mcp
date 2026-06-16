@@ -110,6 +110,7 @@ export type RegisterActionState = {
     | "idle"
     | "in_progress"
     | "success"
+    | "check_email"
     | "failed"
     | "user_exists"
     | "invalid_data";
@@ -152,48 +153,25 @@ export const register = async (
       return { status: "failed" };
     }
 
-    if (data.session) {
-      const sessionUser = data.session.user;
-      if (sessionUser.email) {
-        await startAppSession({
-          id: sessionUser.id,
-          email: sessionUser.email,
-          name: sessionUser.user_metadata?.name,
-          image:
-            sessionUser.user_metadata?.avatar_url ??
-            sessionUser.user_metadata?.image,
-          isAnonymous: sessionUser.is_anonymous === true,
-        });
-      }
-      revalidatePath("/", "layout");
-      return { status: "success" };
+    // Supabase returns a session immediately only when email confirmation is
+    // disabled. With confirmation enabled, `data.session` is null and a
+    // confirmation email has been sent — surface that instead of trying to
+    // sign in (which would fail until the address is verified).
+    if (!data.session) {
+      return { status: "check_email" };
     }
 
-    const { data: signInData, error: signInError } =
-      await supabase.auth.signInWithPassword({
-        email: validatedData.email,
-        password: validatedData.password,
+    const sessionUser = data.session.user;
+    if (sessionUser.email) {
+      await startAppSession({
+        id: sessionUser.id,
+        email: sessionUser.email,
+        name: sessionUser.user_metadata?.name,
+        image:
+          sessionUser.user_metadata?.avatar_url ??
+          sessionUser.user_metadata?.image,
       });
-
-    if (signInError) {
-      console.error("Sign in after registration:", signInError.message);
-      return { status: "failed" };
     }
-
-    if (!signInData.user?.email) {
-      return { status: "failed" };
-    }
-
-    await startAppSession({
-      id: signInData.user.id,
-      email: signInData.user.email,
-      name: signInData.user.user_metadata?.name,
-      image:
-        signInData.user.user_metadata?.avatar_url ??
-        signInData.user.user_metadata?.image,
-      isAnonymous: signInData.user.is_anonymous === true,
-    });
-
     revalidatePath("/", "layout");
     return { status: "success" };
   } catch (error) {
