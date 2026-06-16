@@ -36,7 +36,7 @@ async function LoginPageContent({
   const { redirectUrl } = await searchParams;
   const session = await auth();
 
-  if (session?.user?.email && session.user.type === "regular") {
+  if (session?.user?.email) {
     if (redirectUrl?.startsWith("/") && !redirectUrl.startsWith("//")) {
       redirect(redirectUrl);
     }

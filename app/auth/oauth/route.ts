@@ -1,28 +1,15 @@
-import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import {
-  APP_SESSION_COOKIE,
-  clearAppSessionCookieOptions,
-  clearSupabaseAuthCookiesOnResponse,
-} from "@/lib/auth/app-session";
 import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
-function redirectWithClearedAuth(request: NextRequest, url: string) {
-  const response = NextResponse.redirect(url);
-  response.cookies.set(APP_SESSION_COOKIE, "", clearAppSessionCookieOptions());
-  clearSupabaseAuthCookiesOnResponse(request, response);
-  return response;
-}
-
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
 
   if (code) {
     if (!isSupabasePublicConfigured()) {
-      return redirectWithClearedAuth(request, `${origin}/auth/error`);
+      return NextResponse.redirect(`${origin}/auth/error`);
     }
 
     const supabase = await createClient();
@@ -44,5 +31,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return redirectWithClearedAuth(request, `${origin}/auth/error`);
+  return NextResponse.redirect(`${origin}/auth/error`);
 }

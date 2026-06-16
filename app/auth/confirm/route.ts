@@ -1,11 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import {
-  APP_SESSION_COOKIE,
-  clearAppSessionCookieOptions,
-  clearSupabaseAuthCookiesOnResponse,
-} from "@/lib/auth/app-session";
 import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -37,17 +32,6 @@ function safeNext(raw: string | null): string {
   return raw;
 }
 
-function redirectTo(request: NextRequest, path: string) {
-  return NextResponse.redirect(new URL(path, request.url));
-}
-
-function redirectWithClearedAuth(request: NextRequest, path: string) {
-  const response = redirectTo(request, path);
-  response.cookies.set(APP_SESSION_COOKIE, "", clearAppSessionCookieOptions());
-  clearSupabaseAuthCookiesOnResponse(request, response);
-  return response;
-}
-
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
@@ -56,8 +40,7 @@ export async function GET(request: NextRequest) {
   const next = safeNext(searchParams.get("next"));
 
   if (!isSupabasePublicConfigured()) {
-    return redirectWithClearedAuth(
-      request,
+    redirect(
       buildErrorUrl({
         error: "Authentication is not configured",
         errorCode: "auth_not_configured",
@@ -72,11 +55,10 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return redirectTo(request, next);
+      redirect(next);
     }
     const message = error.message ?? "verification_failed";
-    return redirectWithClearedAuth(
-      request,
+    redirect(
       buildErrorUrl({
         error: message,
         errorCode: "exchange_failed",
@@ -93,15 +75,14 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      return redirectTo(request, next);
+      redirect(next);
     }
 
     const message = error.message ?? "verification_failed";
     const otpCode = /expired/i.test(message)
       ? "otp_expired"
       : "verification_failed";
-    return redirectWithClearedAuth(
-      request,
+    redirect(
       buildErrorUrl({
         error: message,
         errorCode: otpCode,
@@ -110,8 +91,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  return redirectWithClearedAuth(
-    request,
+  redirect(
     buildErrorUrl({
       error: "Missing confirmation token",
       errorCode: "missing_token",

@@ -31,16 +31,8 @@ export const auth = cache(async () => {
   );
 
   if (appSession) {
-    if (appSession.type === "guest" || guestRegex.test(appSession.email)) {
-      return null;
-    }
-
     const appUser = await getUserById(appSession.userId);
     if (appUser && !appUser.disabled) {
-      if (guestRegex.test(appUser.email)) {
-        return null;
-      }
-
       const userType: UserType = guestRegex.test(appUser.email)
         ? "guest"
         : appSession.type;
@@ -68,13 +60,9 @@ export const auth = cache(async () => {
   }
 
   // Anonymous Supabase users have no email — synthesize a stable, digit-only
-  // guest identifier (matches `guestRegex`) in older sessions. Guest mode has
-  // been removed, so anonymous Supabase users are treated as logged out.
+  // guest identifier (matches `guestRegex`) so they're treated as guests
+  // throughout the app and can chat with the limited guest entitlement.
   const isAnonymous = user.is_anonymous === true || !user.email;
-  if (isAnonymous) {
-    return null;
-  }
-
   const email =
     user.email && user.email.length > 0
       ? user.email
