@@ -138,6 +138,7 @@ export function SidebarUserNav() {
                   } else {
                     await signOut();
                     router.push("/");
+                    router.refresh();
                   }
                 }}
                 type="button"

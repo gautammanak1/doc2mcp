@@ -8,15 +8,17 @@ import {
   CreditCard,
   FileText,
   Home,
-  LayoutDashboard,
+  LogIn,
   Menu,
+  MessageSquare,
+  ShieldCheck,
   Sliders,
   Store,
   Terminal,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
@@ -30,6 +32,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { isAdminEmail } from "@/lib/admin/admin-access";
+import { guestRegex } from "@/lib/constants";
+import { type AppAuthUser, useSupabaseAuth } from "@/lib/supabase/auth";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -76,6 +81,30 @@ function displayNameFor(session: NonNullable<LandingSessionInfo>): string {
     .join(" ");
 }
 
+function isRegularUser(email: string | null | undefined): email is string {
+  return Boolean(email && !guestRegex.test(email));
+}
+
+function sessionFromClientUser(
+  clientUser: AppAuthUser,
+  serverSession: LandingSessionInfo
+): LandingSessionInfo {
+  if (serverSession && serverSession.email === clientUser.email) {
+    return serverSession;
+  }
+
+  return {
+    email: clientUser.email,
+    name: clientUser.name ?? null,
+    initial: (
+      (clientUser.name?.trim()?.[0] || clientUser.email[0]) ??
+      "?"
+    ).toUpperCase(),
+    plan: "free",
+    isAdmin: isAdminEmail(clientUser.email),
+  };
+}
+
 export function LandingNavigation({
   session = null,
 }: {
@@ -84,6 +113,23 @@ export function LandingNavigation({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const { user: clientUser, loading: authLoading } = useSupabaseAuth();
+
+  const activeSession = useMemo(() => {
+    if (authLoading) {
+      return session;
+    }
+
+    if (clientUser?.type !== "regular" || !isRegularUser(clientUser.email)) {
+      return null;
+    }
+
+    return sessionFromClientUser(clientUser, session);
+  }, [authLoading, clientUser, session]);
+
+  const appHref = activeSession?.isAdmin ? "/admin" : "/chat";
+  const appLabel = activeSession?.isAdmin ? "Admin" : "Chat";
+  const AppIcon = activeSession?.isAdmin ? ShieldCheck : MessageSquare;
 
   useEffect(() => {
     setMounted(true);
@@ -144,25 +190,26 @@ export function LandingNavigation({
         {/* Right actions */}
         <div className="hidden items-center gap-2 md:flex" data-tour="nav-cta">
           <ThemeToggle />
-          {session ? (
+          {activeSession ? (
             <Button
               asChild
               className="group h-8.5 gap-1.5 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
               size="sm"
             >
-              <Link href={session.isAdmin ? "/admin" : "/dashboard"}>
-                <LayoutDashboard aria-hidden="true" className="size-3.5" />
-                {session.isAdmin ? "Admin" : "Dashboard"}
+              <Link href={appHref}>
+                <AppIcon aria-hidden="true" className="size-3.5" />
+                {appLabel}
                 <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
             </Button>
           ) : (
             <Button
               asChild
-              className="group h-8.5 gap-1 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
+              className="group h-8.5 gap-1.5 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
               size="sm"
             >
               <Link href="/login">
+                <LogIn aria-hidden="true" className="size-3.5" />
                 Sign up
                 <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
@@ -198,51 +245,62 @@ export function LandingNavigation({
               </SheetHeader>
 
               <div className="flex flex-col gap-1 px-3 pb-3">
-                {NAV_LINKS.map((link) => (
-                  <a
-                    className="rounded-lg px-3 py-2.5 text-[15px] text-foreground/85 hover:bg-muted hover:text-foreground"
-                    href={link.href}
-                    key={link.name}
-                    onClick={() => setIsMobileOpen(false)}
-                  >
-                    {link.name}
-                  </a>
-                ))}
+                {NAV_LINKS.map((link) => {
+                  const Icon = link.icon;
+
+                  return (
+                    <a
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[15px] text-foreground/85 hover:bg-muted hover:text-foreground"
+                      href={link.href}
+                      key={link.name}
+                      onClick={() => setIsMobileOpen(false)}
+                    >
+                      <Icon
+                        aria-hidden="true"
+                        className="size-4 shrink-0 text-muted-foreground"
+                      />
+                      {link.name}
+                    </a>
+                  );
+                })}
               </div>
 
               <div className="border-border/60 border-t px-5 py-5">
-                {session ? (
+                {activeSession ? (
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/40 p-3">
                       <Avatar className="size-9">
                         <AvatarFallback className="bg-foreground text-background font-medium text-xs">
-                          {session.initial.toUpperCase()}
+                          {activeSession.initial.toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium text-foreground text-sm">
-                          {displayNameFor(session)}
+                          {displayNameFor(activeSession)}
                         </p>
                         <p className="mt-0.5 text-[11px] text-muted-foreground">
-                          {session.isAdmin
+                          {activeSession.isAdmin
                             ? "Administrator"
-                            : `${session.plan} plan`}
+                            : `${activeSession.plan} plan`}
                         </p>
                       </div>
                     </div>
                     <Button asChild className="w-full rounded-lg">
                       <Link
-                        href={session.isAdmin ? "/admin" : "/dashboard"}
+                        href={appHref}
                         onClick={() => setIsMobileOpen(false)}
                       >
-                        <LayoutDashboard className="mr-1.5 size-4" />
-                        {session.isAdmin ? "Admin dashboard" : "Dashboard"}
+                        <AppIcon className="mr-1.5 size-4" />
+                        {activeSession.isAdmin
+                          ? "Admin dashboard"
+                          : "Open chat"}
                       </Link>
                     </Button>
                   </div>
                 ) : (
-                  <Button asChild className="w-full rounded-lg">
+                  <Button asChild className="w-full gap-2 rounded-lg">
                     <Link href="/login" onClick={() => setIsMobileOpen(false)}>
+                      <LogIn className="size-4" />
                       Sign up with Google
                     </Link>
                   </Button>
