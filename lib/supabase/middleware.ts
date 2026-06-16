@@ -3,7 +3,6 @@ import { type NextRequest, NextResponse } from "next/server";
 import {
   APP_SESSION_COOKIE,
   appSessionCookieOptions,
-  clearAppSessionCookieOptions,
   clearSupabaseAuthCookiesOnResponse,
   createAppSessionToken,
   readAppSessionToken,
@@ -24,23 +23,13 @@ export async function updateSession(request: NextRequest) {
     request.cookies.get(APP_SESSION_COOKIE)?.value
   );
   if (appSession) {
-    if (appSession.type === "guest" || guestRegex.test(appSession.email)) {
-      supabaseResponse.cookies.set(
-        APP_SESSION_COOKIE,
-        "",
-        clearAppSessionCookieOptions()
-      );
-      clearSupabaseAuthCookiesOnResponse(request, supabaseResponse);
-      return { supabaseResponse, user: null };
-    }
-
     clearSupabaseAuthCookiesOnResponse(request, supabaseResponse);
     return {
       supabaseResponse,
       user: {
         id: appSession.userId,
         email: appSession.email,
-        is_anonymous: false,
+        is_anonymous: appSession.type === "guest",
       },
     };
   }
@@ -79,25 +68,14 @@ export async function updateSession(request: NextRequest) {
   });
 
   const user = await getSafeUser(supabase);
-  if (
-    user?.is_anonymous === true ||
-    !user?.email ||
-    guestRegex.test(user.email)
-  ) {
-    supabaseResponse.cookies.set(
-      APP_SESSION_COOKIE,
-      "",
-      clearAppSessionCookieOptions()
-    );
-    clearSupabaseAuthCookiesOnResponse(request, supabaseResponse);
-    return { supabaseResponse, user: null };
-  }
-
   if (user?.email) {
     const token = await createAppSessionToken({
       userId: user.id,
       email: user.email,
-      type: "regular",
+      type:
+        user.is_anonymous === true || guestRegex.test(user.email)
+          ? "guest"
+          : "regular",
     });
     supabaseResponse.cookies.set(
       APP_SESSION_COOKIE,

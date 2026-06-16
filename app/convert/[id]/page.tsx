@@ -9,7 +9,13 @@ import { redactSecrets } from "@/services/mcp/exports";
 async function ConvertLoader({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
-  if (!session?.user?.id || session.user.type === "guest") {
+  if (!session?.user?.id) {
+    redirect(
+      `/api/auth/guest?redirectUrl=${encodeURIComponent(`/convert/${id}`)}`
+    );
+  }
+
+  if (session.user.type === "guest") {
     redirect(`/login?redirectUrl=${encodeURIComponent(`/convert/${id}`)}`);
   }
 

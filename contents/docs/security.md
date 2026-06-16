@@ -16,11 +16,11 @@ your environment. This page describes the identity, token, and data-flow model.
 
 | Role | Read public docs | Use chat | Generate MCP | Hit MCP endpoint |
 |------|------------------|----------|--------------|------------------|
-| Anonymous | yes | no (login required) | no (login required) | no (token required) |
+| Guest | yes | yes | no (401) | no (token required) |
 | Authenticated | yes | yes | yes | yes |
 
-There is no guest mode: chat, MCP generation, and the dashboard all require a
-signed-in account. Sessions are cookie-only, signed with `AUTH_SECRET`.
+Guest sessions are created via `/api/auth/guest?redirectUrl=...` to avoid
+client-side CSRF, and are cookie-only, signed with `AUTH_SECRET`.
 
 ## MCP token isolation
 

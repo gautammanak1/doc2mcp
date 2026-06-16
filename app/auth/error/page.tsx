@@ -42,18 +42,6 @@ function categorize(parsed: ParsedError): {
     };
   }
   if (
-    code.includes("exchange_failed") ||
-    desc.includes("code challenge") ||
-    desc.includes("code verifier")
-  ) {
-    return {
-      title: "Please request a fresh link",
-      message:
-        "This sign-in link no longer matches your browser session. Enter your email below and we'll send a fresh confirmation link.",
-      canResend: true,
-    };
-  }
-  if (
     code === "access_denied" ||
     desc.includes("invalid") ||
     desc.includes("not found")
