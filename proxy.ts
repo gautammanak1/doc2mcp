@@ -153,6 +153,19 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
+  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
+  if (pathname === "/register") {
+    const loginUrl = new URL(`${base}/login`, request.url);
+    const redirectUrl = request.nextUrl.searchParams.get("redirectUrl");
+    if (redirectUrl?.startsWith("/") && !redirectUrl.startsWith("//")) {
+      loginUrl.searchParams.set("redirectUrl", redirectUrl);
+    }
+    const redirect = NextResponse.redirect(loginUrl);
+    applySecurityHeaders(redirect);
+    return redirect;
+  }
+
   // Hot path: MCP tool calls authenticate via bearer token inside the route
   // handler (resolveMcpProject → verifyMcpToken). Running Supabase session
   // refresh here adds 150-400ms per call for zero benefit, since the MCP
@@ -164,7 +177,6 @@ export async function proxy(request: NextRequest) {
   }
 
   const { supabaseResponse, user } = await updateSession(request);
-  const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
   setCurrencyHintIfMissing(request, supabaseResponse);
   applySecurityHeaders(supabaseResponse);
