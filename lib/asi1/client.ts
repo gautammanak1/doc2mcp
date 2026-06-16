@@ -19,11 +19,16 @@ const GEMINI_OPENAI_BASE_URL =
 const GEMINI_NATIVE_BASE_URL =
   "https://generativelanguage.googleapis.com/v1beta";
 
+function readEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
+}
+
 export const ASI1_MODEL =
-  process.env.GEMINI_MODEL ?? process.env.ASI1_MODEL ?? "gemini-2.5-flash";
+  readEnv("GEMINI_MODEL") ?? readEnv("ASI1_MODEL") ?? "gemini-2.5-flash";
 export const ASI1_IMAGE_MODEL =
-  process.env.GEMINI_IMAGE_MODEL ??
-  process.env.ASI1_IMAGE_MODEL ??
+  readEnv("GEMINI_IMAGE_MODEL") ??
+  readEnv("ASI1_IMAGE_MODEL") ??
   "gemini-3-pro-image-preview";
 const DEFAULT_TEXT_FALLBACK_MODELS = [
   ASI1_MODEL,
@@ -59,7 +64,7 @@ export type Asi1ChatCompletionResponse = {
 };
 
 function getApiKey(): string {
-  const key = process.env.GEMINI_API_KEY ?? process.env.ASI_ONE_API_KEY;
+  const key = readEnv("GEMINI_API_KEY") ?? readEnv("ASI_ONE_API_KEY");
   if (!key) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
@@ -67,7 +72,7 @@ function getApiKey(): string {
 }
 
 function getImageApiKey(): string {
-  const key = process.env.GEMINI_API_KEY;
+  const key = readEnv("GEMINI_API_KEY");
   if (!key) {
     throw new Error(
       "GEMINI_API_KEY is not configured (required for native Gemini image generation)"
