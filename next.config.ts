@@ -62,6 +62,11 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     turbopackFileSystemCacheForDev: true,
   },
+  // Pin the workspace root so Turbopack doesn't mis-infer it from stray
+  // lockfiles outside the repo (which breaks the instrumentation hook).
+  turbopack: {
+    root: process.cwd(),
+  },
 };
 
 export default withBotId(nextConfig);

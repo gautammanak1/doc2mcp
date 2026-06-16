@@ -29,7 +29,7 @@ async function RegisterPageContent() {
   await connection();
   const session = await auth();
 
-  if (session?.user?.email) {
+  if (session?.user?.email && session.user.type === "regular") {
     redirect(isAdminEmail(session.user.email) ? "/admin" : "/chat");
   }
 
