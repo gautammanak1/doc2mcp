@@ -193,7 +193,9 @@ export async function proxy(request: NextRequest) {
   }
 
   if (
-    (pathname.startsWith("/dashboard") || pathname.startsWith("/chat")) &&
+    (pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/chat") ||
+      pathname.startsWith("/convert")) &&
     !isAuthed
   ) {
     const redirectUrl = new URL(`${base}/login`, request.url);
