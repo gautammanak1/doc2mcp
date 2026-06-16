@@ -37,15 +37,18 @@ export const generateImageTool = tool({
       ),
     size: z
       .enum(["256x256", "512x512", "1024x1024", "1024x1792", "1792x1024"])
-      .default("1024x1024")
-      .describe("Output resolution. Default 1024x1024."),
+      .default("1792x1024")
+      .describe(
+        "Output resolution. Default 1792x1024 (16:9 YouTube thumbnail)."
+      ),
   }),
   execute: async ({ prompt, topic, size }) => {
     try {
-      if (!(process.env.GEMINI_API_KEY || process.env.ASI_ONE_API_KEY)) {
+      if (!process.env.GEMINI_API_KEY) {
         return {
           ok: false,
-          error: "Image generation is not configured on this deployment.",
+          error:
+            "Image generation is not configured (GEMINI_API_KEY missing on this deployment).",
         };
       }
       const { images } = await asi1GenerateImage({ prompt, topic, size });
