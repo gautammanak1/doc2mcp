@@ -80,11 +80,10 @@ export function GoogleAuthButton({
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       <Button
-        className="relative h-10 w-full gap-2.5 rounded-lg border-border/60 bg-background text-sm font-medium shadow-sm hover:bg-muted/50"
+        className="relative h-11 w-full gap-2.5 rounded-xl border-0 bg-[#4285f4] font-medium text-sm text-white shadow-[0_4px_14px_rgba(66,133,244,0.35)] transition-all hover:opacity-95 active:scale-[0.99] dark:bg-[#8ab4f8] dark:text-[#131314] dark:shadow-[0_4px_14px_rgba(138,180,248,0.25)]"
         disabled={loading}
         onClick={handleGoogleSignIn}
         type="button"
-        variant="outline"
       >
         <GoogleIcon className="size-4" />
         {loading ? "Redirecting to Google…" : label}
@@ -94,6 +93,9 @@ export function GoogleAuthButton({
           </span>
         ) : null}
       </Button>
+      <p className="text-center text-[11px] text-muted-foreground">
+        Secure OAuth · We never see your Google password
+      </p>
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
     </div>
   );

@@ -1,3 +1,4 @@
+import { MessageSquare, Sparkles, Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -5,21 +6,44 @@ import { auth } from "@/app/(auth)/auth";
 import { LoginForm } from "@/components/auth/login-form";
 import { isAdminEmail } from "@/lib/admin/admin-access";
 
+const BENEFITS = [
+  { icon: Zap, text: "5 free doc conversions every month" },
+  { icon: MessageSquare, text: "Jump straight into chat after sign-in" },
+  { icon: Sparkles, text: "One-click Google — no password to remember" },
+] as const;
+
 function LoginHeading() {
   return (
-    <>
-      <h1 className="font-semibold text-2xl tracking-tight">Get started</h1>
-      <p className="text-muted-foreground text-sm">
-        Sign up or sign in with your Google account
+    <div className="mb-6 space-y-3">
+      <p className="inline-flex items-center rounded-full border border-[#4285f4]/25 bg-[#4285f4]/8 px-3 py-1 font-medium text-[#4285f4] text-xs dark:border-[#8ab4f8]/30 dark:bg-[#8ab4f8]/10 dark:text-[#8ab4f8]">
+        Free to get started
       </p>
-    </>
+      <h1 className="font-semibold text-2xl tracking-tight sm:text-[1.65rem]">
+        Create your account
+      </h1>
+      <p className="text-muted-foreground text-sm leading-relaxed">
+        Sign up or sign in with Google. We&apos;ll send you to chat as soon as
+        you&apos;re in.
+      </p>
+      <ul className="space-y-2.5 pt-1">
+        {BENEFITS.map(({ icon: Icon, text }) => (
+          <li className="flex items-start gap-2.5 text-sm" key={text}>
+            <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[#4285f4]/10 text-[#4285f4] dark:bg-[#8ab4f8]/15 dark:text-[#8ab4f8]">
+              <Icon className="size-3" strokeWidth={2.25} />
+            </span>
+            <span className="text-foreground/85">{text}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
 function LoginFormSkeleton() {
   return (
     <div aria-hidden="true" className="flex flex-col gap-4">
-      <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
+      <div className="h-11 animate-pulse rounded-xl bg-muted/60" />
+      <div className="h-3 w-2/3 animate-pulse rounded bg-muted/40" />
     </div>
   );
 }
