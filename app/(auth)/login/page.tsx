@@ -8,9 +8,9 @@ import { isAdminEmail } from "@/lib/admin/admin-access";
 function LoginHeading() {
   return (
     <>
-      <h1 className="font-semibold text-2xl tracking-tight">Welcome back</h1>
+      <h1 className="font-semibold text-2xl tracking-tight">Get started</h1>
       <p className="text-muted-foreground text-sm">
-        Sign in to your account to continue
+        Sign up or sign in with your Google account
       </p>
     </>
   );
@@ -19,9 +19,6 @@ function LoginHeading() {
 function LoginFormSkeleton() {
   return (
     <div aria-hidden="true" className="flex flex-col gap-4">
-      <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
-      <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
-      <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
       <div className="h-10 animate-pulse rounded-lg bg-muted/60" />
     </div>
   );

@@ -157,26 +157,16 @@ export function LandingNavigation({
               </Link>
             </Button>
           ) : (
-            <>
-              <Button
-                asChild
-                className="h-8.5 rounded-full px-3.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/40"
-                size="sm"
-                variant="ghost"
-              >
-                <Link href="/login">Sign in</Link>
-              </Button>
-              <Button
-                asChild
-                className="group h-8.5 gap-1 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
-                size="sm"
-              >
-                <Link href="/register">
-                  Sign up
-                  <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Link>
-              </Button>
-            </>
+            <Button
+              asChild
+              className="group h-8.5 gap-1 rounded-full px-4 text-xs font-medium bg-[#4285f4] dark:bg-[#8ab4f8] text-white dark:text-[#131314] hover:opacity-90 border-0"
+              size="sm"
+            >
+              <Link href="/login">
+                Sign up
+                <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </Button>
           )}
         </div>
 
@@ -251,28 +241,11 @@ export function LandingNavigation({
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid gap-2">
-                    <Button
-                      asChild
-                      className="w-full rounded-lg"
-                      variant="outline"
-                    >
-                      <Link
-                        href="/login"
-                        onClick={() => setIsMobileOpen(false)}
-                      >
-                        Sign in
-                      </Link>
-                    </Button>
-                    <Button asChild className="w-full rounded-lg">
-                      <Link
-                        href="/register"
-                        onClick={() => setIsMobileOpen(false)}
-                      >
-                        Sign up
-                      </Link>
-                    </Button>
-                  </div>
+                  <Button asChild className="w-full rounded-lg">
+                    <Link href="/login" onClick={() => setIsMobileOpen(false)}>
+                      Sign up with Google
+                    </Link>
+                  </Button>
                 )}
               </div>
             </SheetContent>
