@@ -94,13 +94,14 @@ export const systemPrompt = ({
 
 const imageAddendum = () =>
   `Image generation:
-- You have a generateImage tool backed by the ASI1 image model.
+- You have a generateImage tool backed by Gemini 3 Pro Image (gemini-3-pro-image-preview).
 - Use it ONLY when the user explicitly asks to create, generate, draw, or
   design an image, illustration, mockup, banner, or visual asset.
 - Do NOT use it for charts, plots, diagrams, or data visualizations — those
   belong in a code artifact instead.
-- Provide a detailed prompt (subject, style, palette, composition, mood)
-  and a sensible size (default 1024x1024).
+- Provide a detailed prompt (subject, style, palette, composition, mood),
+  an optional topic label for sharper technical styling, and a sensible size
+  (default 1024x1024).
 - After the image renders, summarize what you generated in one short line.
 
 PDF generation:

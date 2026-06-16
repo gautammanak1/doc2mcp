@@ -101,7 +101,7 @@ export function DocsHome() {
         <Image
           alt="The doc2mcp pipeline: documentation, crawling, knowledge processing, retrieval, MCP generation, AI agents"
           className="w-full"
-          height={260}
+          height={300}
           src="/diagrams/pipeline.svg"
           unoptimized
           width={1280}

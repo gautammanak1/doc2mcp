@@ -11,11 +11,13 @@ import { asi1GenerateImage } from "@/lib/asi1/client";
  */
 export const generateImageTool = tool({
   description: [
-    "Generate a new image with the Gemini image model.",
+    "Generate a realistic, high-quality image with Gemini 3 Pro Image",
+    "(gemini-3-pro-image-preview).",
     "Call this ONLY when the user explicitly asks to create, generate, draw,",
     "or design an image, illustration, mockup, banner, or visual asset.",
     "Do not call it for charts, plots, diagrams, or data visualizations.",
-    "Pass a detailed prompt (subject, style, layout, palette, mood).",
+    "Pass a detailed prompt (subject, style, layout, palette, mood) and an",
+    "optional topic for sharper technical styling.",
   ].join(" "),
   inputSchema: z.object({
     prompt: z
@@ -25,12 +27,20 @@ export const generateImageTool = tool({
       .describe(
         "Detailed image prompt: subject, style, palette, composition, mood."
       ),
+    topic: z
+      .string()
+      .min(1)
+      .max(200)
+      .optional()
+      .describe(
+        "Short subject label (e.g. MCP servers, API docs) for enhanced technical styling."
+      ),
     size: z
       .enum(["256x256", "512x512", "1024x1024", "1024x1792", "1792x1024"])
       .default("1024x1024")
       .describe("Output resolution. Default 1024x1024."),
   }),
-  execute: async ({ prompt, size }) => {
+  execute: async ({ prompt, topic, size }) => {
     try {
       if (!(process.env.GEMINI_API_KEY || process.env.ASI_ONE_API_KEY)) {
         return {
@@ -38,7 +48,7 @@ export const generateImageTool = tool({
           error: "Image generation is not configured on this deployment.",
         };
       }
-      const { images } = await asi1GenerateImage({ prompt, size });
+      const { images } = await asi1GenerateImage({ prompt, topic, size });
       const first = images.at(0);
       if (!first) {
         return {

@@ -1,12 +1,14 @@
 import "server-only";
 
+import { enhanceImagePrompt } from "@/lib/asi1/image-prompt";
+
 /**
  * AI client. Backed by Google Gemini.
  *
  * Text/chat uses Gemini's OpenAI-compatible endpoint so the request/response
  * (and SSE streaming) shapes stay identical to the previous provider; image
- * generation uses the native `generateContent` endpoint (gemini image model
- * returns base64 PNG via inlineData).
+ * generation uses the native `generateContent` endpoint (Gemini 3 Pro Image
+ * model returns base64 PNG via inlineData with 2K imageConfig).
  *
  * Function names keep their historical `asi1*` prefix so existing callers do
  * not need to change; the implementation underneath is Gemini.
@@ -22,7 +24,7 @@ export const ASI1_MODEL =
 export const ASI1_IMAGE_MODEL =
   process.env.GEMINI_IMAGE_MODEL ??
   process.env.ASI1_IMAGE_MODEL ??
-  "gemini-2.5-flash-image";
+  "gemini-3-pro-image-preview";
 const DEFAULT_TEXT_FALLBACK_MODELS = [
   ASI1_MODEL,
   "models/gemini-2.5-flash-lite",
@@ -121,6 +123,7 @@ export type Asi1ImageSize =
 
 export type Asi1ImageGenerationRequest = {
   prompt: string;
+  topic?: string;
   size?: Asi1ImageSize;
   model?: string;
   n?: number;
@@ -174,24 +177,30 @@ function isRetriableGeminiError(error: Error): boolean {
   );
 }
 
+function sizeToAspectRatio(size?: Asi1ImageSize): string {
+  if (size === "1024x1792") {
+    return "9:16";
+  }
+  if (size === "1792x1024") {
+    return "16:9";
+  }
+  return "1:1";
+}
+
 /**
- * Generate an image with the Gemini image model.
+ * Generate an image with the Gemini 3 Pro Image model.
  *
  *   POST {base}/models/{imageModel}:generateContent
  *
- * The model returns the image as base64 PNG inside `inlineData`. We normalise
- * it to the historical `GeneratedImage` shape (`b64Json`) so existing callers
- * and the UI keep working unchanged. `size` is folded into the prompt because
- * the native API does not take a discrete size enum.
+ * Uses generationConfig.imageConfig (2K, aspect ratio) and an enhanced
+ * technical prompt for realistic, professional output.
  */
 export async function asi1GenerateImage(
   request: Asi1ImageGenerationRequest
 ): Promise<{ images: GeneratedImage[]; raw: Asi1ImageGenerationResponse }> {
   const model = request.model ?? ASI1_IMAGE_MODEL;
-  const sizeHint =
-    request.size && request.size.length > 0
-      ? ` Render at roughly ${request.size} resolution.`
-      : "";
+  const enhancedPrompt = enhanceImagePrompt(request.prompt, request.topic);
+  const aspectRatio = sizeToAspectRatio(request.size);
 
   const response = await fetch(
     `${GEMINI_NATIVE_BASE_URL}/models/${model}:generateContent`,
@@ -202,8 +211,15 @@ export async function asi1GenerateImage(
         "x-goog-api-key": getApiKey(),
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `${request.prompt}${sizeHint}` }] }],
+        contents: [{ role: "user", parts: [{ text: enhancedPrompt }] }],
+        generationConfig: {
+          imageConfig: {
+            aspectRatio,
+            imageSize: "2K",
+          },
+        },
       }),
+      signal: AbortSignal.timeout(180_000),
     }
   );
 

@@ -4,6 +4,7 @@ import { asi1GenerateImage } from "@/lib/asi1/client";
 
 const bodySchema = z.object({
   prompt: z.string().min(1).max(2000),
+  topic: z.string().min(1).max(200).optional(),
   size: z
     .enum(["", "256x256", "512x512", "1024x1024", "1024x1792", "1792x1024"])
     .optional(),
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
   try {
     const { images } = await asi1GenerateImage({
       prompt: parsed.prompt,
+      topic: parsed.topic,
       size: parsed.size ?? "",
       n: parsed.n ?? 1,
     });
