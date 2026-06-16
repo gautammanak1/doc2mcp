@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { connection } from "next/server";
 
 export const metadata: Metadata = {
   title: "Sign up",
 };
 
-export default async function RegisterPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ redirectUrl?: string }>;
-}) {
-  await connection();
-  const { redirectUrl } = await searchParams;
-
-  if (redirectUrl?.startsWith("/") && !redirectUrl.startsWith("//")) {
-    redirect(`/login?redirectUrl=${encodeURIComponent(redirectUrl)}`);
-  }
-
+/** Legacy /register URLs funnel to the single Google sign-in page. */
+export default function RegisterPage() {
   redirect("/login");
 }
