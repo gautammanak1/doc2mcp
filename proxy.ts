@@ -17,7 +17,6 @@ const PUBLIC_PATHS = [
   "/api/auth",
   "/api/contact",
   "/ping",
-  "/chat",
   "/docs",
   "/api/mcp",
 ];
@@ -193,7 +192,10 @@ export async function proxy(request: NextRequest) {
     return redirect;
   }
 
-  if (pathname.startsWith("/dashboard") && !isAuthed) {
+  if (
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/chat")) &&
+    !isAuthed
+  ) {
     const redirectUrl = new URL(`${base}/login`, request.url);
     redirectUrl.searchParams.set("redirectUrl", pathname);
     const redirect = NextResponse.redirect(redirectUrl);

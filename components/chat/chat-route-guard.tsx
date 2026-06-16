@@ -1,6 +1,8 @@
 "use client";
 
-import { useGuestSession } from "@/hooks/use-guest-session";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { useSupabaseAuth } from "@/lib/supabase/auth";
 
 function ChatLoadingShimmer() {
   return (
@@ -13,10 +15,27 @@ function ChatLoadingShimmer() {
   );
 }
 
+/**
+ * Chat requires a real (signed-in) account. Visitors who are not logged in are
+ * sent to the login page — there is no guest mode.
+ */
 export function ChatRouteGuard({ redirectUrl }: { redirectUrl: string }) {
-  const { user, loading } = useGuestSession(redirectUrl);
+  const router = useRouter();
+  const { user, loading } = useSupabaseAuth();
+  const redirected = useRef(false);
 
-  if (loading || !user) {
+  const isAuthed = Boolean(user && user.type !== "guest");
+
+  useEffect(() => {
+    if (loading || isAuthed || redirected.current) {
+      return;
+    }
+
+    redirected.current = true;
+    router.replace(`/login?redirectUrl=${encodeURIComponent(redirectUrl)}`);
+  }, [loading, isAuthed, redirectUrl, router]);
+
+  if (loading || !isAuthed) {
     return <ChatLoadingShimmer />;
   }
 
