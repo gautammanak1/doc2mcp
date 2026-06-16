@@ -24,6 +24,25 @@ const PUBLIC_PATHS = [
 
 const AUTH_PAGES = ["/login", "/register"];
 
+const GUEST_EMAIL_REGEX = /^guest-\d+$/;
+
+/**
+ * A "real" authenticated user — i.e. a regular account, not an anonymous /
+ * guest session. Guests get a synthesized `guest-…` email and must be treated
+ * as logged out for protected areas (dashboard, admin) and auth pages.
+ */
+function isAuthenticatedUser(
+  user: { email?: string | null; is_anonymous?: boolean } | null
+): boolean {
+  if (!user || user.is_anonymous === true) {
+    return false;
+  }
+  if (!user.email || GUEST_EMAIL_REGEX.test(user.email)) {
+    return false;
+  }
+  return true;
+}
+
 function splitEmails(value: string | undefined): string[] {
   return (value ?? "")
     .split(",")
@@ -151,8 +170,10 @@ export async function proxy(request: NextRequest) {
   setCurrencyHintIfMissing(request, supabaseResponse);
   applySecurityHeaders(supabaseResponse);
 
+  const isAuthed = isAuthenticatedUser(user);
+
   if (isPublicPath(pathname)) {
-    if (user && AUTH_PAGES.includes(pathname)) {
+    if (isAuthed && AUTH_PAGES.includes(pathname)) {
       const redirect = NextResponse.redirect(new URL(`${base}/`, request.url));
       applySecurityHeaders(redirect);
       return redirect;
@@ -161,7 +182,10 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  if (pathname.startsWith("/admin") && (!user || !isAdminEmail(user.email))) {
+  if (
+    pathname.startsWith("/admin") &&
+    (!isAuthed || !isAdminEmail(user?.email))
+  ) {
     const redirect = NextResponse.redirect(
       new URL(`${base}/login`, request.url)
     );
@@ -169,7 +193,7 @@ export async function proxy(request: NextRequest) {
     return redirect;
   }
 
-  if (pathname.startsWith("/dashboard") && !user) {
+  if (pathname.startsWith("/dashboard") && !isAuthed) {
     const redirectUrl = new URL(`${base}/login`, request.url);
     redirectUrl.searchParams.set("redirectUrl", pathname);
     const redirect = NextResponse.redirect(redirectUrl);
