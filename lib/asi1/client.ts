@@ -66,6 +66,16 @@ function getApiKey(): string {
   return key;
 }
 
+function getImageApiKey(): string {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error(
+      "GEMINI_API_KEY is not configured (required for native Gemini image generation)"
+    );
+  }
+  return key;
+}
+
 export async function asi1ChatCompletion(
   request: Omit<Asi1ChatCompletionRequest, "model"> & { model?: string }
 ): Promise<Asi1ChatCompletionResponse> {
@@ -187,54 +197,54 @@ function sizeToAspectRatio(size?: Asi1ImageSize): string {
   return "1:1";
 }
 
-/**
- * Generate an image with the Gemini 3 Pro Image model.
- *
- *   POST {base}/models/{imageModel}:generateContent
- *
- * Uses generationConfig.imageConfig (2K, aspect ratio) and an enhanced
- * technical prompt for realistic, professional output.
- */
-export async function asi1GenerateImage(
-  request: Asi1ImageGenerationRequest
-): Promise<{ images: GeneratedImage[]; raw: Asi1ImageGenerationResponse }> {
-  const model = request.model ?? ASI1_IMAGE_MODEL;
-  const enhancedPrompt = enhanceImagePrompt(request.prompt, request.topic);
-  const aspectRatio = sizeToAspectRatio(request.size);
+const IMAGE_MODEL_FALLBACKS = [
+  ASI1_IMAGE_MODEL,
+  "gemini-3-pro-image-preview",
+  "gemini-2.5-flash-image",
+] as const;
 
-  const response = await fetch(
-    `${GEMINI_NATIVE_BASE_URL}/models/${model}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": getApiKey(),
-      },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: enhancedPrompt }] }],
-        generationConfig: {
-          imageConfig: {
-            aspectRatio,
-            imageSize: "2K",
-          },
-        },
-      }),
-      signal: AbortSignal.timeout(180_000),
-    }
-  );
+function imageModelCandidates(requested?: string): string[] {
+  const models = requested
+    ? [requested, ...IMAGE_MODEL_FALLBACKS]
+    : [...IMAGE_MODEL_FALLBACKS];
+  return Array.from(new Set(models.filter(Boolean)));
+}
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Gemini image API error (${response.status}): ${errorText}`
-    );
+function supportsHighResImage(model: string): boolean {
+  return /gemini-3(?:\.\d+)?-(?:pro|flash)-image/i.test(model);
+}
+
+function buildImageGenerationConfig(model: string, aspectRatio: string) {
+  const imageConfig: { aspectRatio: string; imageSize?: string } = {
+    aspectRatio,
+  };
+  if (supportsHighResImage(model)) {
+    imageConfig.imageSize = "2K";
   }
 
-  const data = (await response.json()) as GeminiGenerateContentResponse;
-  const parts = data.candidates?.at(0)?.content?.parts ?? [];
+  return {
+    responseModalities: ["TEXT", "IMAGE"],
+    imageConfig,
+  };
+}
 
+function isRetriableImageStatus(status: number): boolean {
+  return (
+    status === 429 ||
+    status === 500 ||
+    status === 502 ||
+    status === 503 ||
+    status === 504
+  );
+}
+
+function parseGeminiImageResponse(
+  data: GeminiGenerateContentResponse
+): GeneratedImage[] {
+  const parts = data.candidates?.at(0)?.content?.parts ?? [];
   const images: GeneratedImage[] = [];
   let revisedPrompt: string | undefined;
+
   for (const part of parts) {
     if (part.text) {
       revisedPrompt = part.text;
@@ -245,14 +255,104 @@ export async function asi1GenerateImage(
     }
   }
 
-  const raw: Asi1ImageGenerationResponse = {
-    data: images.map((img) => ({
-      b64_json: img.b64Json,
-      revised_prompt: img.revisedPrompt,
-    })),
-  };
+  return images;
+}
 
-  return { images, raw };
+async function requestGeminiImage(
+  model: string,
+  prompt: string,
+  aspectRatio: string
+): Promise<GeneratedImage[]> {
+  const maxAttempts = 2;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const response = await fetch(
+      `${GEMINI_NATIVE_BASE_URL}/models/${model}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": getImageApiKey(),
+        },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: buildImageGenerationConfig(model, aspectRatio),
+        }),
+        signal: AbortSignal.timeout(180_000),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      lastError = new Error(
+        `Gemini image API error (${response.status}): ${errorText}`
+      );
+      if (
+        isRetriableImageStatus(response.status) &&
+        attempt < maxAttempts - 1
+      ) {
+        const delay = 2 ** attempt * 1500 + Math.random() * 500;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        continue;
+      }
+      throw lastError;
+    }
+
+    const data = (await response.json()) as GeminiGenerateContentResponse;
+    const images = parseGeminiImageResponse(data);
+    if (images.length === 0) {
+      lastError = new Error(
+        `Gemini image model ${model} returned no image data`
+      );
+      if (attempt < maxAttempts - 1) {
+        continue;
+      }
+      throw lastError;
+    }
+
+    return images;
+  }
+
+  throw lastError ?? new Error("Gemini image request failed");
+}
+
+/**
+ * Generate an image with Gemini image models (Pro first, Flash fallback).
+ *
+ *   POST {base}/models/{imageModel}:generateContent
+ */
+export async function asi1GenerateImage(
+  request: Asi1ImageGenerationRequest
+): Promise<{ images: GeneratedImage[]; raw: Asi1ImageGenerationResponse }> {
+  const enhancedPrompt = enhanceImagePrompt(request.prompt, request.topic);
+  const aspectRatio = sizeToAspectRatio(request.size);
+  const models = imageModelCandidates(request.model);
+
+  let lastError: Error | null = null;
+  for (const model of models) {
+    try {
+      const images = await requestGeminiImage(
+        model,
+        enhancedPrompt,
+        aspectRatio
+      );
+      const raw: Asi1ImageGenerationResponse = {
+        data: images.map((img) => ({
+          b64_json: img.b64Json,
+          revised_prompt: img.revisedPrompt,
+        })),
+      };
+      return { images, raw };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      if (!isRetriableGeminiError(lastError)) {
+        throw lastError;
+      }
+    }
+  }
+
+  throw lastError ?? new Error("Gemini image request failed");
 }
 
 /**
