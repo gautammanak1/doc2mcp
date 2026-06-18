@@ -1,6 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import type { NextRequest } from "next/server";
+import { startAppSession } from "@/lib/auth/start-app-session";
 import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -53,11 +54,24 @@ export async function GET(request: NextRequest) {
   // Newer Supabase PKCE flow sends ?code=... instead of token_hash.
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error && data.user?.email) {
+      const metadata = data.user.user_metadata ?? {};
+      await startAppSession({
+        id: data.user.id,
+        email: data.user.email,
+        name:
+          (typeof metadata.full_name === "string" && metadata.full_name) ||
+          (typeof metadata.name === "string" && metadata.name) ||
+          null,
+        image:
+          (typeof metadata.avatar_url === "string" && metadata.avatar_url) ||
+          (typeof metadata.picture === "string" && metadata.picture) ||
+          null,
+      });
       redirect(next);
     }
-    const message = error.message ?? "verification_failed";
+    const message = error?.message ?? "verification_failed";
     redirect(
       buildErrorUrl({
         error: message,
@@ -69,16 +83,29 @@ export async function GET(request: NextRequest) {
 
   if (tokenHash && type) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.verifyOtp({
+    const { data, error } = await supabase.auth.verifyOtp({
       type,
       token_hash: tokenHash,
     });
 
-    if (!error) {
+    if (!error && data.user?.email) {
+      const metadata = data.user.user_metadata ?? {};
+      await startAppSession({
+        id: data.user.id,
+        email: data.user.email,
+        name:
+          (typeof metadata.full_name === "string" && metadata.full_name) ||
+          (typeof metadata.name === "string" && metadata.name) ||
+          null,
+        image:
+          (typeof metadata.avatar_url === "string" && metadata.avatar_url) ||
+          (typeof metadata.picture === "string" && metadata.picture) ||
+          null,
+      });
       redirect(next);
     }
 
-    const message = error.message ?? "verification_failed";
+    const message = error?.message ?? "verification_failed";
     const otpCode = /expired/i.test(message)
       ? "otp_expired"
       : "verification_failed";

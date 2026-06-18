@@ -12,7 +12,7 @@ import {
   readAppSessionToken,
 } from "@/lib/auth/app-session";
 import { guestRegex } from "@/lib/constants";
-import { ensureAppUserFromSupabase, getUserById } from "@/lib/db/queries";
+import { ensureAppUserFromSupabase } from "@/lib/db/queries";
 import { isSupabasePublicConfigured } from "@/lib/supabase/env";
 import { getSafeUser } from "@/lib/supabase/safe-session";
 import { createClient } from "@/lib/supabase/server";
@@ -35,24 +35,28 @@ export const auth = cache(async () => {
       return null;
     }
 
-    const appUser = await getUserById(appSession.userId);
-    if (appUser && !appUser.disabled) {
-      if (guestRegex.test(appUser.email)) {
-        return null;
-      }
+    try {
+      const appUser = await ensureAppUserFromSupabase({
+        id: appSession.userId,
+        email: appSession.email,
+      });
 
-      const userType: UserType = guestRegex.test(appUser.email)
-        ? "guest"
-        : appSession.type;
-      return {
-        user: {
-          id: appUser.id,
-          email: appUser.email,
-          name: appUser.name ?? undefined,
-          image: appUser.image ?? undefined,
-          type: userType,
-        },
-      };
+      if (!appUser.disabled && !guestRegex.test(appUser.email)) {
+        const userType: UserType = guestRegex.test(appUser.email)
+          ? "guest"
+          : appSession.type;
+        return {
+          user: {
+            id: appUser.id,
+            email: appUser.email,
+            name: appUser.name ?? undefined,
+            image: appUser.image ?? undefined,
+            type: userType,
+          },
+        };
+      }
+    } catch {
+      // Stale or corrupt app session — fall through to Supabase below.
     }
   }
 

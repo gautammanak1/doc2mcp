@@ -2,10 +2,8 @@ import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import {
   APP_SESSION_COOKIE,
-  appSessionCookieOptions,
   clearAppSessionCookieOptions,
   clearSupabaseAuthCookiesOnResponse,
-  createAppSessionToken,
   readAppSessionToken,
 } from "@/lib/auth/app-session";
 import { guestRegex } from "@/lib/constants";
@@ -93,19 +91,11 @@ export async function updateSession(request: NextRequest) {
     return { supabaseResponse, user: null };
   }
 
-  if (user?.email) {
-    const token = await createAppSessionToken({
-      userId: user.id,
-      email: user.email,
-      type: "regular",
-    });
-    supabaseResponse.cookies.set(
-      APP_SESSION_COOKIE,
-      token,
-      appSessionCookieOptions()
-    );
-    clearSupabaseAuthCookiesOnResponse(request, supabaseResponse);
-  }
+  // Do NOT mint an app session here. Supabase user.id can differ from the
+  // canonical app `User.id` when the same email already exists (see
+  // ensureAppUserFromSupabase). OAuth/email confirm routes call
+  // startAppSession() which resolves the correct id. Creating a session
+  // here caused /api/projects/:id polls to 404 mid-conversion.
 
   return { supabaseResponse, user };
 }

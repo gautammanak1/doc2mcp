@@ -87,6 +87,8 @@ export function ConvertExperience({
     let attempts = 0;
     const MAX_ATTEMPTS = 150;
 
+    let authErrorShown = false;
+
     const poll = async () => {
       if (cancelled) {
         return;
@@ -104,6 +106,16 @@ export function ConvertExperience({
           if (["ready", "error"].includes(data.project.status)) {
             return;
           }
+        } else if (
+          (res.status === 401 || res.status === 404) &&
+          !authErrorShown
+        ) {
+          authErrorShown = true;
+          toast.error(
+            res.status === 401
+              ? "Session expired — sign in again to track this conversion."
+              : "Could not load project updates. Try refreshing or sign in again."
+          );
         }
       } catch {
         // Transient network error — keep polling with backoff.
