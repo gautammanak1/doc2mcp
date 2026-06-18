@@ -55,7 +55,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    await processProjectPipeline(payload);
+    await processProjectPipeline({
+      ...payload,
+      phase: payload.phase,
+    });
     return Response.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : "pipeline_failed";

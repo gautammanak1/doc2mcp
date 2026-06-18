@@ -41,6 +41,8 @@ export type PipelineJobPayload = {
   sourceUrl: string;
   sourceType: SourceType;
   projectName: string;
+  /** When set, the worker skips crawl/analyze and runs MCP generation only. */
+  phase?: "generate";
 };
 
 let _client: Client | null = null;
