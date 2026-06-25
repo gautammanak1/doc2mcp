@@ -364,7 +364,7 @@ export async function POST(request: Request) {
         ) {
           return "AI Gateway requires a valid credit card on file to service requests. Please visit https://vercel.com/d?to=%2F%5Bteam%5D%2F%7E%2Fai%3Fmodal%3Dadd-credit-card to add a card and unlock your free credits.";
         }
-        // ASI1 / OpenAI-style context overflow surfaces as a 400 with a
+        // Gemini / OpenAI-style context overflow surfaces as a 400 with a
         // "context_length_exceeded" code (sometimes wrapped in Zod parse
         // failures because the upstream uses `type: 400` instead of a string).
         if (

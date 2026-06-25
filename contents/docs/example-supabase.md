@@ -50,7 +50,3 @@ What's the difference between the anon key and the service role key?
 |---------|-----|
 | Slow first answer | Index is large; subsequent queries are fast |
 | Wrong client lib | Specify the language in your prompt |
-
-## Next
-
-- [GitHub docs → MCP](/docs/example-github)

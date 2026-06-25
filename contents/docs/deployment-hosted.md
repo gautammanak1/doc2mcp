@@ -36,7 +36,3 @@ to scale. You paste a URL and get a live endpoint.
 
 - Use the hosted version unless you have a strict data-residency or air-gapped
   requirement — then see [Self hosted](/docs/self-hosted).
-
-## Next
-
-- [Self hosted](/docs/self-hosted)

@@ -52,7 +52,3 @@ print(result.final_output)
 |---------|-----|
 | 401 from server | Check the `Authorization` header value |
 | Tools not discovered | Confirm `server_url` ends in `/mcp` |
-
-## Next
-
-- [Convert private documentation](/docs/private-docs)

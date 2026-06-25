@@ -59,7 +59,3 @@ Content-Type: application/json
 - Clients usually handle JSON-RPC for you — paste the config and let the tool
   drive.
 - Prefer `search_documentation` over `read_full_documentation` for cost/latency.
-
-## Next
-
-- [Search](/docs/api-search)

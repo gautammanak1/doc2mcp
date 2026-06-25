@@ -23,7 +23,7 @@ const PHASE_LABEL: Record<Phase, string> = {
   typing: "Paste docs URL",
   submitting: "Sending to doc2mcp",
   crawling: "Crawling pages",
-  analyzing: "Indexing chunks with ASI1",
+  analyzing: "Indexing chunks with AI",
   building: "Building MCP endpoint",
   ready: "MCP ready — paste into Cursor",
 };

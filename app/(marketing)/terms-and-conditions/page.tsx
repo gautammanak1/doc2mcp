@@ -132,8 +132,8 @@ export default function TermsAndConditionsPage() {
               <p>
                 We aim for high availability but do not guarantee uninterrupted
                 service. Scheduled maintenance, upstream provider outages
-                (Vercel, Supabase, Razorpay, ASI1), or events beyond our
-                reasonable control may cause downtime.
+                (Vercel, Supabase, Razorpay, Google Gemini), or events beyond
+                our reasonable control may cause downtime.
               </p>
             ),
           },

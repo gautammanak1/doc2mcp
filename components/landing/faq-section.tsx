@@ -20,7 +20,7 @@ const FAQS: Faq[] = [
   {
     id: "how-it-works",
     q: "How does doc2mcp work?",
-    a: "Paste a documentation URL. We crawl the site (Mintlify, Docusaurus, Swagger, GitBook, plain HTML — all supported), preserve code blocks, run an ASI1 understanding pass that detects auth, workflows, and endpoint groups, and generate a hosted MCP server with semantic tools — typically in under 60 seconds.",
+    a: "Paste a documentation URL. We crawl the site (Mintlify, Docusaurus, Swagger, GitBook, plain HTML — all supported), preserve code blocks, run an AI understanding pass that detects auth, workflows, and endpoint groups, and generate a hosted MCP server with semantic tools — typically in under 60 seconds.",
   },
   {
     id: "supported-clients",

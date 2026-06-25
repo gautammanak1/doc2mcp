@@ -5,7 +5,7 @@
  * ---------------
  * On Vercel's Hobby plan every lambda invocation is capped at 60s,
  * INCLUDING work scheduled via `next/server` `after()`. Our pipeline
- * (crawl → ASI1 analysis → tool compression → DB writes) routinely
+ * (crawl → Gemini analysis → tool compression → DB writes) routinely
  * takes 40-90s, so the user-facing `POST /api/convert` would time out
  * and leave projects stuck in `crawling` forever.
  *
@@ -112,7 +112,7 @@ export async function enqueuePipelineJob(
     url: workerUrl,
     body: payload,
     // Retries are cheap; this matters when the worker has a transient
-    // ASI1 / Supabase blip. QStash applies exponential backoff between
+    // Gemini / Supabase blip. QStash applies exponential backoff between
     // attempts automatically.
     retries: 2,
   });

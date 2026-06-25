@@ -54,7 +54,3 @@ A grounded answer cites a real page, e.g.
 |---------|-----|
 | Answers feel generic | Name the `stripe` MCP in the prompt |
 | Endpoint missing | Re-run to refresh; large APIs take longer |
-
-## Next
-
-- [Supabase docs → MCP](/docs/example-supabase)

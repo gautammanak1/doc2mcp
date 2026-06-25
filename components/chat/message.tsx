@@ -366,7 +366,7 @@ const PurePreviewMessage = ({
                   if (!src) {
                     return (
                       <div className="px-4 py-3 text-muted-foreground text-sm">
-                        ASI1 returned no image.
+                        The model returned no image.
                       </div>
                     );
                   }

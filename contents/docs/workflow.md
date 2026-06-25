@@ -42,8 +42,3 @@ transition, so polling or resuming just reads the row.
 | `lint` | `tsc --noEmit` + Biome/Ultracite | Yes |
 | `e2e` | Playwright against the built app | Yes |
 | Vercel preview | `next build` + deploy | Yes |
-
-## Next
-
-- [How it works](/docs/how-it-works)
-- [Security](/docs/security)

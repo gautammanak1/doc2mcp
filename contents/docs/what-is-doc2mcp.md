@@ -69,9 +69,3 @@ The generated server exposes these tools:
   homepage.
 - Re-run a conversion when the source docs change to keep the index fresh.
 - Treat the project token like a read-only API key.
-
-## Next
-
-- [Why doc2mcp?](/docs/why-doc2mcp)
-- [How it works](/docs/how-it-works)
-- [Quick start](/docs/quickstart)

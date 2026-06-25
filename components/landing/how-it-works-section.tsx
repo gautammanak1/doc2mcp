@@ -54,7 +54,7 @@ code_blocks: 2,406`,
     code: `chunks      → 4,182
 schemas     → 312
 embeddings  → 4,182 × 1536
-retrieval   → ASI1 Engine`,
+retrieval   → AI Engine`,
     files: [
       { name: "chunks.db", active: true, icon: "database" },
       { name: "embeddings.bin", active: false, icon: "file" },

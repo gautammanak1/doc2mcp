@@ -72,9 +72,3 @@ fetch). See [Convert private documentation](/docs/private-docs).
 
 - **Hosted** — fastest path; doc2mcp runs crawl, index, and MCP endpoint.
 - **Self-hosted** — run the stack in your VPC; see [Self hosted](/docs/self-hosted).
-
-## Next
-
-- [Quick start](/docs/quickstart)
-- [Convert docs to MCP](/docs/convert-to-mcp)
-- [Connect to Cursor](/docs/connect-cursor)

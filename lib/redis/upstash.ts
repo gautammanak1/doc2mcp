@@ -10,7 +10,7 @@
  *
  *   2. Per-user / per-IP rate limiting for the MCP and ingestion routes.
  *      The Vercel Hobby plan gives us no built-in WAF — without ratelimit
- *      a single attacker can burn through ASI1 + Razorpay budget in
+ *      a single attacker can burn through Gemini + Razorpay budget in
  *      minutes.
  *
  * Free tier (Upstash, no-auth REST): 10 k commands/day, 256 MB storage.

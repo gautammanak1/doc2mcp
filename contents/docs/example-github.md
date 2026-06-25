@@ -52,7 +52,3 @@ What environment variable holds the API key?
 |---------|-----|
 | Few files indexed | Repo keeps docs elsewhere; point at the docs site instead |
 | Private repo | Must be readable by doc2mcp |
-
-## Next
-
-- [API reference: Authentication](/docs/api-authentication)

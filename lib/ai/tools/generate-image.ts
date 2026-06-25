@@ -3,7 +3,7 @@ import { z } from "zod";
 import { asi1GenerateImage } from "@/lib/asi1/client";
 
 /**
- * Lets the chat model generate an image with the ASI1 image API.
+ * Lets the chat model generate an image with the Gemini image API.
  *
  * Returns a public URL (or base64 fallback) the UI can render inline. Keep
  * the tool description concrete so the model only reaches for it when the

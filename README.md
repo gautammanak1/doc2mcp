@@ -12,10 +12,16 @@ No install. No local clone. No API keys to hand over.
 
 [**Live**](https://doc2mcp.site) · [Docs](https://doc2mcp.site/docs) · [Pricing](https://doc2mcp.site/pricing) · [Comparison](https://doc2mcp.site/comparison)
 
+[![GitHub stars](https://img.shields.io/github/stars/gautammanak1/doc2mcp?style=social)](https://github.com/gautammanak1/doc2mcp/stargazers)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org)
+[![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini-4285F4?logo=googlegemini&logoColor=white)](https://ai.google.dev)
 [![MCP](https://img.shields.io/badge/Model_Context_Protocol-SDK-7c3aed)](https://modelcontextprotocol.io)
 [![Registry](https://img.shields.io/badge/MCP_Registry-io.github.doc2mcp-2563eb)](https://registry.modelcontextprotocol.io/?search=doc2mcp)
+[![npm](https://img.shields.io/npm/v/doc2mcp?color=8b5cf6&label=doc2mcp&logo=npm)](https://www.npmjs.com/package/doc2mcp)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-22c55e)](https://github.com/gautammanak1/doc2mcp/pulls)
 [![License](https://img.shields.io/badge/License-Apache_2.0-green)](#license)
+
+**If doc2mcp is useful to you, please [⭐ star the repo](https://github.com/gautammanak1/doc2mcp) — it helps other developers find it.**
 
 </div>
 
@@ -88,7 +94,7 @@ Desktop, and Windsurf.
 | `search_documentation` | Heading-aware section search (BM25-ish scoring) |
 | `get_documentation_overview` | Summary + `llms.txt` index |
 | `read_full_documentation` | All pages combined as one big markdown |
-| `ask_documentation` | Natural-language Q&A using ASI1 with citations |
+| `ask_documentation` | Natural-language Q&A using Google Gemini with citations |
 
 ## Supported source formats
 
@@ -122,7 +128,7 @@ the full flow and security notes.
 ## Architecture
 
 - **Next.js 16** App Router + Cache Components + Turbopack
-- **ASI1** for crawling analysis, tool compression, and `ask_documentation`
+- **Google Gemini** for crawling analysis, tool compression, and `ask_documentation`
 - **Supabase Postgres** for project storage, sessions, chunks
 - **Streamable HTTP MCP** (JSON-RPC 2.0) at `/api/mcp/<projectId>/mcp` — no stdio required
 - **`@modelcontextprotocol/sdk`** powers the generated self-hosted server export
@@ -133,11 +139,11 @@ the full flow and security notes.
 ## Local development
 
 ```bash
-git clone https://github.com/doc2mcp/doc2mcp.git
+git clone https://github.com/gautammanak1/doc2mcp.git
 cd doc2mcp
 pnpm install
 cp .env.example .env.local
-# fill ASI_ONE_API_KEY, AUTH_SECRET, POSTGRES_URL, Supabase keys
+# fill GEMINI_API_KEY, AUTH_SECRET, POSTGRES_URL, Supabase keys
 pnpm db:migrate
 pnpm dev
 ```
@@ -149,7 +155,7 @@ Open <http://localhost:3000>.
 ```env
 # Core
 AUTH_SECRET=...                 # openssl rand -base64 32
-ASI_ONE_API_KEY=...             # https://api.asi1.ai
+GEMINI_API_KEY=...              # https://aistudio.google.com/apikey
 
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=...
@@ -187,9 +193,9 @@ URLs resolve correctly for auth.
 | | |
 |---|---|
 | Framework | Next.js 16, React 19, Turbopack |
-| AI | ASI1 (`asi1` by default) |
+| AI | Google Gemini (`gemini-2.5-flash` by default) |
 | Database | Supabase Postgres |
-| Auth | NextAuth 5 (credentials + guest) |
+| Auth | Supabase Auth (Google OAuth) |
 | UI | Tailwind v4, shadcn/ui, Framer Motion, Streamdown |
 | Lint | Ultracite (Biome) |
 | MCP | `@modelcontextprotocol/sdk` + official MCP Registry |
@@ -207,6 +213,32 @@ Branching: feature branches cut from `staging` → PR → `staging` preview for 
 → `main` → tagged release to production. Preview deploys are created per branch
 and support full login.
 
+## Contributing
+
+Contributions are welcome! Whether it's a bug fix, a new source-format adapter,
+or docs improvements:
+
+1. Fork the repo and create a branch off `staging`.
+2. Run `pnpm check` and `pnpm exec tsc --noEmit` before opening a PR.
+3. Open a PR against `staging` with a clear description.
+
+Found a bug or have an idea? [Open an issue](https://github.com/gautammanak1/doc2mcp/issues).
+
+## Security
+
+Never commit secrets — all API keys belong in `.env.local` (gitignored) or your
+host's environment settings. If you discover a security issue, please open a
+[private security advisory](https://github.com/gautammanak1/doc2mcp/security/advisories/new)
+instead of a public issue.
+
 ## License
 
-Apache 2.0
+[Apache 2.0](./LICENSE)
+
+---
+
+<div align="center">
+
+**Built for developers shipping AI agents.** If this saved you time, [⭐ star the repo](https://github.com/gautammanak1/doc2mcp).
+
+</div>

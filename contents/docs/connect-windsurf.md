@@ -47,7 +47,3 @@ Using the stripe MCP, find the refund API and show a request example.
 |---------|-----|
 | Not listed | Re-open settings and refresh MCP |
 | Header unsupported | Use the `?token=` URL fallback |
-
-## Next
-
-- [Connect to VS Code](/docs/connect-vscode)

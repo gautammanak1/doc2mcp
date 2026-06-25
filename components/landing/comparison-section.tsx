@@ -72,9 +72,9 @@ const CAPABILITIES: Capability[] = [
     desc: "Auto-detects Mintlify, Docusaurus, Swagger/OpenAPI, Markdown, GitBook, Postman.",
   },
   {
-    key: "asi1_native",
-    label: "ASI1-native",
-    desc: "Built on ASI1 end-to-end. No OpenAI/Anthropic lock-in for the index layer.",
+    key: "ai_native",
+    label: "AI-native",
+    desc: "Built on a modern LLM end-to-end. No vendor lock-in for the index layer.",
   },
 ];
 
@@ -93,7 +93,7 @@ const COMPETITORS: Competitor[] = [
       ai_understanding: "yes",
       live_processing: "yes",
       multi_docs: "yes",
-      asi1_native: "yes",
+      ai_native: "yes",
     },
   },
   {
@@ -109,7 +109,7 @@ const COMPETITORS: Competitor[] = [
       ai_understanding: "partial",
       live_processing: "no",
       multi_docs: "no",
-      asi1_native: "no",
+      ai_native: "no",
     },
   },
   {
@@ -125,7 +125,7 @@ const COMPETITORS: Competitor[] = [
       ai_understanding: "no",
       live_processing: "no",
       multi_docs: "partial",
-      asi1_native: "no",
+      ai_native: "no",
     },
   },
   {
@@ -141,7 +141,7 @@ const COMPETITORS: Competitor[] = [
       ai_understanding: "no",
       live_processing: "no",
       multi_docs: "partial",
-      asi1_native: "no",
+      ai_native: "no",
     },
   },
   {
@@ -157,7 +157,7 @@ const COMPETITORS: Competitor[] = [
       ai_understanding: "no",
       live_processing: "no",
       multi_docs: "partial",
-      asi1_native: "no",
+      ai_native: "no",
     },
   },
 ];

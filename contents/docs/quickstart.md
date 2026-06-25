@@ -63,8 +63,3 @@ https://github.com/openai/openai-python
 | "Conversion failed" | Re-run with the `docs.` subdomain |
 | Token not shown | The token appears once on the result page — copy it then |
 | Client can't connect | Confirm the `Authorization: Bearer` header is set |
-
-## Next
-
-- [First MCP in 5 minutes](/docs/first-mcp)
-- [Connect to Cursor](/docs/connect-cursor)

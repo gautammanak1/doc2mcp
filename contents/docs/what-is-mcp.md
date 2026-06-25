@@ -73,9 +73,3 @@ and receive ranked sections with source URLs — not a hallucinated endpoint lis
 | Client shows "no tools" | Reload MCP; confirm URL ends with `/mcp` |
 | 401 Unauthorized | Re-copy `Authorization: Bearer …` from the convert page |
 | Stale answers | Re-run conversion when source docs change |
-
-## Next
-
-- [What is doc2mcp?](/docs/what-is-doc2mcp)
-- [Quick start](/docs/quickstart)
-- [FAQ](/docs/faq)

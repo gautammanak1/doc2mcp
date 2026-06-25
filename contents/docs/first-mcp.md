@@ -80,8 +80,3 @@ endpoint.
 | Server shows "no tools" | Reload MCP in Cursor settings |
 | 401 errors | Re-copy the token; check the `Bearer ` prefix |
 | Agent ignores the MCP | Name the server explicitly in your prompt |
-
-## Next
-
-- [Connect to Claude Desktop](/docs/connect-claude)
-- [Core concepts](/docs/crawling)
