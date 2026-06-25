@@ -19,6 +19,11 @@ import { DOC_MCP_TOOLS } from "@/services/mcp/doc-tools";
  */
 const TOOL_CALL_RATELIMIT = getRatelimiter("mcp:tools:call", 60, "1 m");
 
+// Hard cap on a single MCP request. This route is request/response JSON-RPC
+// (no long-lived SSE), so it returns quickly — but the explicit cap bounds the
+// worst case so a hung/slow `tools/call` can't keep the Fluid function
+// CPU-active and run up Active CPU billing. 30s is ample for the LLM-backed
+// path; `initialize`/`tools/list` return in milliseconds.
 export const maxDuration = 30;
 
 const PROTOCOL_VERSION = "2025-06-18";

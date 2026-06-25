@@ -145,7 +145,7 @@ jobs:
     env:
       # Build needs these to type-resolve; values can be dummies for CI build.
       AUTH_SECRET: ci-secret-not-used-at-runtime
-      ASI_ONE_API_KEY: ci-key
+      GEMINI_API_KEY: ci-key
       POSTGRES_URL: postgres://user:pass@localhost:5432/ci
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon

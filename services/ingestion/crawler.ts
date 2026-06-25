@@ -10,7 +10,7 @@ import { fetchRobotsRules, isPathAllowed } from "./robots";
 import { discoverSitemapUrls } from "./sitemap";
 
 // Tuned for Vercel Hobby's 60s lambda cap. The full pipeline (crawl +
-// ASI1 analyze + tool compression + DB writes) needs to fit in one
+// Gemini analyze + tool compression + DB writes) needs to fit in one
 // invocation when QStash isn't configured, so we cap pages aggressively.
 // On Pro/Enterprise (300s+), bump this back to 80 for breadth.
 const MAX_PAGES = 40;

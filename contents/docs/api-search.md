@@ -58,7 +58,3 @@ No third-party API key is required — doc2mcp uses platform AI.
 |---------|-----|
 | Empty results | Broaden the query or re-run the conversion |
 | Stale answer | Re-crawl to refresh the index |
-
-## Next
-
-- [Deployment: Hosted version](/docs/deployment-hosted)

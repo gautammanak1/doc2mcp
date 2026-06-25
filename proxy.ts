@@ -221,21 +221,13 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
+  // Run on everything EXCEPT Next internals (`_next/*`, which includes RSC /
+  // segment payloads and prefetches), the favicon, sitemap/robots, and static
+  // asset files (now also css/js/map). Each of those previously invoked the
+  // middleware and added Active CPU on every hit for zero benefit. Pages and
+  // all `/api/*` routes (incl. `/api/auth`, `/api/mcp`, protected pages) still
+  // run middleware exactly as before — auth and routing are unchanged.
   matcher: [
-    "/",
-    "/convert/:path*",
-    "/api/:path*",
-    "/login",
-    "/register",
-    "/auth/:path*",
-    "/pricing",
-    "/demo",
-    "/blog",
-    "/blog/:path*",
-    "/contact",
-    "/privacy-policy",
-    "/refund-policy",
-    "/terms-and-conditions",
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|txt|xml|woff2?|ttf|eot)$).*)",
+    "/((?!_next/|favicon\\.ico|sitemap\\.xml|robots\\.txt|.*\\.(?:png|jpe?g|gif|webp|svg|ico|css|js|map|txt|xml|woff2?|ttf|eot|mp4|webm)$).*)",
   ],
 };

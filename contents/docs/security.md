@@ -59,7 +59,3 @@ the AI provider, and Postgres are contacted.
 
 Found a security issue? Email doc2mcp@gmail.com — please don't open a public
 GitHub issue.
-
-## Next
-
-- [Access control](/docs/access-control)

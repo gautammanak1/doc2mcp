@@ -28,7 +28,7 @@ We do **not** collect:
 
 doc2mcp processes data through a small number of vendors:
 
-- **ASI1 (api.asi1.ai)** — receives doc excerpts and chat messages when generating MCP tools or answering `ask_documentation`.
+- **Google Gemini (generativelanguage.googleapis.com)** — receives doc excerpts and chat messages when generating MCP tools or answering `ask_documentation`.
 - **Supabase** — stores project rows, crawled pages, chunks, and tokens.
 - **Vercel** — hosts the application and edge functions.
 - **Web search providers (optional)** — Tavily / Brave / Exa receive search queries when configured.

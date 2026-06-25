@@ -107,8 +107,8 @@ export default function PrivacyPolicyPage() {
                     plans.
                   </li>
                   <li>
-                    <strong>ASI1</strong> — the LLM provider that powers chat,
-                    workflow inference, and image / PDF generation.
+                    <strong>Google Gemini</strong> — the LLM provider that
+                    powers chat, workflow inference, and image / PDF generation.
                   </li>
                 </ul>
               </>

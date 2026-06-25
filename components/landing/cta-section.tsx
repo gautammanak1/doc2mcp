@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const FOOTNOTES = [
   { icon: CheckCircle2, label: "Free forever tier" },
   { icon: Clock, label: "< 60s to first MCP" },
-  { icon: CheckCircle2, label: "ASI1 under the hood" },
+  { icon: CheckCircle2, label: "AI under the hood" },
 ];
 
 export function CtaSection() {

@@ -59,7 +59,3 @@ query: "How does authentication work?"
 |---------|-----|
 | Irrelevant results | Make the query more specific / use section keywords |
 | Missing a known page | Re-run the conversion to refresh the index |
-
-## Next
-
-- [MCP generation](/docs/mcp-generation)

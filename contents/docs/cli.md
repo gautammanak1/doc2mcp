@@ -176,9 +176,3 @@ doc2mcp chat prj_123abc -m "How do I authenticate requests?"
 | "Limit reached" | Monthly conversion limit hit (shared across CLI and web) |
 | Editor ignores the new MCP | Fully restart the editor so it reloads MCP config |
 | `doc2mcp chat` says no projects | Convert docs first (`doc2mcp <url>`) and wait for `ready` |
-
-## Next
-
-- [CLI landing page](/cli)
-- [Connect to Cursor](/docs/connect-cursor)
-- [Connect to Claude Desktop](/docs/connect-claude)

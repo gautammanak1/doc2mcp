@@ -57,7 +57,3 @@ GET /api/projects/<projectId>
 
 - Poll status while not `ready`/`error` (the convert page does this for you).
 - Treat `ready` as the signal to read the MCP config and token.
-
-## Next
-
-- [MCP servers](/docs/api-mcp)

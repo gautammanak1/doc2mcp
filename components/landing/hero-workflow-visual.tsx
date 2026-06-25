@@ -33,7 +33,7 @@ const STAGES: Stage[] = [
   {
     id: "processing",
     label: "Knowledge Processing",
-    body: "ASI1 \u00b7 semantic chunks",
+    body: "AI \u00b7 semantic chunks",
     icon: Cpu,
   },
   {

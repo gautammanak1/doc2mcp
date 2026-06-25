@@ -48,7 +48,3 @@ X-Doc2MCP-Token: <token>          # fallback header
 |---------|-----|
 | Client lacks header support | Use the `X-Doc2MCP-Token` or `?token=` fallback |
 | Tools not listed | Reload/restart MCP in the client |
-
-## Next
-
-- [Guides: Connect to Cursor](/docs/connect-cursor)

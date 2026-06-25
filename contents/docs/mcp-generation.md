@@ -60,7 +60,3 @@ server for you to deploy, scale, or secure.
 |---------|-----|
 | 401 unauthorized | Token wrong/expired — re-copy from the result page |
 | Endpoint shows localhost | Open the latest result page; configs use the live host |
-
-## Next
-
-- [Agent compatibility](/docs/agent-compatibility)

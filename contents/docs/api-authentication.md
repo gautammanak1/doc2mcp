@@ -46,7 +46,3 @@ X-Doc2MCP-Token: <token>
 |--------|---------|
 | `401` | Missing or invalid token |
 | `404` | Unknown project id |
-
-## Next
-
-- [Projects](/docs/api-projects)

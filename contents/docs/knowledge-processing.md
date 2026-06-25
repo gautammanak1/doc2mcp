@@ -50,7 +50,3 @@ exact section instead of the whole page.
 |---------|-----|
 | Low quality score | Source docs are thin; add more detail upstream |
 | Chunks too broad | Source lacks headings; results still rank, just coarser |
-
-## Next
-
-- [Retrieval layer](/docs/retrieval)

@@ -45,7 +45,3 @@ to controlling who can read which documentation.
 |---------|-----|
 | Leaked token | Re-run the conversion to mint a new one |
 | Need broader sharing | Issue the same project config to the team |
-
-## Next
-
-- [Security](/docs/security)

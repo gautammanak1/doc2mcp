@@ -105,8 +105,13 @@ export async function asi1ChatCompletion(
 }
 
 export async function asi1ChatCompletionStream(
-  request: Omit<Asi1ChatCompletionRequest, "model"> & { model?: string }
+  request: Omit<Asi1ChatCompletionRequest, "model"> & {
+    model?: string;
+    /** Abort the upstream fetch on client disconnect / idle timeout. */
+    signal?: AbortSignal;
+  }
 ): Promise<Response> {
+  const { signal, ...rest } = request;
   const response = await fetch(`${GEMINI_OPENAI_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
@@ -116,8 +121,9 @@ export async function asi1ChatCompletionStream(
     body: JSON.stringify({
       model: ASI1_MODEL,
       stream: true,
-      ...request,
+      ...rest,
     }),
+    signal,
   });
 
   if (!response.ok) {

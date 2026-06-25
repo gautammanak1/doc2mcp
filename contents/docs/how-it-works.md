@@ -69,8 +69,3 @@ curl -X POST https://doc2mcp.site/api/convert \
 | Stuck on `crawling` | Large site or slow origin | Wait; status polls automatically |
 | `error` immediately | Marketing page or blocked URL | Use the `docs.` subdomain |
 | Few pages indexed | No `llms.txt`/sitemap | doc2mcp falls back to link crawl; re-run |
-
-## Next
-
-- [Quick start](/docs/quickstart)
-- [Core concepts: crawling](/docs/crawling)

@@ -63,7 +63,3 @@ a marketing homepage, it redirects to the docs subdomain automatically.
 | Zero pages | URL blocked or JS-only shell | Use docs subdomain; Jina fallback kicks in |
 | Missing pages | No manifest/sitemap | Re-run; link crawl is best-effort |
 | Garbled code | Aggressive HTML | doc2mcp preserves `<pre><code>` — report the URL |
-
-## Next
-
-- [Knowledge processing](/docs/knowledge-processing)

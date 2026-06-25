@@ -51,7 +51,3 @@ Open the page on Connect onboarding and list the required fields.
 |---------|-----|
 | Server missing | Validate JSON; restart Claude |
 | 401 | Re-copy token; confirm `Authorization` header |
-
-## Next
-
-- [Connect to Windsurf](/docs/connect-windsurf)

@@ -66,7 +66,3 @@ Find the section on webhook signature verification.
 | Server not connecting | Re-check the URL and `Bearer ` prefix, reload MCP |
 | "No tools" | Reload MCP in settings |
 | 401 | Re-copy the token from the result page |
-
-## Next
-
-- [Connect to Claude Desktop](/docs/connect-claude)

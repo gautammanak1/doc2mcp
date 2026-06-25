@@ -38,7 +38,7 @@ NEXT_PUBLIC_SUPABASE_URL="https://<project>.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="..."
 SUPABASE_SERVICE_ROLE_KEY="..."
 AUTH_SECRET="<random-secret>"
-ASI_ONE_API_KEY="<ai-provider-key>"
+GEMINI_API_KEY="<google-gemini-api-key>"
 ```
 
 3. Run migrations and start:
@@ -68,7 +68,3 @@ Point `NEXT_PUBLIC_APP_URL` at your production domain.
 | MCP URL shows localhost | Set `NEXT_PUBLIC_APP_URL` and rebuild |
 | Auth failures | Regenerate `AUTH_SECRET`; clear stale sessions |
 | Empty crawls | Ensure the host can reach target docs sites |
-
-## Next
-
-- [Enterprise: Security](/docs/security)

@@ -47,7 +47,3 @@ API references. Making it agent-accessible is where doc2mcp pays off most.
 |---------|-----|
 | Crawl returns nothing | URL not reachable publicly — publish a mirror |
 | Auth-walled pages skipped | Provide an unauthenticated docs URL |
-
-## Next
-
-- [Examples: Stripe → MCP](/docs/example-stripe)

@@ -87,9 +87,3 @@ Using the myapi docs MCP, how do I authenticate API requests? Cite the page.
 | Few pages indexed | Paste the `docs.` subdomain; check robots.txt |
 | Duplicate tools in config | One server id per hostname |
 | Slow crawl | Large sites may take 1–3 minutes — watch the convert page |
-
-## Next
-
-- [Quick start](/docs/quickstart)
-- [Connect to Cursor](/docs/connect-cursor)
-- [Example: Stripe → MCP](/docs/example-stripe)

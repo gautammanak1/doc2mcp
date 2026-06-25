@@ -49,7 +49,3 @@ workspace `.vscode/mcp.json` or user settings.
 |---------|-----|
 | Server won't start | Validate JSON; check `type: "http"` |
 | 401 | Re-copy token |
-
-## Next
-
-- [Connect to OpenAI Agents](/docs/connect-openai)

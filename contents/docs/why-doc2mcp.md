@@ -47,8 +47,3 @@ three indexes, and three servers to host. With doc2mcp it is three pasted URLs.
   reachable URL.
 - Standardize on one MCP endpoint per source so configs stay portable across
   Cursor, Claude, and the rest.
-
-## Next
-
-- [How it works](/docs/how-it-works)
-- [Quick start](/docs/quickstart)

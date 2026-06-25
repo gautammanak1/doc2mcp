@@ -40,7 +40,7 @@ const FREE_PLAN: FreePlan = {
     "1 MCP conversion / month",
     "Up to 30 pages per docs site",
     "Token-based remote MCP (Cursor + Claude)",
-    "ask_documentation with ASI1",
+    "ask_documentation with AI",
     "Public projects · community support",
   ],
   ctaLabel: "Start free",
