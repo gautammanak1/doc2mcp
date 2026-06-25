@@ -4,6 +4,19 @@ import { mcpError, mcpJson, resolveMcpProject } from "@/lib/doc2mcp/mcp-api";
 
 export const maxDuration = 30;
 
+// Close an SSE session that has received no upstream token for this long. An
+// idle-but-open stream keeps the Fluid function CPU-active (and billable) for
+// nothing; bounding idle time releases it. The LLM streams tokens far more
+// frequently than this, so active sessions are never cut short.
+const SSE_IDLE_TIMEOUT_MS = 20_000;
+
+const SSE_HEADERS = {
+  "Cache-Control": "no-cache, no-transform",
+  Connection: "keep-alive",
+  "Content-Type": "text/event-stream; charset=utf-8",
+  "X-Accel-Buffering": "no",
+} as const;
+
 function sse(data: unknown): string {
   return `data: ${JSON.stringify(data)}\n\n`;
 }
@@ -11,26 +24,49 @@ function sse(data: unknown): string {
 async function streamAsi1Answer({
   messages,
   sources,
+  clientSignal,
 }: {
   messages: Parameters<typeof asi1ChatCompletionStream>[0]["messages"];
   sources: Array<{ title: string; url: string }>;
+  clientSignal: AbortSignal;
 }) {
   const encoder = new TextEncoder();
-  const upstream = await asi1ChatCompletionStream({
-    messages,
-    temperature: 0.1,
-    max_tokens: 2048,
-  });
+
+  // Single controller aborts the upstream fetch on client disconnect, idle
+  // timeout, or stream cancel — that's what actually releases the function
+  // instead of leaving it draining a dead/idle connection.
+  const upstreamAbort = new AbortController();
+  const onClientAbort = () => upstreamAbort.abort();
+  if (clientSignal.aborted) {
+    upstreamAbort.abort();
+  } else {
+    clientSignal.addEventListener("abort", onClientAbort, { once: true });
+  }
+
+  let upstream: Response;
+  try {
+    upstream = await asi1ChatCompletionStream({
+      messages,
+      temperature: 0.1,
+      max_tokens: 2048,
+      signal: upstreamAbort.signal,
+    });
+  } catch (error) {
+    clientSignal.removeEventListener("abort", onClientAbort);
+    const message = error instanceof Error ? error.message : "Streaming failed";
+    return new Response(sse({ type: "error", message }), {
+      headers: SSE_HEADERS,
+    });
+  }
+
   const reader = upstream.body?.getReader();
 
   if (!reader) {
+    clientSignal.removeEventListener("abort", onClientAbort);
     return new Response(
       sse({ type: "error", message: "Missing stream body" }),
       {
-        headers: {
-          "Cache-Control": "no-cache, no-transform",
-          "Content-Type": "text/event-stream; charset=utf-8",
-        },
+        headers: SSE_HEADERS,
       }
     );
   }
@@ -40,7 +76,19 @@ async function streamAsi1Answer({
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      let idleTimer: ReturnType<typeof setTimeout> | undefined;
+      const resetIdle = () => {
+        if (idleTimer) {
+          clearTimeout(idleTimer);
+        }
+        idleTimer = setTimeout(
+          () => upstreamAbort.abort(),
+          SSE_IDLE_TIMEOUT_MS
+        );
+      };
+
       controller.enqueue(encoder.encode(sse({ type: "sources", sources })));
+      resetIdle();
 
       try {
         while (true) {
@@ -48,6 +96,7 @@ async function streamAsi1Answer({
           if (done) {
             break;
           }
+          resetIdle();
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
@@ -83,24 +132,37 @@ async function streamAsi1Answer({
         controller.enqueue(encoder.encode(sse({ type: "done" })));
         controller.close();
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Streaming failed";
-        controller.enqueue(encoder.encode(sse({ type: "error", message })));
-        controller.close();
+        // An intentional abort (client gone or idle timeout) also lands here;
+        // don't emit a spurious error frame in that case.
+        if (!upstreamAbort.signal.aborted) {
+          const message =
+            error instanceof Error ? error.message : "Streaming failed";
+          try {
+            controller.enqueue(encoder.encode(sse({ type: "error", message })));
+          } catch {
+            // Controller already closed.
+          }
+        }
+        try {
+          controller.close();
+        } catch {
+          // Controller already closed.
+        }
       } finally {
+        if (idleTimer) {
+          clearTimeout(idleTimer);
+        }
         reader.releaseLock();
+        clientSignal.removeEventListener("abort", onClientAbort);
       }
+    },
+    cancel() {
+      // The HTTP consumer went away — stop pulling upstream and release CPU.
+      upstreamAbort.abort();
     },
   });
 
-  return new Response(stream, {
-    headers: {
-      "Cache-Control": "no-cache, no-transform",
-      Connection: "keep-alive",
-      "Content-Type": "text/event-stream; charset=utf-8",
-      "X-Accel-Buffering": "no",
-    },
-  });
+  return new Response(stream, { headers: SSE_HEADERS });
 }
 
 export async function POST(
@@ -164,7 +226,11 @@ export async function POST(
   const sources = hits.map((h) => ({ title: h.page.title, url: h.page.url }));
 
   if (body.stream) {
-    return streamAsi1Answer({ messages: [...messages], sources });
+    return streamAsi1Answer({
+      messages: [...messages],
+      sources,
+      clientSignal: request.signal,
+    });
   }
 
   const { text } = await asi1GenerateText([...messages]);
