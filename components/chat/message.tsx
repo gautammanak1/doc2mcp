@@ -1,5 +1,6 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
+import { Download } from "lucide-react";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
@@ -21,6 +22,32 @@ import { MessageReasoning } from "./message-reasoning";
 import { MessageWithMedia } from "./message-with-media";
 import { PreviewAttachment } from "./preview-attachment";
 import { Weather } from "./weather";
+
+function imageFileName(prompt?: string): string {
+  const base = (prompt ?? "doc2mcp-image")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return `${base || "doc2mcp-image"}.png`;
+}
+
+async function downloadImage(src: string, filename: string): Promise<void> {
+  try {
+    const res = await fetch(src);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch {
+    window.open(src, "_blank", "noopener,noreferrer");
+  }
+}
 
 const PurePreviewMessage = ({
   addToolApprovalResponse,
@@ -372,12 +399,25 @@ const PurePreviewMessage = ({
                   }
                   return (
                     <div className="space-y-2 px-3 py-3">
-                      {/** biome-ignore lint/performance/noImgElement: external generated image, next/image needs domain whitelist */}
-                      <img
-                        alt={out.prompt ?? "Generated image"}
-                        className="w-full rounded-lg border border-border/40"
-                        src={src}
-                      />
+                      <div className="group relative">
+                        {/** biome-ignore lint/performance/noImgElement: external generated image, next/image needs domain whitelist */}
+                        <img
+                          alt={out.prompt ?? "Generated image"}
+                          className="w-full rounded-lg border border-border/40"
+                          src={src}
+                        />
+                        <button
+                          aria-label="Download image"
+                          className="absolute top-2 right-2 flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/60 px-2.5 py-1.5 font-medium text-white text-xs opacity-0 backdrop-blur-sm transition-all hover:bg-black/80 focus-visible:opacity-100 group-hover:opacity-100"
+                          onClick={() =>
+                            downloadImage(src, imageFileName(out.prompt))
+                          }
+                          type="button"
+                        >
+                          <Download className="size-3.5" />
+                          Download
+                        </button>
+                      </div>
                       {out.revisedPrompt ? (
                         <p className="px-1 text-muted-foreground text-xs">
                           {out.revisedPrompt}
