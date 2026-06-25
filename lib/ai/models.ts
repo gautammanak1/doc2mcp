@@ -39,7 +39,8 @@ export async function getCapabilities(): Promise<
     asi1: {
       tools: true,
       vision: true,
-      reasoning: true,
+      // flash-lite is not a thinking model; don't request/forward reasoning.
+      reasoning: false,
     },
   };
 }
@@ -59,7 +60,7 @@ export async function getAllGatewayModels(): Promise<
     capabilities: caps[m.id] ?? {
       tools: true,
       vision: true,
-      reasoning: true,
+      reasoning: false,
     },
   }));
 }

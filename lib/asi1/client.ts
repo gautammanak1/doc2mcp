@@ -24,16 +24,21 @@ function readEnv(name: string): string | undefined {
   return value ? value : undefined;
 }
 
+// Default to flash-lite: gemini-2.5-flash is a "thinking" model that burns the
+// token budget on internal reasoning (often returning empty content) and is
+// rate-limited / 503-prone on the free tier, which surfaced as "Failed after 3
+// attempts / Too Many Requests" in chat. flash-lite returns content reliably,
+// is faster, and has higher free-tier limits.
 export const ASI1_MODEL =
-  readEnv("GEMINI_MODEL") ?? readEnv("ASI1_MODEL") ?? "gemini-2.5-flash";
+  readEnv("GEMINI_MODEL") ?? readEnv("ASI1_MODEL") ?? "gemini-2.5-flash-lite";
 export const ASI1_IMAGE_MODEL =
   readEnv("GEMINI_IMAGE_MODEL") ??
   readEnv("ASI1_IMAGE_MODEL") ??
   "gemini-3-pro-image-preview";
 const DEFAULT_TEXT_FALLBACK_MODELS = [
   ASI1_MODEL,
-  "models/gemini-2.5-flash-lite",
-  "models/gemini-flash-lite-latest",
+  "gemini-2.5-flash-lite",
+  "gemini-flash-lite-latest",
 ];
 
 export type Asi1Message = {
