@@ -22,6 +22,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Doc2McpLogo } from "@/components/doc2mcp/logo";
 import { ThemeToggle } from "@/components/doc2mcp/theme-toggle";
+import { GithubStarButton } from "@/components/landing/github-star-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -189,6 +190,7 @@ export function LandingNavigation({
 
         {/* Right actions */}
         <div className="hidden items-center gap-2 md:flex" data-tour="nav-cta">
+          <GithubStarButton />
           <ThemeToggle />
           {activeSession ? (
             <Button
@@ -263,6 +265,10 @@ export function LandingNavigation({
                     </a>
                   );
                 })}
+              </div>
+
+              <div className="px-3 pb-2">
+                <GithubStarButton className="w-full justify-center" />
               </div>
 
               <div className="border-border/60 border-t px-5 py-5">
