@@ -1,25 +1,10 @@
 /**
  * "Custom domain" card surfaced on the Settings page.
- *
- * The actual TLS/cert provisioning lives behind Team plan and a manual
- * onboarding (Vercel domain attachment + Supabase row), so this card
- * does two things today:
- *   1. Shows the user the DNS records they'd need to add.
- *   2. Routes them to support so we can attach the domain to their
- *      project. The form is intentionally a request-flow, not a
- *      self-service registration, until we wire the Vercel domains API.
  */
 
 "use client";
 
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  Globe2,
-  Lock,
-  Sparkles,
-} from "lucide-react";
+import { Check, Copy, Globe2, Lock, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -34,14 +19,11 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-type Plan = "free" | "starter" | "pro" | "team" | string;
-
 type Props = {
-  plan: Plan;
+  plan: string;
 };
 
-const REQUIRED_PLAN: Plan = "team";
-
+const REQUIRED_PLANS = new Set(["team", "enterprise"]);
 const TARGET_HOST = "cname.doc2mcp.app";
 
 const DNS_RECORDS = [
@@ -60,7 +42,7 @@ const DNS_RECORDS = [
 ] as const;
 
 export function CustomDomainCard({ plan }: Props) {
-  const isEligible = plan === REQUIRED_PLAN;
+  const isEligible = REQUIRED_PLANS.has(plan);
   const [copied, setCopied] = useState<string | null>(null);
 
   function copy(value: string, label: string) {
@@ -86,14 +68,13 @@ export function CustomDomainCard({ plan }: Props) {
           <Globe2 aria-hidden="true" className="size-4 text-foreground/80" />
           Custom domain
           <Badge variant={isEligible ? "default" : "secondary"}>
-            {isEligible ? "Available on your plan" : "Team plan"}
+            {isEligible ? "Available on your plan" : "Team / Enterprise"}
           </Badge>
         </CardTitle>
         <CardDescription>
-          Serve your MCP server from{" "}
+          Serve your MCP from{" "}
           <code className="font-mono text-foreground">mcp.your-domain.com</code>{" "}
-          instead of the default <code className="font-mono">doc2mcp.site</code>{" "}
-          URL. Great for vendor docs you ship to customers.
+          instead of the default hostname.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -102,11 +83,10 @@ export function CustomDomainCard({ plan }: Props) {
             We recommend{" "}
             <code className="font-mono text-foreground">
               mcp.your-domain.com
-            </code>{" "}
-            so it&apos;s obvious to your team and customers what the endpoint is
-            for. Any subdomain works — pick what fits your brand.
+            </code>
+            .
           </Step>
-          <Step n={2} title="Add these DNS records at your registrar">
+          <Step n={2} title="Add DNS records">
             <div className="mt-2 grid gap-2">
               {DNS_RECORDS.map((rec) => (
                 <div
@@ -142,28 +122,18 @@ export function CustomDomainCard({ plan }: Props) {
                 </div>
               ))}
             </div>
-            <p className="mt-2 text-[11px] text-muted-foreground/80">
-              Common registrars: Cloudflare, Namecheap, GoDaddy, AWS Route 53,
-              Google Domains. TTL: <code className="font-mono">3600</code> (or
-              Auto) is fine.
-            </p>
           </Step>
-          <Step n={3} title="Request domain attachment">
-            DNS propagation usually takes 1–10 minutes. Once that&apos;s done,
-            email us with your domain and project ID and we&apos;ll attach it,
-            issue the TLS certificate via Let&apos;s Encrypt, and confirm.
+          <Step n={3} title="Request attachment">
+            After DNS propagates, request setup or ask an admin to attach the
+            domain at <code className="font-mono">/admin/domains</code>.
           </Step>
-          <Step n={4} title="Update your MCP client config">
-            Swap{" "}
-            <code className="font-mono text-foreground">
-              https://doc2mcp.site/api/mcp/&lt;id&gt;/mcp
-            </code>{" "}
-            for{" "}
-            <code className="font-mono text-foreground">
-              https://mcp.your-domain.com/api/mcp/&lt;id&gt;/mcp
-            </code>{" "}
-            in Cursor, Claude Desktop, Windsurf, or your client of choice. The
-            Bearer token doesn&apos;t change.
+          <Step n={4} title="Update MCP config">
+            Swap the host in <code className="font-mono">mcp.json</code>. Bearer
+            token stays the same. See{" "}
+            <a className="underline" href="/docs/custom-domains">
+              custom domains docs
+            </a>
+            .
           </Step>
         </ol>
 
@@ -178,17 +148,9 @@ export function CustomDomainCard({ plan }: Props) {
               className="mt-0.5 size-4 shrink-0 text-foreground/80"
             />
             <p className="text-foreground/85 text-sm">
-              {isEligible ? (
-                <>
-                  You&apos;re on the Team plan — custom domains are included.
-                  Add records, then click below to request attachment.
-                </>
-              ) : (
-                <>
-                  Custom domains are part of the Team plan. Upgrade or talk to
-                  the founders if you need it on your current plan.
-                </>
-              )}
+              {isEligible
+                ? "Add DNS records, then request attachment."
+                : "Upgrade to Team or Enterprise for custom domains."}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -199,14 +161,7 @@ export function CustomDomainCard({ plan }: Props) {
               </a>
             </Button>
             <Button asChild size="sm" type="button" variant="ghost">
-              <a
-                href="https://docs.doc2mcp.site/custom-domains"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <ExternalLink aria-hidden="true" className="mr-1.5 size-3.5" />
-                Docs
-              </a>
+              <a href="/docs/custom-domains">Docs</a>
             </Button>
           </div>
         </div>

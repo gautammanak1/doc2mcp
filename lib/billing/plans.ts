@@ -1,4 +1,4 @@
-export type PlanId = "starter" | "pro" | "team";
+export type PlanId = "starter" | "pro" | "team" | "enterprise";
 export type BillingCycle = "monthly" | "biannual" | "yearly";
 export type BillingCurrency = "USD" | "INR";
 
@@ -108,6 +108,29 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       teammates: 5,
     },
   },
+  enterprise: {
+    id: "enterprise",
+    name: "Enterprise",
+    prices: {
+      USD: {
+        monthly: 0,
+        biannual: 0,
+        yearly: 0,
+      },
+      INR: {
+        monthly: 0,
+        biannual: 0,
+        yearly: 0,
+      },
+    },
+    entitlements: {
+      mcpConversionsPerMonth: -1,
+      maxPagesPerSite: 10_000,
+      privateProjects: true,
+      recrawlHours: 1,
+      teammates: 50,
+    },
+  },
 };
 
 export const FREE_ENTITLEMENTS: PlanEntitlements = {
@@ -119,7 +142,12 @@ export const FREE_ENTITLEMENTS: PlanEntitlements = {
 };
 
 export function isPlanId(value: string): value is PlanId {
-  return value === "starter" || value === "pro" || value === "team";
+  return (
+    value === "starter" ||
+    value === "pro" ||
+    value === "team" ||
+    value === "enterprise"
+  );
 }
 
 export function isBillingCycle(value: string): value is BillingCycle {

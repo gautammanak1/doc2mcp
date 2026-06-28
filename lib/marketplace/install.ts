@@ -1,3 +1,4 @@
+import { TOKEN_PLACEHOLDER } from "@/lib/marketplace/sanitize";
 import type { ProjectArtifacts } from "@/types/platform";
 
 export type InstallTargets = {
@@ -58,31 +59,26 @@ function extractServerEntry(
   };
 }
 
-/**
- * Build one-click install links + copy-paste configs for Cursor and VS
- * Code from a project's stored MCP config.
- *
- * NOTE: the resulting links embed the project's bearer token (that's what
- * makes "one-click install" actually work). Only call this for projects
- * that are intentionally public on the marketplace.
- */
-export function buildInstallTargets(
-  artifactsValue: unknown
-): InstallTargets | null {
-  const server = extractServerEntry(readArtifacts(artifactsValue));
-  if (!server) {
-    return null;
-  }
-  const { name, url, headers } = server;
+function buildTargetsFromServer(
+  server: ServerEntry,
+  options?: { includeToken?: boolean; userToken?: string }
+): InstallTargets {
+  const { name, url } = server;
+  const token =
+    options?.userToken ??
+    (options?.includeToken
+      ? server.headers.Authorization?.replace(/^Bearer\s+/i, "")
+      : null);
+  const headers: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : { Authorization: `Bearer ${TOKEN_PLACEHOLDER}` };
 
-  // Cursor: same shape as mcp.json transport config, base64-encoded.
   const cursorInner = { url, headers };
   const cursorB64 = encodeBase64(JSON.stringify(cursorInner));
   const cursorDeeplink = `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(
     name
   )}&config=${encodeURIComponent(cursorB64)}`;
 
-  // VS Code: URL-encoded JSON config with explicit http transport.
   const vscodeConfig = { type: "http", url, headers };
   const vscodeJson = JSON.stringify(vscodeConfig);
   const vscodeBase = `https://insiders.vscode.dev/redirect/mcp/install?name=${encodeURIComponent(
@@ -106,4 +102,53 @@ export function buildInstallTargets(
     vscodeDeeplink: vscodeBase,
     vscodeInsidersDeeplink: `${vscodeBase}&quality=insiders`,
   };
+}
+
+/**
+ * Build one-click install links + copy-paste configs for Cursor and VS
+ * Code from a project's stored MCP config.
+ *
+ * NOTE: the resulting links embed the project's bearer token (that's what
+ * makes "one-click install" actually work). Only call this for projects
+ * owned by the authenticated creator.
+ */
+export function buildInstallTargets(
+  artifactsValue: unknown
+): InstallTargets | null {
+  const server = extractServerEntry(readArtifacts(artifactsValue));
+  if (!server) {
+    return null;
+  }
+  return buildTargetsFromServer(server, { includeToken: true });
+}
+
+/**
+ * Marketplace install bundle — never embeds the project owner's token.
+ * Pass the viewer's profile MCP access token to enable one-click install.
+ */
+export function buildMarketplaceInstallTargets(
+  artifactsValue: unknown,
+  userToken?: string
+): InstallTargets | null {
+  const server = extractServerEntry(readArtifacts(artifactsValue));
+  if (!server) {
+    return null;
+  }
+  return buildTargetsFromServer(server, { userToken });
+}
+
+/** Build install targets when only endpoint + server name are known. */
+export function buildInstallTargetsFromEndpoint(
+  endpointUrl: string,
+  serverName: string,
+  userToken?: string
+): InstallTargets {
+  return buildTargetsFromServer(
+    {
+      name: serverName,
+      url: endpointUrl,
+      headers: userToken ? { Authorization: `Bearer ${userToken}` } : {},
+    },
+    { userToken }
+  );
 }

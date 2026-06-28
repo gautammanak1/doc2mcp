@@ -14,11 +14,11 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { AuthAwareLandingNavigation } from "@/components/landing/auth-aware-navigation";
 import { FooterSection } from "@/components/landing/footer-section";
-import { InstallPanel } from "@/components/marketplace/install-panel";
+import { MarketplaceInstallSection } from "@/components/marketplace/marketplace-install-section";
 import { SourceIcon } from "@/components/marketplace/source-icon";
 import { Button } from "@/components/ui/button";
 import { getMarketplaceProjectById } from "@/lib/db/queries";
-import { buildInstallTargets } from "@/lib/marketplace/install";
+import { readMarketplaceEndpoint } from "@/lib/marketplace/endpoint";
 import { toMarketplaceMcpDetail } from "@/lib/marketplace/transform";
 import { SOURCE_TYPE_LABELS } from "@/lib/marketplace/types";
 
@@ -115,7 +115,7 @@ async function MarketplaceDetailContent({
     notFound();
   }
   const mcp = toMarketplaceMcpDetail(row);
-  const installTargets = buildInstallTargets(row.artifacts);
+  const endpoint = readMarketplaceEndpoint(row.artifacts);
   const mcpHost = hostOf(mcp.sourceUrl);
 
   return (
@@ -206,7 +206,12 @@ async function MarketplaceDetailContent({
         />
       </div>
 
-      {installTargets ? <InstallPanel targets={installTargets} /> : null}
+      {endpoint ? (
+        <MarketplaceInstallSection
+          endpointUrl={endpoint.endpointUrl}
+          serverName={endpoint.serverName}
+        />
+      ) : null}
 
       {mcp.tools.length > 0 ? (
         <section className="mt-12">

@@ -1,7 +1,10 @@
 import {
+  getMarketplaceProjectById,
+  getMcpAccessTokenByHash,
   getPlatformProjectForMcp,
   getPlatformProjectMetaForMcp,
   recordMcpHit,
+  touchMcpAccessTokenLastUsed,
 } from "@/lib/db/queries";
 import type { PlatformProject } from "@/lib/db/schema";
 import {
@@ -11,6 +14,10 @@ import {
   searchDocs,
 } from "@/lib/doc2mcp/docs-index";
 import { readMcpAuthToken, verifyMcpToken } from "@/lib/doc2mcp/mcp-access";
+import {
+  hashMcpUserAccessToken,
+  isMcpUserAccessToken,
+} from "@/lib/doc2mcp/mcp-user-tokens";
 import type { CrawlResult, ProjectArtifacts } from "@/types/platform";
 
 export type ResolveMcpProjectOptions = {
@@ -23,6 +30,29 @@ export type ResolveMcpProjectOptions = {
    */
   withPages?: boolean;
 };
+
+async function isMarketplaceEligibleProject(
+  projectId: string
+): Promise<boolean> {
+  const row = await getMarketplaceProjectById(projectId);
+  return row !== null;
+}
+
+async function resolveUserMcpToken(token: string | null) {
+  if (!isMcpUserAccessToken(token)) {
+    return null;
+  }
+  const row = await getMcpAccessTokenByHash({
+    tokenHash: hashMcpUserAccessToken(token as string),
+  });
+  if (!row || row.revokedAt) {
+    return null;
+  }
+  touchMcpAccessTokenLastUsed({ id: row.id }).catch(() => {
+    // best-effort
+  });
+  return row;
+}
 
 export async function resolveMcpProject(
   request: Request,
@@ -42,7 +72,17 @@ export async function resolveMcpProject(
   const artifacts = project.artifacts as ProjectArtifacts | null;
   const storedHash = artifacts?.mcpTokenHash;
 
-  if (!verifyMcpToken(token, storedHash)) {
+  const projectTokenOk = verifyMcpToken(token, storedHash);
+  let userTokenOk = false;
+
+  if (!projectTokenOk && token) {
+    const userToken = await resolveUserMcpToken(token);
+    if (userToken) {
+      userTokenOk = await isMarketplaceEligibleProject(projectId);
+    }
+  }
+
+  if (!projectTokenOk && !userTokenOk) {
     return { error: "unauthorized" as const };
   }
 

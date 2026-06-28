@@ -30,21 +30,10 @@ https://github.com/openai/openai-python
 
 4. **Wait for `ready`.** The convert page shows live progress
    (`crawling → analyzing → generating → ready`).
-5. **Copy the config and token** from the result page.
+5. **Copy the project token and config** from the result page (shown once).
+6. **Connect a client.** See [Connect to Cursor](/docs/connect-cursor).
 
-```json
-{
-  "mcpServers": {
-    "stripe": {
-      "url": "https://doc2mcp.site/api/mcp/<projectId>/mcp",
-      "headers": { "Authorization": "Bearer <project-token>" }
-    }
-  }
-}
-```
-
-6. **Connect a client.** See [Connect to Cursor](/docs/connect-cursor) or
-   [Connect to Claude Desktop](/docs/connect-claude).
+Using a MCP from the [marketplace](/docs/marketplace)? Create an [MCP access token](/docs/mcp-access-tokens) on your profile instead.
 
 > **Tip** The server id (e.g. `stripe`) is derived from the docs hostname, so
 > configs read naturally.

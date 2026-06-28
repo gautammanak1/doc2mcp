@@ -13,6 +13,7 @@ export async function loadConfig(): Promise<CliConfig> {
     return {
       apiUrl: parsed.apiUrl || getApiUrl(),
       token: parsed.token,
+      mcpAccessToken: parsed.mcpAccessToken,
       user: parsed.user,
     };
   } catch {
