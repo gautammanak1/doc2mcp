@@ -314,7 +314,9 @@ export const subscription = pgTable("Subscription", {
   userId: uuid("userId")
     .notNull()
     .references(() => user.id),
-  plan: varchar("plan", { enum: ["starter", "pro", "team"] }).notNull(),
+  plan: varchar("plan", {
+    enum: ["starter", "pro", "team", "enterprise"],
+  }).notNull(),
   billingCycle: varchar("billingCycle", {
     enum: ["monthly", "biannual", "yearly"],
   }).notNull(),
@@ -535,6 +537,21 @@ export const cliToken = pgTable("CliToken", {
 });
 
 export type CliToken = InferSelectModel<typeof cliToken>;
+
+/** McpAccessToken — per-user token for accessing marketplace MCP servers. */
+export const mcpAccessToken = pgTable("McpAccessToken", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  tokenHash: varchar("tokenHash", { length: 128 }).notNull().unique(),
+  name: varchar("name", { length: 120 }).notNull().default("Marketplace"),
+  lastUsedAt: timestamp("lastUsedAt"),
+  createdAt: timestamp("createdAt").notNull().defaultNow(),
+  revokedAt: timestamp("revokedAt"),
+});
+
+export type McpAccessToken = InferSelectModel<typeof mcpAccessToken>;
 
 /**
  * McpHit — daily aggregate of MCP endpoint usage per project, tagged with

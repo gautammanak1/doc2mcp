@@ -7,6 +7,8 @@ import { runChat } from "./commands/chat.js";
 import { runConvert, runList } from "./commands/convert.js";
 import { runInstallCommand } from "./commands/install.js";
 import { runLogin } from "./commands/login.js";
+import { runMarketplaceInstall } from "./commands/marketplace.js";
+import { runTokenCreate, runTokenList } from "./commands/token.js";
 import { printCompactBanner } from "./banner.js";
 
 // Injected at build time by tsup `define` from package.json.
@@ -49,9 +51,33 @@ program
 
 program
   .command("install <projectId>")
-  .description("Install an existing MCP into Cursor, VS Code, Claude, or Windsurf")
+  .description("Install your own MCP into Cursor, VS Code, Claude, or Windsurf")
   .action(async (projectId: string) => {
     await runInstallCommand(projectId);
+  });
+
+const token = program.command("token").description("Manage MCP access tokens for marketplace");
+
+token
+  .command("create")
+  .description("Create an MCP access token for marketplace installs")
+  .option("-n, --name <name>", "Token label", "Marketplace")
+  .action(async (options: { name: string }) => {
+    await runTokenCreate(options.name);
+  });
+
+token
+  .command("list")
+  .description("List your MCP access tokens")
+  .action(async () => {
+    await runTokenList();
+  });
+
+program
+  .command("marketplace <projectId>")
+  .description("Install a marketplace MCP using your profile access token")
+  .action(async (projectId: string) => {
+    await runMarketplaceInstall(projectId);
   });
 
 program

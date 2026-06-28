@@ -6,6 +6,8 @@ export const DEFAULT_API_URL = "https://doc2mcp.site";
 export type CliConfig = {
   apiUrl: string;
   token?: string;
+  /** User MCP access token for marketplace installs (`d2mcp_usr_…`). */
+  mcpAccessToken?: string;
   user?: {
     id: string;
     email: string;

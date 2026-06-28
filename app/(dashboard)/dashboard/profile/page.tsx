@@ -9,6 +9,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { auth } from "@/app/(auth)/auth";
+import { McpAccessTokensCard } from "@/components/dashboard/mcp-access-tokens-card";
 import { ProfileHero } from "@/components/dashboard/profile-hero";
 import { ProfileNameEditor } from "@/components/dashboard/profile-name-editor";
 import {
@@ -200,6 +201,8 @@ export default async function DashboardProfilePage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
+        <McpAccessTokensCard />
+
         <Card>
           <CardHeader>
             <CardTitle>Billing</CardTitle>

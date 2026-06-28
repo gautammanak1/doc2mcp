@@ -57,6 +57,20 @@
       "when": 1780600000000,
       "tag": "0009_cli",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780700000000,
+      "tag": "0011_mcp_access_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780701000000,
+      "tag": "0012_grant_founder_enterprise",
+      "breakpoints": true
     }
   ]
 }

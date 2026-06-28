@@ -11,6 +11,7 @@ import {
   DEFAULT_CURRENCY,
   FREE_ENTITLEMENTS,
   isBillingCurrency,
+  isPlanId,
   PLANS,
 } from "@/lib/billing/plans";
 import {
@@ -46,8 +47,24 @@ export const getUserPlan = cache(
       };
     }
 
-    const planId = sub.plan as PlanId;
-    const config = PLANS[planId];
+    const planId = sub.plan as PlanId | "enterprise";
+    const config =
+      planId === "enterprise"
+        ? PLANS.enterprise
+        : isPlanId(planId)
+          ? PLANS[planId]
+          : null;
+
+    if (!config) {
+      return {
+        planId: "free",
+        billingCycle: null,
+        entitlements: FREE_ENTITLEMENTS,
+        status: sub.status,
+        currentPeriodEnd: sub.currentPeriodEnd,
+        currency: DEFAULT_CURRENCY,
+      };
+    }
     const subCurrency =
       sub.currency && isBillingCurrency(sub.currency)
         ? sub.currency

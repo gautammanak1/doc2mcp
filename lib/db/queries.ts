@@ -29,6 +29,7 @@ import {
   cliToken,
   type DBMessage,
   document,
+  mcpAccessToken,
   mcpHit,
   mcpServer,
   message,
@@ -894,6 +895,28 @@ export async function getPlatformProjectByCustomDomain(domain: string) {
   return project ?? null;
 }
 
+export async function adminSetProjectCustomDomain({
+  projectId,
+  customDomain,
+  customDomainVerified,
+}: {
+  projectId: string;
+  customDomain: string | null;
+  customDomainVerified: boolean;
+}) {
+  const normalized = customDomain?.trim().toLowerCase() || null;
+  const [updated] = await db
+    .update(platformProject)
+    .set({
+      customDomain: normalized,
+      customDomainVerified,
+      updatedAt: new Date(),
+    })
+    .where(eq(platformProject.id, projectId))
+    .returning();
+  return updated ?? null;
+}
+
 /**
  * Mark a project as company-owned (official MCP infrastructure) and attach an
  * optional custom domain. Scoped to the owning user so a developer can only
@@ -1396,11 +1419,15 @@ export async function getMarketplaceProjects({
       createdAt: platformProject.createdAt,
       updatedAt: platformProject.updatedAt,
       ownerName: user.name,
+      ownerEmail: user.email,
     })
     .from(platformProject)
     .innerJoin(user, eq(platformProject.userId, user.id))
     .where(and(...filters))
-    .orderBy(desc(platformProject.createdAt))
+    .orderBy(
+      sql`CASE WHEN lower(${user.email}) = 'gautammanak1@gmail.com' THEN 0 ELSE 1 END`,
+      desc(platformProject.createdAt)
+    )
     .limit(limit)
     .offset(offset);
 }
@@ -1661,4 +1688,92 @@ export async function revokeCliTokensForUser({ userId }: { userId: string }) {
     .where(
       and(eq(cliToken.userId, userId), sql`${cliToken.revokedAt} IS NULL`)
     );
+}
+
+export async function listMcpAccessTokensForUser({
+  userId,
+}: {
+  userId: string;
+}) {
+  return await db
+    .select({
+      id: mcpAccessToken.id,
+      name: mcpAccessToken.name,
+      lastUsedAt: mcpAccessToken.lastUsedAt,
+      createdAt: mcpAccessToken.createdAt,
+      revokedAt: mcpAccessToken.revokedAt,
+    })
+    .from(mcpAccessToken)
+    .where(eq(mcpAccessToken.userId, userId))
+    .orderBy(desc(mcpAccessToken.createdAt));
+}
+
+export async function createMcpAccessTokenRow({
+  userId,
+  tokenHash,
+  name = "Marketplace",
+}: {
+  userId: string;
+  tokenHash: string;
+  name?: string;
+}) {
+  const [row] = await db
+    .insert(mcpAccessToken)
+    .values({ userId, tokenHash, name })
+    .returning();
+  return row;
+}
+
+export async function getMcpAccessTokenByHash({
+  tokenHash,
+}: {
+  tokenHash: string;
+}) {
+  const [row] = await db
+    .select()
+    .from(mcpAccessToken)
+    .where(eq(mcpAccessToken.tokenHash, tokenHash))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function touchMcpAccessTokenLastUsed({ id }: { id: string }) {
+  await db
+    .update(mcpAccessToken)
+    .set({ lastUsedAt: new Date() })
+    .where(eq(mcpAccessToken.id, id));
+}
+
+export async function revokeMcpAccessToken({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) {
+  const [row] = await db
+    .update(mcpAccessToken)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(mcpAccessToken.id, id), eq(mcpAccessToken.userId, userId)))
+    .returning();
+  return row ?? null;
+}
+
+export async function getActiveMcpAccessTokenForUser({
+  userId,
+}: {
+  userId: string;
+}) {
+  const [row] = await db
+    .select()
+    .from(mcpAccessToken)
+    .where(
+      and(
+        eq(mcpAccessToken.userId, userId),
+        sql`${mcpAccessToken.revokedAt} IS NULL`
+      )
+    )
+    .orderBy(desc(mcpAccessToken.createdAt))
+    .limit(1);
+  return row ?? null;
 }
